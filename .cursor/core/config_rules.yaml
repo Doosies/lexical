@@ -9,62 +9,31 @@
 # 상시 규칙 (Always-On Rules): AI가 부팅 시 반드시 메모리에 상주시켜야 하는 최상위 규칙들입니다.
 # ==================================================================================================
 always_on_rules:
-    - rule_id: 'brain'
-      description: 'AI의 핵심 두뇌 역할을 하는 메인 설정 파일'
-      path: '.cursor/brain.yaml'
-    - rule_id: 'core_principles'
-      description: '시스템의 핵심 원칙. AI의 정체성과 기본적인 행동 양식을 정의합니다.'
-      path: '.cursor/core_principles.yaml'
-    - rule_id: 'config_index'
-      description: 'AI의 지식 베이스(Knowledge Base) 설정을 관리하는 파일'
-      path: '.cursor/config_index.yaml'
-    - rule_id: 'config_rules'
-      description: 'AI의 모든 행동 규칙(Always-On, On-Demand)을 정의하는 파일'
-      path: '.cursor/config_rules.yaml'
+  - rule_id: 'brain'
+    path: '.cursor/brain.yaml'
+  - rule_id: 'core_principles'
+    path: '.cursor/core_principles.yaml'
+  - rule_id: 'config_rules'
+    path: '.cursor/config_rules.yaml'
+  - rule_id: 'coding-style-rule'
+    path: '.cursor/rules/coding-style-rule.mdc'
+    # 이 규칙은 항상 활성화되어 AI의 모든 코드 생성에 영향을 미칩니다.
+  - rule_id: 'code-quality-rule'
+    path: '.cursor/rules/code-quality-rule.mdc'
+    # 이 규칙은 항상 활성화되어 AI의 모든 코드 생성에 영향을 미칩니다.
 
 # ==================================================================================================
 # 요청 기반 규칙 (On-Demand Rules): 특정 상황에 따라 동적으로 로드되는 규칙들입니다.
 # ==================================================================================================
 on_demand_rules:
-    - rule_id: 'commit-rule'
-      path: '.cursor/rules/commit-rule.mdc'
-      description: 'Git 커밋 메시지 형식 규칙'
-      trigger_state: 'COMMITTING'
+  - rule_id: 'commit-rule'
+    path: '.cursor/rules/commit-rule.mdc'
+    # 이 규칙의 상세 정의는 path에 명시된 mdc 파일 내의 YAML Front Matter에서 직접 로드됩니다.
 
-    - rule_id: 'mermaid-rule'
-      path: '.cursor/rules/mermaid-rule.mdc'
-      description: 'Mermaid 다이어그램 문법 및 스타일 가이드'
-      trigger_keywords:
-          - 'diagram'
-          - 'mermaid'
-          - 'visualize'
-          - '다이어그램'
-          - '도식화'
-          - '시각화'
-          - '그려줘'
-      # AI가 생성물을 스스로 검증하기 위한 기계가 읽을 수 있는 체크리스트
-      verification_checklist:
-          - check: "최상단에 'graph' 선언이 한 번만 존재하는가?"
-            fix: "최상단에 'graph TD' 또는 'graph LR'을 한 번만 선언합니다"
-          - check: "'subgraph' 내부에 'direction' 선언이 없는가?"
-            fix: "'subgraph' 내부의 모든 'direction' 선언을 제거합니다"
-          - check: '모든 노드 텍스트는 큰따옴표로 감싸져 있는가? (단, classDef의 색상값 등은 제외)'
-            fix: 'ID를 제외한 모든 노드 텍스트를 큰따옴표로 감쌉니다'
-          - check: '노드 텍스트에 백틱(```) 문자가 포함되어 있지 않은가?'
-            fix: '노드 텍스트의 모든 백틱(`) 문자를 제거하거나 일반 텍스트로 변경합니다'
+  - rule_id: 'mermaid-rule'
+    path: '.cursor/rules/mermaid-rule.mdc'
+    # 이 규칙의 상세 정의는 path에 명시된 mdc 파일 내의 YAML Front Matter에서 직접 로드됩니다.
 
-    - rule_id: 'resolver-naming-rule'
-      path: '.cursor/rules/resolver-naming-rule.mdc'
-      description: '프레임워크의 동작과 연결된 명명 규칙'
-      trigger_file_patterns:
-          - '*.resolver.ts'
-
-    - rule_id: 'coding-style-rule'
-      path: '.cursor/rules/coding-style-rule.mdc'
-      description: 'Ecount 고유의 코딩 스타일 규칙'
-      trigger_file_patterns:
-          - '*.ts'
-          - '*.tsx'
-          - '*.js'
-          - '*.jsx'
-          - '*.cs'
+  - rule_id: 'resolver-naming-rule'
+    path: '.cursor/rules/resolver-naming-rule.mdc'
+    # 이 규칙의 상세 정의는 path에 명시된 mdc 파일 내의 YAML Front Matter에서 직접 로드됩니다.
