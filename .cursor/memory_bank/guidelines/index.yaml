@@ -7,11 +7,10 @@
 # ===============================================
 
 documents:
-    # 예시:
-    # - path: './sample-document.md'
-    #   summary: '문서에 대한 간략한 요약입니다.'
-
-directories:
-    # 예시:
-    # - path: './sub-directory/'
-    #   summary: '하위 디렉토리에 대한 간략한 요약입니다.' 
+  - path: './nodeGuide.md'
+    summary: 'Lexical의 핵심 개념인 노드(Node) 시스템에 대한 상세한 가이드입니다.'
+  - path: './apiReference.md'
+    summary: 'Lexical의 주요 플러그인, HTML 변환, 직렬화, 테마 등 핵심 API 활용법에 대한 레퍼런스입니다.'
+  - path: './react_troubleshooting.md'
+    summary: 'Lexical을 React 환경에서 사용할 때 발생할 수 있는 주요 문제들과 해결 방안을 정리한 문서입니다.'
+directories: []

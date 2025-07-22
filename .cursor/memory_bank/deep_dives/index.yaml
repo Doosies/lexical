@@ -7,11 +7,12 @@
 # ===============================================
 
 documents:
-    # 예시:
-    # - path: './sample-document.md'
-    #   summary: '문서에 대한 간략한 요약입니다.'
+  - path: './collaboration_with_yjs.md'
+    summary: '@lexical/react와 @lexical/yjs를 사용하여 Lexical 에디터에 실시간 협업 기능을 구현하는 방법에 대해 심층적으로 분석합니다.'
+  - path: './lexical_with_react.md'
+    summary: '@lexical/react 패키지를 사용하여 Lexical을 React 애플리케이션에 통합하는 방법과 주요 패턴, 그리고 고급 활용법에 대해 심층적으로 분석합니다.'
 
 directories:
-    # 예시:
-    # - path: './sub-directory/'
-    #   summary: '하위 디렉토리에 대한 간략한 요약입니다.' 
+  # 예시:
+  # - path: './sub-directory/'
+  #   summary: '하위 디렉토리에 대한 간략한 요약입니다.'
