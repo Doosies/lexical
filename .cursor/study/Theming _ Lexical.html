@@ -1,0 +1,66 @@
+<p>Skip to main contentPlaygroundDocsAPICommunityiOSGalleryGitHubiOS GitHub</p>
+<h3 id="theming">Theming</h3>
+<p>
+  Lexical tries to make theming straight-forward, by providing a way of passing
+  a customizable theming object that maps CSS class names to the editor on
+  creation. Here&#39;s an example of a plain-text theme: const exampleTheme = {
+  ltr : &#39;ltr&#39; , rtl : &#39;rtl&#39; , paragraph :
+  &#39;editor-paragraph&#39; , } ;
+</p>
+<p>
+  In your CSS, you can then add something like: .ltr { text-align : left ; }
+  .rtl { text-align : right ; } .editor-placeholder { color : #999 ; overflow :
+  hidden ; position : absolute ; top : 15 px ; left : 15 px ; user-select : none
+  ; pointer-events : none ; } .editor-paragraph { margin : 0 0 15 px 0 ;
+  position : relative ; }
+</p>
+<p>
+  To apply it, you need to pass it to your editor instance. If you&#39;re using
+  a framework like React, this is done by passing it as a property of the
+  initialConfig to
+</p>
+<p>
+  If you are using vanilla JS, you can pass it to the createEditor() function,
+  like shown: import { createEditor } from &#39;lexical&#39; ; const editor =
+  createEditor ( { namespace : &#39;MyEditor&#39; , theme : exampleTheme , } ) ;
+</p>
+<p>
+  Many of the Lexical&#39;s core nodes also accept theming properties.
+  Here&#39;s a more comprehensive theming object: const exampleTheme = { ltr :
+  &#39;ltr&#39; , rtl : &#39;rtl&#39; , paragraph : &#39;editor-paragraph&#39; ,
+  quote : &#39;editor-quote&#39; , heading : { h1 : &#39;editor-heading-h1&#39;
+  , h2 : &#39;editor-heading-h2&#39; , h3 : &#39;editor-heading-h3&#39; , h4 :
+  &#39;editor-heading-h4&#39; , h5 : &#39;editor-heading-h5&#39; , h6 :
+  &#39;editor-heading-h6&#39; , } , list : { nested : { listitem :
+  &#39;editor-nested-listitem&#39; , } , ol : &#39;editor-list-ol&#39; , ul :
+  &#39;editor-list-ul&#39; , listitem : &#39;editor-listItem&#39; ,
+  listitemChecked : &#39;editor-listItemChecked&#39; , listitemUnchecked :
+  &#39;editor-listItemUnchecked&#39; , } , hashtag : &#39;editor-hashtag&#39; ,
+  image : &#39;editor-image&#39; , link : &#39;editor-link&#39; , text : { bold
+  : &#39;editor-textBold&#39; , code : &#39;editor-textCode&#39; , italic :
+  &#39;editor-textItalic&#39; , strikethrough :
+  &#39;editor-textStrikethrough&#39; , subscript :
+  &#39;editor-textSubscript&#39; , superscript :
+  &#39;editor-textSuperscript&#39; , underline : &#39;editor-textUnderline&#39;
+  , underlineStrikethrough : &#39;editor-textUnderlineStrikethrough&#39; , } ,
+  code : &#39;editor-code&#39; , codeHighlight : { atrule :
+  &#39;editor-tokenAttr&#39; , attr : &#39;editor-tokenAttr&#39; , boolean :
+  &#39;editor-tokenProperty&#39; , builtin : &#39;editor-tokenSelector&#39; ,
+  cdata : &#39;editor-tokenComment&#39; , char : &#39;editor-tokenSelector&#39;
+  , class : &#39;editor-tokenFunction&#39; , &#39;class-name&#39; :
+  &#39;editor-tokenFunction&#39; , comment : &#39;editor-tokenComment&#39; ,
+  constant : &#39;editor-tokenProperty&#39; , deleted :
+  &#39;editor-tokenProperty&#39; , doctype : &#39;editor-tokenComment&#39; ,
+  entity : &#39;editor-tokenOperator&#39; , function :
+  &#39;editor-tokenFunction&#39; , important : &#39;editor-tokenVariable&#39; ,
+  inserted : &#39;editor-tokenSelector&#39; , keyword :
+  &#39;editor-tokenAttr&#39; , namespace : &#39;editor-tokenVariable&#39; ,
+  number : &#39;editor-tokenProperty&#39; , operator :
+  &#39;editor-tokenOperator&#39; , prolog : &#39;editor-tokenComment&#39; ,
+  property : &#39;editor-tokenProperty&#39; , punctuation :
+  &#39;editor-tokenPunctuation&#39; , regex : &#39;editor-tokenVariable&#39; ,
+  selector : &#39;editor-tokenSelector&#39; , string :
+  &#39;editor-tokenSelector&#39; , symbol : &#39;editor-tokenProperty&#39; , tag
+  : &#39;editor-tokenProperty&#39; , url : &#39;editor-tokenOperator&#39; ,
+  variable : &#39;editor-tokenVariable&#39; , } , } ;
+</p>

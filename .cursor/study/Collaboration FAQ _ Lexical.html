@@ -1,0 +1,121 @@
+<p>Skip to main contentPlaygroundDocsAPICommunityiOSGalleryGitHubiOS GitHub</p>
+<h3 id="collaboration-faq">Collaboration FAQ</h3>
+<h4 id="source-of-truth-lexical-state-yjs-and-app-s-db">
+  Source of truth: Lexical State, Yjs and App&#39;s DB
+</h4>
+<p>
+  It&#39;s recommended to treat the Yjs model as the source of truth. You can
+  store the document to a database for indexing. But, if possible, you should
+  never forget the Yjs model, as this is the only way clients without internet
+  access can reliably join and sync with the server. You can also treat the
+  database as the source of truth. This is how it could be achieved:
+</p>
+<ul>
+  <li>Clients receive a sessionId when they connect to the server</li>
+  <li>
+    When a client connects without an existing sessionId , get the content from
+    the database and create a sessionId
+  </li>
+  <li>
+    When all clients disconnect, forget the room content and sessionId on the
+    server after some timeout (e.g. 1 hour)
+  </li>
+  <li>
+    When a client reconnects, use that content on the server. Furthermore, get
+    the sessionId from the client
+  </li>
+  <li>
+    When two clients with different sessionId reconnect, one of the clients
+    should forget the room content.
+    <em>In this case the client will lose content</em>
+    - although it is very unlikely if you set the forget timeout (see point 2)
+    very high. Or, there is an ever simpler approach:
+  </li>
+  <li>
+    When a client connects to the server, the server populates the room content
+    if empty
+  </li>
+  <li>
+    When all clients disconnect, the server forgets the room content after some
+    timeout (e.g. 1 hour)
+  </li>
+  <li>
+    When a client was not able to reconnect for 40 minutes, the client must
+    forget its local updates and start fresh (this should be enforced by the
+    server) When the database is the source of truth, and if you want to be able
+    to forget the Yjs model, you will always run into cases where clients are
+    not able to commit changes. That&#39;s not too bad in most projects. It
+    somehow limits you, because you can&#39;t cache the document on the client
+    using y-indexeddb. On the other hand, it is much easier to maintain, and do
+    Yjs upgrades. Furthermore, most people would say that SQL is a bit more
+    reliable than Yjs.
+  </li>
+  <li>Based on the advice of the Yjs author - Kevin Jahns</li>
+</ul>
+<h4 id="initializing-editorstate-from-yjs-document">
+  Initializing EditorState from Yjs Document
+</h4>
+<p>
+  It&#39;s achievable by leveraging headless Lexical and no-op provider for Yjs:
+</p>
+<ul>
+  <li>
+    createHeadlessCollaborativeEditor.ts import type { Binding , Provider } from
+    &#39;@lexical/yjs&#39; ; import type { Klass , LexicalEditor , LexicalNode ,
+    LexicalNodeReplacement , SerializedEditorState , SerializedLexicalNode , }
+    from &#39;lexical&#39; ; import { createHeadlessEditor } from
+    &#39;@lexical/headless&#39; ; import { createBinding ,
+    syncLexicalUpdateToYjs , syncYjsChangesToLexical , } from
+    &#39;@lexical/yjs&#39; ; import { type YEvent , applyUpdate , Doc ,
+    Transaction } from &#39;yjs&#39; ; export default function
+    headlessConvertYDocStateToLexicalJSON ( nodes : ReadonlyArray &lt; Klass
+    &lt; LexicalNode &gt; | LexicalNodeReplacement &gt; , yDocState : Uint8Array
+    , ) : SerializedEditorState &lt; SerializedLexicalNode &gt; { return
+    withHeadlessCollaborationEditor ( nodes , ( editor , binding ) =&gt; {
+    applyUpdate ( binding . doc , yDocState , { isUpdateRemote : true } ) ;
+    editor . update ( ( ) =&gt; { } , { discrete : true } ) ; return editor .
+    getEditorState ( ) . toJSON ( ) ; } ) ; } /**
+    <ul>
+      <li>
+        Creates headless collaboration editor with no-op provider (since it
+        won&#39;t
+      </li>
+      <li>
+        connect to message distribution infra) and binding. It also sets up
+      </li>
+      <li>
+        bi-directional synchronization between yDoc and editor */ function
+        withHeadlessCollaborationEditor &lt; T &gt; ( nodes : ReadonlyArray &lt;
+        Klass &lt; LexicalNode &gt; | LexicalNodeReplacement &gt; , callback : (
+        editor : LexicalEditor , binding : Binding , provider : Provider ) =&gt;
+        T , ) : T { const editor = createHeadlessEditor ( { nodes , } ) ; const
+        id = &#39;main&#39; ; const doc = new Doc ( ) ; const docMap = new Map (
+        [ [ id , doc ] ] ) ; const provider = createNoOpProvider ( ) ; const
+        binding = createBinding ( editor , provider , id , doc , docMap ) ;
+        const unsubscribe = registerCollaborationListeners ( editor , provider ,
+        binding ) ; const res = callback ( editor , binding , provider ) ;
+        unsubscribe ( ) ; return res ; } function registerCollaborationListeners
+        ( editor : LexicalEditor , provider : Provider , binding : Binding , ) :
+        ( ) =&gt; void { const unsubscribeUpdateListener = editor .
+        registerUpdateListener ( ( { dirtyElements , dirtyLeaves , editorState ,
+        normalizedNodes , prevEditorState , tags , } ) =&gt; { if ( tags . has (
+        &#39;skip-collab&#39; ) === false ) { syncLexicalUpdateToYjs ( binding ,
+        provider , prevEditorState , editorState , dirtyElements , dirtyLeaves ,
+        normalizedNodes , tags , ) ; } } , ) ; const observer = ( events : Array
+        &lt; YEvent &lt; any &gt;&gt; , transaction : Transaction ) =&gt; { if (
+        transaction . origin !== binding ) { syncYjsChangesToLexical ( binding ,
+        provider , events , false ) ; } } ; binding . root . getSharedType ( ) .
+        observeDeep ( observer ) ; return ( ) =&gt; { unsubscribeUpdateListener
+        ( ) ; binding . root . getSharedType ( ) . unobserveDeep ( observer ) ;
+        } ; } function createNoOpProvider ( ) : Provider { const emptyFunction =
+        ( ) =&gt; { } ; return { awareness : { getLocalState : ( ) =&gt; null ,
+        getStates : ( ) =&gt; new Map ( ) , off : emptyFunction , on :
+        emptyFunction , setLocalState : emptyFunction , } , connect :
+        emptyFunction , disconnect : emptyFunction , off : emptyFunction , on :
+        emptyFunction , } ; } Source of truth: Lexical State, Yjs and App&#39;s
+        DB
+      </li>
+    </ul>
+  </li>
+  <li>Initializing EditorState from Yjs Document</li>
+</ul>

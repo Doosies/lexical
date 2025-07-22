@@ -1,0 +1,135 @@
+<p>Skip to main contentPlaygroundDocsAPICommunityiOSGalleryGitHubiOS GitHub</p>
+<h3 id="node-cloning">Node Cloning</h3>
+<p>
+  Understanding how to properly clone and modify nodes is crucial for working
+  with Lexical. This guide explains the different cloning mechanisms and when to
+  use each one.
+</p>
+<h4 id="types-of-node-cloning">Types of Node Cloning</h4>
+<p>
+  Lexical provides several ways to clone nodes, each serving a different
+  purpose:
+</p>
+<ol>
+  <li>static clone() - Internal API for state management</li>
+  <li>$copyNode() - Public API for creating new nodes</li>
+  <li>getWritable() - Public API for node modifications</li>
+</ol>
+<h4 id="the-clone-method">The clone Method</h4>
+<h5 id="what-is-clone">What is clone ?</h5>
+<p>
+  The clone method is a static method required by all Lexical nodes that creates
+  the next version of a node. However, it&#39;s important to understand that
+  this is an
+  <strong>internal API</strong>
+  used by Lexical&#39;s state management system. class MyCustomNode extends
+  ElementNode { static clone ( node : MyCustomNode ) : MyCustomNode { // ✅
+  Correct implementation return new MyCustomNode ( node . __someData , node .
+  __key ) ; } }
+</p>
+<h5 id="when-is-clone-used">When is clone Used?</h5>
+<p><strong>Internal State Management</strong></p>
+<ul>
+  <li>Used by Lexical internally</li>
+  <li>Part of the editor&#39;s state update system</li>
+  <li>
+    Called by getWritable()
+    <strong>Node Mutations</strong>
+    // Example of a node method implementation class MyCustomNode extends
+    ElementNode { setData ( data : string ) : this { const self = this .
+    getWritable ( ) ; self . __data = data ; return self ; } } node .
+    setSomeData ( &#34;new data&#34; ) ;
+  </li>
+</ul>
+<h5 id="when-not-to-use-clone">When NOT to Use clone ?</h5>
+<p>
+  // ❌ Never do this function $duplicateNode ( node : MyCustomNode ) { return
+  MyCustomNode . clone ( node ) ; // Don&#39;t call clone directly }
+</p>
+<h4 id="using-copynode">Using $copyNode</h4>
+<h5 id="what-is-copynode">What is $copyNode ?</h5>
+<p>
+  $copyNode is the public API for creating a copy of a node with a new key. Use
+  this when you need to create a duplicate node. // ✅ Correct: Using $copyNode
+  const copy = $copyNode ( existingNode ) ;
+</p>
+<h5 id="when-to-use-copynode">When to Use $copyNode ?</h5>
+<ol>
+  <li>
+    <strong>Creating Duplicates</strong>
+    // ✅ Correct: Duplicating a node const duplicate = $copyNode ( originalNode
+    ) ; someParent . append ( duplicate ) ;
+  </li>
+</ol>
+<h4 id="using-getwritable">Using getWritable</h4>
+<h5 id="what-is-getwritable">What is getWritable ?</h5>
+<p>
+  getWritable is an internal API used within node method implementations to get
+  a mutable version of a node. Node consumers should use the node&#39;s public
+  methods instead. // ✅ Correct: Implementation of a node method class
+  MyCustomNode extends ElementNode { setData ( data : string ) : this { const
+  self = this . getWritable ( ) ; self . __data = data ; return self ; } } // ✅
+  Correct: Using the node const node = new MyCustomNode ( ) ; node . setData (
+  &#34;new value&#34; ) ;
+</p>
+<h4 id="common-patterns">Common Patterns</h4>
+<h5 id="modifying-nodes">Modifying Nodes</h5>
+<p>
+  // ✅ Correct: Modifying a node function $updateNodeData ( node : MyCustomNode
+  , newData : string ) : MyCustomNode { return node . setData ( newData ) ; } //
+  ❌ Incorrect: Don&#39;t clone manually function $updateNodeDataWrong ( node :
+  MyCustomNode , newData : string ) : MyCustomNode { const clone = MyCustomNode
+  . clone ( node ) ; clone . setData ( newData ) ; return clone ; }
+</p>
+<h5 id="copying-nodes">Copying Nodes</h5>
+<p>
+  // ✅ Correct: Copying a node function $duplicateNode ( node : MyCustomNode )
+  : MyCustomNode { return $copyNode ( node ) ; } // ❌ Incorrect: Don&#39;t use
+  clone function $duplicateNodeWrong ( node : MyCustomNode ) : MyCustomNode {
+  return node . constructor . clone ( node ) ; }
+</p>
+<h4 id="performance-considerations">Performance Considerations</h4>
+<p><strong>Referential Integrity</strong></p>
+<ul>
+  <li>getWritable() ensures proper EditorState updates with new clones</li>
+  <li>
+    Prevents &#34;orphaned&#34; nodes that won&#39;t be rendered
+    <strong>State Management</strong>
+    class MyCustomNode extends ElementNode { setData ( data : string ) : this {
+    const self = this . getWritable ( ) ; self . __data = data ; // Properly
+    tracked by editor return self ; } }
+  </li>
+</ul>
+<h4 id="testing">Testing</h4>
+<p>
+  test ( &#39;node modification&#39; , async ( ) =&gt; { await editor . update (
+  ( ) =&gt; { const node = new MyCustomNode ( &#34;test&#34; ) ; node . setData
+  ( &#34;new data&#34; ) ; // ✅ Correct: Use $copyNode for duplication const
+  copy = $copyNode ( node ) ; } ) ; } ) ;
+</p>
+<h4 id="related-concepts">Related Concepts</h4>
+<ul>
+  <li>Editor State - How cloning affects editor state</li>
+  <li>Nodes - Core concepts about Lexical nodes</li>
+</ul>
+<h4 id="common-questions">Common Questions</h4>
+<p>
+  <strong>Q: How do I duplicate a node?</strong>
+  A: Use $copyNode(node) to create a new copy with a new key.
+  <strong>Q: When should I use clone?</strong>
+  A: Never directly. Use $copyNode() or getWritable() instead.
+</p>
+<ul>
+  <li>Types of Node Cloning</li>
+  <li>The clone MethodWhat is clone ?</li>
+  <li>When is clone Used?</li>
+  <li>When NOT to Use clone ?</li>
+  <li>Using $copyNodeWhat is $copyNode ?</li>
+  <li>When to Use $copyNode ?</li>
+  <li>Using getWritableWhat is getWritable ?</li>
+  <li>Common PatternsModifying Nodes</li>
+  <li>
+    Copying Nodes Performance Considerations Testing Related Concepts Common
+    Questions
+  </li>
+</ul>

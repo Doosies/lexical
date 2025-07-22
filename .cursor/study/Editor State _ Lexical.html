@@ -1,0 +1,176 @@
+<p>Skip to main contentPlaygroundDocsAPICommunityiOSGalleryGitHubiOS GitHub</p>
+<h3 id="editor-state">Editor State</h3>
+<h4 id="why-is-it-necessary">Why is it necessary?</h4>
+<p>
+  With Lexical, the source of truth is not the DOM, but rather an underlying
+  state model that Lexical maintains and associates with an editor instance.
+  While HTML is great for storing rich text content it&#39;s often &#34;way too
+  flexible&#34; when it comes to text editing. For example the following lines
+  of content will produce equal outcome: &lt; i &gt; &lt; b &gt; Lexical &lt;/ b
+  &gt; &lt;/ i &gt; &lt; i &gt; &lt; b &gt; Lex &lt; b &gt; &lt; b &gt; ical
+  &lt;/ b &gt; &lt;/ i &gt; &lt; b &gt; &lt; i &gt; Lexical &lt;/ i &gt; &lt;/ b
+  &gt; See rendered version!
+  <strong>Lexical</strong>
+  <strong>Lex</strong>
+  <strong>ical</strong>
+  <em>Lexical</em>
+  Of course, there are ways to normalize all these variants to a single
+  canonical form, however this would require DOM manipulation and so
+  re-rendering of the content. And to overcome this we can use Virtual DOM, or
+  State. On top of that it allows to decouple content structure from content
+  formatting. Let&#39;s look at this example stored in HTML: &lt; p &gt; Why did
+  the JavaScript developer go to the bar? &lt; b &gt; Because he couldn&#39;t
+  handle his &lt; i &gt; Promise &lt;/ i &gt; s &lt;/ b &gt; &lt;/ p &gt; Nested
+  structure of the HTML state because of the formatting In contrast, Lexical
+  decouples structure from formatting by offsetting this information to
+  attributes. This allows us to have canonical document structure regardless of
+  the order in which different styles were applied. Flat Lexical state structure
+</p>
+<h4 id="understanding-the-editor-state">Understanding the Editor State</h4>
+<p>
+  You can get the latest editor state from an editor by calling
+  editor.getEditorState() . Editor states have two phases:
+</p>
+<ul>
+  <li>
+    During an update they can be thought of as &#34;mutable&#34;. See
+    &#34;Updating state&#34; below to mutate an editor state.
+  </li>
+  <li>
+    After an update, the editor state is then locked and deemed immutable from
+    there on. This editor state can therefore be thought of as a
+    &#34;snapshot&#34;. Editor states contain two core things:
+  </li>
+  <li>The editor node tree (starting from the root node).</li>
+  <li>
+    The editor selection (which can be null). Editor states are serializable to
+    JSON, and the editor instance provides a useful method to deserialize
+    stringified editor states. Here&#39;s an example of how you can initialize
+    editor with some state and then persist it: // Get editor initial state
+    (e.g. loaded from backend) const loadContent = async ( ) =&gt; { //
+    &#39;empty&#39; editor const value =
+    &#39;{&#34;root&#34;:{&#34;children&#34;:[{&#34;children&#34;:[],&#34;direction&#34;:null,&#34;format&#34;:&#34;&#34;,&#34;indent&#34;:0,&#34;type&#34;:&#34;paragraph&#34;,&#34;version&#34;:1}],&#34;direction&#34;:null,&#34;format&#34;:&#34;&#34;,&#34;indent&#34;:0,&#34;type&#34;:&#34;root&#34;,&#34;version&#34;:1}}&#39;
+    ; return value ; } const initialEditorState = await loadContent ( ) ; const
+    editor = createEditor ( ... ) ; registerRichText ( editor ,
+    initialEditorState ) ; ... // Handler to store content (e.g. when user
+    submits a form) const onSubmit = ( ) =&gt; { await saveContent ( JSON .
+    stringify ( editor . getEditorState ( ) ) ) ; }
+  </li>
+</ul>
+<p>
+  For React it could be something like the following: const initialEditorState =
+  await loadContent ( ) ; const editorStateRef = useRef ( undefined ) ; &lt;
+  LexicalComposer initialConfig = { { editorState : initialEditorState } } &gt;
+  &lt; LexicalRichTextPlugin /&gt; &lt; LexicalOnChangePlugin onChange = { (
+  editorState ) =&gt; { editorStateRef . current = editorState ; } } /&gt; &lt;
+  Button label = &#34; Save &#34; onPress = { ( ) =&gt; { if ( editorStateRef .
+  current ) { saveContent ( JSON . stringify ( editorStateRef . current ) ) } }
+  } /&gt; &lt;/ LexicalComposer &gt;
+</p>
+<p>
+  Note that Lexical uses initialConfig.editorState only once (when it&#39;s
+  being initialized) and passing different value later won&#39;t be reflected in
+  editor. See &#34;Update state&#34; below for proper ways of updating editor
+  state.
+</p>
+<h4 id="updating-state">Updating state</h4>
+<p>
+  tip For a deep dive into how state updates work, check out this blog post by
+  Lexical contributor @DaniGuardiola. The most common way to update the editor
+  is to use editor.update() . Calling this function requires a function to be
+  passed in that will provide access to mutate the underlying editor state. When
+  starting a fresh update, the current editor state is cloned and used as the
+  starting point. From a technical perspective, this means that Lexical
+  leverages a technique called double-buffering during updates. There&#39;s the
+  &#34;current&#34; frozen editor state to represent what was most recently
+  reconciled to the DOM, and another work-in-progress &#34;pending&#34; editor
+  state that represents future changes for the next reconciliation. Reconciling
+  an update is typically an async process that allows Lexical to batch multiple
+  synchronous updates of the editor state together in a single update to the DOM
+  – improving performance. When Lexical is ready to commit the update to the
+  DOM, the underlying mutations and changes in the update batch will form a new
+  immutable editor state. Calling editor.getEditorState() will then return the
+  latest editor state based on the changes from the update. Here&#39;s an
+  example of how you can update an editor instance: import { $getRoot ,
+  $getSelection } from &#39;lexical&#39; ; import { $createParagraphNode } from
+  &#39;lexical&#39; ; // Inside the
+  <code>editor.update</code>
+  you can use special $ prefixed helper functions. // These functions cannot be
+  used outside the closure, and will error if you try. // (If you&#39;re
+  familiar with React, you can imagine these to be a bit like using a hook //
+  outside of a React function component). editor . update ( ( ) =&gt; { // Get
+  the RootNode from the EditorState const root = $getRoot ( ) ; // Get the
+  selection from the EditorState const selection = $getSelection ( ) ; // Create
+  a new ParagraphNode const paragraphNode = $createParagraphNode ( ) ; // Create
+  a new TextNode const textNode = $createTextNode ( &#39;Hello world&#39; ) ; //
+  Append the text node to the paragraph paragraphNode . append ( textNode ) ; //
+  Finally, append the paragraph to the root root . append ( paragraphNode ) ; }
+  ) ;
+</p>
+<p>
+  Another way to set state is setEditorState method, which replaces current
+  state with the one passed as an argument. Here&#39;s an example of how you can
+  set editor state from a stringified JSON: const editorState = editor .
+  parseEditorState ( editorStateJSONString ) ; editor . setEditorState (
+  editorState ) ;
+</p>
+<h4 id="state-update-listener">State update listener</h4>
+<p>
+  If you want to know when the editor updates so you can react to the changes,
+  you can add an update listener to the editor, as shown below: editor .
+  registerUpdateListener ( ( { editorState } ) =&gt; { // The latest EditorState
+  can be found as
+  <code>editorState</code>
+  . // To read the contents of the EditorState, use the following API:
+  editorState . read ( ( ) =&gt; { // Just like editor.update(), .read() expects
+  a closure where you can use // the $ prefixed helper functions. } ) ; } ) ;
+</p>
+<h4 id="when-are-listeners-transforms-and-commands-called">
+  When are Listeners, Transforms, and Commands called?
+</h4>
+<p>
+  There are several types of callbacks that can be registered with the editor
+  that are related to updates of the Editor State. Callback Type When It&#39;s
+  Called Update Listener After reconciliation Mutation Listener After
+  reconciliation Node Transform During editor.update() , after the callback
+  finishes, if any instances of the node type they are registered for were
+  updated Command As soon as the command is dispatched to the editor (called
+  from an implicit editor.update() )
+</p>
+<h4 id="synchronous-reconciliation-with-discrete-updates">
+  Synchronous reconciliation with discrete updates
+</h4>
+<p>
+  While commit scheduling and batching are normally what we want, they can
+  sometimes get in the way. Consider this example: you&#39;re trying to
+  manipulate an editor state in a server context and then persist it in a
+  database. editor . update ( ( ) =&gt; { // manipulate the state... } ) ;
+  saveToDatabase ( editor . getEditorState ( ) . toJSON ( ) ) ;
+</p>
+<p>
+  This code will not work as expected, because the saveToDatabase call will
+  happen before the state has been committed. The state that will be saved will
+  be the same one that existed before the update. Fortunately, the discrete
+  option for LexicalEditor.update forces an update to be immediately committed.
+  editor . update ( ( ) =&gt; { // manipulate the state... } , { discrete : true
+  } ) ; saveToDatabase ( editor . getEditorState ( ) . toJSON ( ) ) ;
+</p>
+<h5 id="cloning-state">Cloning state</h5>
+<p>
+  Lexical state can be cloned, optionally with custom selection. One of the
+  scenarios where you&#39;d want to do it is setting editor&#39;s state but not
+  forcing any selection:
+</p>
+<ul>
+  <li>
+    // Passing
+    <code>null</code>
+    as a selection value to prevent focusing the editor editor . setEditorState
+    ( editorState . clone ( null ) ) ; Why is it necessary?
+  </li>
+  <li>Understanding the Editor State</li>
+  <li>Updating state</li>
+  <li>State update listener</li>
+  <li>When are Listeners, Transforms, and Commands called?</li>
+  <li>Synchronous reconciliation with discrete updatesCloning state</li>
+</ul>

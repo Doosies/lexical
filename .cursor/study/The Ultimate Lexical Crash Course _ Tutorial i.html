@@ -1,0 +1,518 @@
+<p>
+  hey everyone my name is usan and this video we will build a rich text editor
+  using legle and by the end of this video we will surely Master it so make sure
+  to subscribe to the Channel smash the like button and let&#39;s dive into it
+  so here&#39;s the r text editor we will be building we can enter any text we
+  want and then we can basically do different things like I can make it bold
+  italic underline I can strike through it highlight it Etc also I can make it a
+  superscript subscript show it in a coded format align it to the center right
+  or left and then basically undo and redo all the actions I just performed also
+  I can apply any heading formatting so you know from H1 to H6 I can apply any
+  heading formatting and you can see that it formats it also if I want to save
+  the r text editor state to the server I can click on the save button it would
+  save it and if I refresh it you will see that loads it from the server so the
+  data doesn&#39;t get lost it persists and we will Implement all these features
+  in this video so let&#39;s remove all the code and build the from the ground
+  up so in order to get started you have to install two dependencies legal and
+  legal direct because we will use legal inside direct after that let&#39;s
+  start importing stuff and start building the red text editor so I&#39;ve got a
+  red text editor component here and I am rendering it in the app component so
+  basically let&#39;s add the lexical code here so first I will add a box which
+  is thetive in Chakra UI you can use any library to make the custom components
+  you will have like the toolbar and everything but I&#39;m us using Sak UA
+  because I like it first thing we&#39;ll add is the legle composer so I will
+  import it from legle react lexical composer and this is basically the rapper
+  for everything legal related and it works as a context provider so if you know
+  about re context basically so inside this lexical composer component you will
+  be able to add any plug-in anything you want and it would work and basically
+  you will be able to extract the editor instance in any component and uh this r
+  everything which is legal related so I will add this component legal composer
+  now this legal composer has an initial config prop so I will add it initial
+  config should be let me make it here initial config is equal to so it has some
+  required properties let me add it here so first is namespace so namespace is
+  basically the name of this sidor just like if you have multiple Fields you can
+  give different names to this and that basically differentiates those two
+  Fields so name space is basically you know just like a name for the D Tex
+  editor so I can give it name like Rich Text Editor one for now I&#39;ll make
+  it Dynamic later then the next property would be theme so right now I will
+  only add an empty object for the theme and we would come back to it later and
+  then the on error so I will add an empty function for now so these are the
+  three required properties you can see that the error goes away and here I will
+  will add the nodes property so nodes is basically if you are using some custom
+  functionality in lexical then you need to pass the related nodes in the nodes
+  array so for this particular Rich Text Editor which I will Implement I added
+  the ability of formatting the text in the form of headings also you could
+  format the text in the form of code blocks so for that I will add the
+  respective nodes here so I will import The Heading node from lexical Rich text
+  and I will add it here and then from lexical code I will import some other
+  nodes as well so legal code I will import the code highlight node and the code
+  node let me copy these and I will add them here so these are basically the
+  nodes related to the functionality which I will Implement if you&#39;re going
+  to implement some other functionalities like adding tables adding list Etc
+  then you will basically import those nodes from the respective packages and
+  then add them here otherwise those functionalities won&#39;t work even if you
+  implement them by following the docs so this is important now if you go here
+  you can see that it still doesn&#39;t render anything so basically this is the
+  config or the base for the lexical project we still need to you know add the r
+  accelator Etc so the way legle works is this is the legic composer inside this
+  we will have different plugins so some are built in plugins some are plugins
+  which we will add ourselves you know custom plugins so first of all I will add
+  a plugin which is you know built in so I will import the RX plugin from
+  lexical react lexical R Tex plugin and this is basically the main thing the
+  portion we will write on stuff so this component has some additional props so
+  one is content editable so I will import content editable we have to pass a
+  component here so this should be legal content editable and there I would get
+  the content editable component and there I have to pass it inside this prop so
+  content editable now this component also requires some other props like
+  placeholder error boundary so let me add those so placeholder for now I will
+  just add some dummy text here and here in the error boundary I will import the
+  lexical error boundary so lexical error boundary lexical error boundary and
+  this would go here now if I go to Local Host I see some text which is
+  basically the placeholder but I don&#39;t see any place for writing content so
+  basically I will have to style the content ID table give it a height or
+  something so I&#39;ll add a class name then basically I will use a library
+  emotion CSS to inject in line Styles so if you want to use normal CSS like you
+  want that you add a CSS file and then you just add a glass here and then add
+  the Styles in that particular CSS file that is okay as well your choice so
+  here I&#39;ll say height should be 120 pixel then font size should be 12
+  padding should be 8 overflow should be Auto so if I now come here you can see
+  that if I click on it there is a text f type thing and you know I can add text
+  and stuff uh which is great I also want to remove this Focus border because it
+  is kind of ugly so I&#39;ll go here and I&#39;ll say outline should be none so
+  now that outline is gone I also would want to add a border with a border
+  radius for at least I can see it so I&#39;ll go here I&#39;ll say border
+  should be 1 pixel solid black and then the Border radius should be 4 pixels
+  great so now you can see that there&#39;s a border around great so the
+  placeholder is not where it should be so we have to style the placeholder a
+  bit so we&#39;ll absolutely position it based on the this text plugin we have
+  so first all I&#39;ll wrap it with a box the box is just a div and chakra UI I
+  will basically place it inside the box I will give a position relative to the
+  box then here I will add another box and then I will give it a class name and
+  some Styles so I&#39;ll say its position should be absolute its color should
+  be slightly light grayish its top should be 8 pixel left should be 10 pixel
+  and then font size should be 12 pixel now if I go here you can see that you
+  know the placeholder kind of looks part of the text editor now which is great
+  if I type anything the placeholder goes away and that is how it should work so
+  you know we have successfully added the placeholder as well now just like the
+  r Tex plugin legle also has some built-in plugins which can add some more
+  functionality so for example there is also an autofocus plugin so if you want
+  that whenever the r text plugin gets stred it has autofocus by default you can
+  add the autofocus plugin so let&#39;s import that I copy this then here
+  I&#39;ll say legal autofocus plugin and here I&#39;ll import autofocus plugin
+  and you just have to add it inside the logical composer so I&#39;ll add it
+  like this now if I refresh you can see that it has focus by default which is
+  great if you want to add the functionality similarly there are tons of other
+  plugins as well you can go to the legal documentation and you can check it out
+  now I will like to add the toolbar because that is the main portion of the
+  text editor and then basically I will add the on click handlers for those
+  buttons and which would basically make the text bold underline Etc so I have
+  already a tool by plugin component here but it is empty so I will add it above
+  the r text plugins so toolbar plugin let me import it great now let me go to
+  the toolbar plugin file di now it has got nothing it has just got a button
+  group component which basically provides some styles for all the icon buttons
+  I will render inside this nothing fancy now I have a constants file and in
+  that coner file I already have an array created because I didn&#39;t want to
+  waste time and first of all basically I have an enum so this enum has all the
+  actions I would like to perform so bold Alex underline code left align right
+  align undoo Etc So based on these rich text actions I have created an array so
+  the array has objects which have IDs the icon which I will show in that icon
+  button and the label so this is the area label if you want to add it and yeah
+  so basically I will use this are to map out icon buttons and based on this ID
+  I will basically decide what I want to do with the text I&#39;ve selected on
+  click so that is what I want to do let&#39;s do that so I&#39;ll go to the
+  toolbar plugin this text options so I inside this this button group I&#39;ll
+  say Rich Text options. map and then I will get some options here let me return
+  an icon button component here and here I will get ID label icon and font size
+  so in the icon button I will add the label area label so area label would be
+  the label then I icon would be icon then font size would be font size and then
+  basically the on click function so on click function would be on action ID and
+  here I will copy the on action function name and I will make an onaction
+  function so the on action function would get an ID which would be Bri text
+  action cool also within this array I have some dividers as well so basically I
+  will use a divider component which is just a vertical line to separate some
+  group of icons so here I&#39;ll say if the ID is equal to H text action.
+  divider then render the divider component otherwise render the second mod so
+  now we can see that the icon buttons have rendered and they have divided as
+  well to separate the icons great now obviously right now if you click on the
+  button nothing happens because the on action function is doing nothing but
+  let&#39;s add the logic for the on action function so basically this on action
+  function is getting the ID now I will add a switch case here and based on the
+  ID I will basically implement the text formatting or whatever I want so I will
+  add a switch case here ID case would be which text action. bold then break
+  similarly I will add for other options as well so basically copy pasted this
+  case statement for other options as well great now in order to do something
+  with the editor we have to get the editor from the context so I will import
+  that so I&#39;ll say import from lexical react lexical composer context and
+  here I&#39;ll get the use lexical composer context and basically gives us the
+  editor instance so const editor is equal to I&#39;ll just use the hook so
+  basically this editor is the main thing in any component if you want to format
+  something if you want to add event handlers anything you want this is the main
+  thing so I&#39;ll get the editor and here I&#39;ll say editor do editor.
+  dispatch command so basically how these formatting thing works we have to
+  dispatch a command in Legacy they have basically added different event lists
+  or something that if someone dispatches this command then basically this
+  action should be performed etc etc so for any kind of formatting we want we
+  have to dispatch a command now for formatting based options like if I want to
+  format the text to make it bold italic underline superscript subscript Etc I
+  have to use a certain command so the first parameter is the command name and
+  the second param is what we want to do with the command so the command name
+  for formatting the text is format text command and the second parem would be
+  the payload for the formatex command so we want to format it but how do we
+  want to format it so if I type an empty string you&#39;ll see the bunch of
+  options I get so bold code highlight italic Etc so basically I&#39;ve can
+  format my text with these options so for this option I&#39;ll say bold now if
+  I type something I selected I click on Bold voil up it has been folded now
+  basically I will add it for all the formatting options so basically these
+  eight options are all formatting text options so I will go here and I will
+  copy paste it so for italics it should be italic for underline it should be
+  underline also it is typescript enabled so if you make a spelling mistake or
+  something or you mistakenly add some other thing here it would give an error
+  so don&#39;t worry so strike through for superscript it would be superscript
+  for subscript it would be subscript for highlight it would be highlight for
+  code it would be code great now I&#39;ve added the code for all the buttons
+  but you will notice one thing if I select this and I click on italic it
+  doesn&#39;t make it if I click on the underline button it doesn&#39;t make it
+  underline why because the there are some things which happen by default for
+  some reason but some formatting options don&#39;t work by default so we
+  basically have to add those Styles in the theme so remember in the initial
+  config we have a theme option so basically for these theme Styles we&#39;ll
+  have to add those styles for these particular things in the theme so let&#39;s
+  go there so I will go to the this text edor component here I will make a theme
+  variable and the theme variable is of type edit the theme classes basically
+  this would give us type completions and this should be the theme cool so
+  basically for text formatting themes I will type text then basically you know
+  it would be like bold again I&#39;m using CSS in JS Library emotion CSS you
+  can create a CSS file import it and then they basically just add the class
+  name here your choice so here I&#39;ll say CSS font weight should be bold then
+  for underline I will say text decoration should be underline for strike
+  through it would be strike through and then there is another option underline
+  strike through so for that it would be under line and strike through sorry it
+  is line through not strike through then for italic it would be font style
+  italic now if I select the text and I click on italic underline you will see
+  that you know all the necessary styles are playing great now there is one
+  thing as well you have to add the theme for some styles to work but you also
+  can use the theme to customize the styles for some so for the if I select this
+  and I click on code you&#39;ll see that gives it a pinkish color and in most
+  of the r text editors that is not how the code formatting looks like the code
+  formatting looks like it has a grayish background and a light grayish border
+  and you know that is how in most of the places the code formatting is and I
+  want that type of code formatting so basically I can override it I can come
+  here I can say code and then basically I can add my own Styles here so color
+  should be black black padding should be two background should be gr so e e and
+  the Border should be 1 pixel solid and then some dark G color CCC now if I
+  refresh I type something and I click on the code button you&#39;ll see that it
+  gives it the format I specified in the theme so this is a great way to
+  override stuff similarly let&#39;s add the logic for these buttons so I will
+  go to the toolbar plug-in file yeah so for left align right align Etc I&#39;m
+  not formatting the text for these alignment options I have to pass a different
+  command so basically it would be format element command and then for format
+  element command obviously code doesn&#39;t make sense so if I add an empty
+  string here you&#39;ll see that these are the options available so for left
+  align I will obviously use left let me copy it and paste it so for right align
+  it would be right for Center align it would be Center for justify line it
+  would be justify great and now alignment would work as well so right alignment
+  center alignment justify Etc everything is working good now similarly for undo
+  and redo we have separate commands so I&#39;ll add it here for undo and redo
+  we have undo command we will pass undefined here and then for redo we have
+  redo command so different commands for undo and redo now I will notice that
+  undo and redo are not working the reason is because in order for them to work
+  we have to add a plugin in the legal composer just like we added the r text
+  plugin at the autofocus plugin so let me add that so I will come to the thisx
+  editor file and I will import the history plugin so here I&#39;ll say lexical
+  history plugin history plugin let me copy it and add it here now if I add
+  something and I click on undo it gets removed if I you know add different
+  styling to it like you know various styling and I click on undo you can see
+  that it goes one step back if I click on redo it basically goes one step
+  forward Etc so undo and redo and working as well great now basically I want to
+  add the functionality where initially undo and doo button should be disabled
+  because obviously right now I haven&#39;t added anything so I shouldn&#39;t be
+  able to undo a redo similarly I should only be able to redo when I undo some
+  step that is when I should be able to redo and similarly if I undo all the way
+  back redo should be disable and so on so forth so let&#39;s add the logic for
+  that so basically I will have to add event handlers for this so legle has a
+  own way of adding event handlers so I&#39;ll add a use effect great then I
+  will say return merge register let me import it so I will import it from
+  lexical utils then inside this SM resister function we can add different event
+  listeners so in legal event listeners can be added by saying editor do
+  register command and then we basically have to add the command name and then a
+  function so here the command name would be can undo command and then here
+  would be we would have function and I will return false and then I also have
+  to pass a priority so I&#39;ll pass a priority so basically how register
+  command works is I have a command here I have a event listener function and
+  then I have a priority so I can have multiple register command functions or
+  multiple event listeners for the same event and based on the priority they
+  will be called so if you know right now low priority is one I can add 1 2 3 4
+  5 any number I want so if there are two event listeners for the same command
+  and one has a higher priority that function would be called first if in that
+  particular function here in that particular event listener I return true
+  basically then it would not propagate further and only that particular
+  function would be called but if I return false then if there is some other
+  function event listen as well with some low priority then that would be called
+  as well but in the order of priority so right now I have only got one function
+  so you know it doesn&#39;t matter so here I will get the payload so I will
+  create a state so this payload will basically tell me if I can undo or not
+  similarly let me copy it place a comma here and then and basically here
+  I&#39;ll say can redo command so basically this payload param in this function
+  would tell me if I can undo here basically it would tell me if I can redo so
+  anytime some change happens in the r text editor these functions would be
+  called and basically I will update the state and based on that state I will
+  disable the buttons so I&#39;ll say disable map set disable map is equal to
+  use State and this would be an object where it would say Rich Text action dot
+  undo true initially obviously it should be disabled and then for redo as well
+  it should be true and then I will basically pass the disable map here so is
+  disable abled should be disable map then I&#39;ll pass the ID here I&#39;ll
+  have to specify its type so I&#39;ll say ID should be string value should be
+  bul so now the error goes away and here I&#39;ll update the state for the
+  disable map so PR disable map and then I&#39;ll spread it and then here it I
+  would say undo should be equal to payload let me copy this here I will update
+  the disabled state for redo great here I have to invert these because this is
+  the can undo command and can redo command and we have to disable them based on
+  those so I will invert them now initially you can see that these are disabled
+  great if I type something you can see that undo gets enabled if I click on
+  enable the redo gets enabled Etc so now this works great now let&#39;s say I
+  add some text like this you know and I click on Bard now you can see that it
+  does get formatted but when I select it I don&#39;t really know which
+  particular formattings are active because you know there is no highlighting
+  done on these buttons so I don&#39;t really know if this particular text which
+  I have selected is currently bold or italic or underline I can you know guess
+  based on formatting it is but still these buttons should be highlighted based
+  on the text I select so if I select select this text then these three buttons
+  should be highlighted because these three formats have currently been applied
+  on this selected text so let&#39;s add the logic for that so within this merg
+  register function I will add two more event handlers and basically I will do
+  that particular functionality there so first of all I will copy this and
+  I&#39;ll paste it here here I will add selection change command so whenever I
+  select something basically this particular event handler would be called and I
+  can basically you know do stuff here so I will call an update toolbar function
+  here let me Define update toolbar function here similarly I need to add
+  another event handler type thing so uh here I will say editor do update
+  register update listener from here we will get the editor State inside it we
+  will do editor state. read and inside this function we will call this update
+  toolbar function again now inside this update toolbar function I want to get
+  the particular text which is selected so I will say cons selection is equal to
+  dollar sign get selection so I will import it from lexical then I&#39;ll say
+  if is is range selection this is check which we need to add so if it is range
+  selection then I want to basically update a state which I will Define right
+  now so as of right now this would be like an empty object and it type would be
+  the same but this would be selection map set selection map right and here
+  I&#39;ll make a variable here so con new select ction map is equal to H text
+  action. bold so selection. has format bold so basically this has format will
+  tell us if that particular format has been applied on the selected text so I
+  will basically you know copy paste it several times so for italics it would be
+  italic for underline it would be underline and similarly for other stuff so
+  strike through here I would write strike through for superscript it would be
+  superscript and so on so forth so the same formatted options which we pass in
+  case of editor do dispatch function click on on the buttons the same formatted
+  options can be passed here and we can know if that particular format has been
+  applied or not so the last one would be code code this should be Capital code
+  also highlight one last thing highlight cool so I will set the selection map
+  to the new selection map great and I will copy the selection map I would go
+  here here and yeah one thing I will make a function which would basically
+  return the selected props if the button is selected so I&#39;ll say go on get
+  selected selected button props is equal to is selected if is selected then let
+  me give it a type so Boolean then return this otherwise return this for the
+  selected case color scheme should be blue and variant should be solid so now I
+  would say spread these props selection map and I will pass the ID so basically
+  if a particular button is Select selected for that particular corresponding ID
+  of the button selection map would return true if it is true then I am
+  basically returning a color scheme blue and we install it so basically that
+  button would become blue so now if I you know write something and I apply some
+  format you can see that that particular button gets highlighted here and now
+  even if I am you know typing something new because it is carrying the same
+  format all the buttons are highlighted and you know if I let&#39;s say remove
+  some format in apply some different kind of formatting then you will see that
+  when I select this these buttons get selected but when when I select this text
+  these buttons get highlighted or selected so basically that is how most rich
+  text editors work now the last thing I need to add is the headings select so
+  if I select a particular heading basically it should change the format of the
+  text to that particular heading style so let&#39;s add that so for that I will
+  add a select here so select from Chakra UI then basically there is a headings
+  array I have already defined so this is H1 to H6 so headings. map heading I
+  would return a option tag an HTML option tag here I will show The Heading and
+  here the value would also be heading now inside the select I will add an on
+  change function I&#39;ll say e update heading e. target. value so whatever
+  option we click basically it would pass it to the update heading function let
+  me create the update heading function so update heading is equal to it we
+  would get the heading here and this heading would have a type so I will go
+  here and I will import from legal this text I&#39;ll import two things first
+  of all I will import the type so heading tag type and then create heading node
+  cool now I will use this as the type here in this particular function now
+  inside this function first of all I&#39;ll do the same thing as I did for the
+  update toolbar case so I have to see if the selection is valid and get the
+  selected text because I want to apply the heading format to the selected text
+  so I&#39;ll add it here remove this here I will import another function so
+  from legal selction I will import rap nodes now here I would say rap nodes
+  I&#39;ll pass in the selection then a function and here I would say create
+  heading node and heading let me pass the dollar sign here great here I would
+  say as heading tag type to silent the types of eror it size is huge let me
+  shrink the size I&#39;ll say size should be XS also let me give it a right
+  margin of two great one last thing which I forgot I will have to wrap this
+  with I do update so this would go here let me also pass a placeholder so Place
+  holder is equal to select heading if I now add any text and I select any
+  heading you&#39;ll see that that particular heading is applied which is great
+  okay so we can see that we can apply different formattings by clicking on
+  these buttons but normally that&#39;s not what people expect when using aex
+  editor they expect that they would have key shortcuts like contrl Z for undo
+  contrl B for bold Etc that is a better ux so let&#39;s add that so for that I
+  will create a hook so let me create a hooks folder so I&#39;ll go here hooks
+  then inside it I will create use key findings. TSX let me create the hook
+  Bings is equal to and basically I will use the on action function which we
+  have in the toolbar plugin and basically I&#39;ll will pass it as a prop to
+  this component and basically based on the keys I press I basically would
+  perform the necessary action so I will get the action here so on action and on
+  action would have the type ID which text action cool now let me import it here
+  so I I will place it here on key bindings and then I&#39;ll pass the on action
+  function here great now here let me get the editor as always so I&#39;ll say
+  import from lexical react composer context I will get the hook so use lexical
+  composer context I will get the editor from here then let me use the use
+  effect and basically I will do the same thing as I did in case of checking if
+  I can undo or redo Etc I will register a event listener so I will say editor.
+  register command and then the command name is key enter command so basically
+  whenever some key would be pressed in this R text editor this event list now
+  would draun cool so event now this this event would basically give me
+  different stuff like also let me pass the priority so basically this event
+  listem would give me different stuff like you know which keys I pressed did I
+  press the control key Etc so I&#39;ll for example I say if event do key is
+  equal to B and and event. control key so basically if I pressed controll and B
+  then I should call on action function with the r Tex action do bold command
+  let me pass on action and editor here cool now let me test it now if I type
+  some text I select it and I click on control B you&#39;ll see that that button
+  gets selected also it gets formatted to bold and I didn&#39;t even click on
+  the button and you saw it so similarly I would like to add it for some more
+  key bindings so if I type control and I I would like to make it italics if I
+  type control and U I would like to underline it if I type contrl n z I would
+  like to undo if I type contrl y I would like to redo so these are the things
+  which I think are essential but if you want you can add your own key
+  combinations and the respective actions here as well your choice now I can
+  select this text I can click on control I it makes it italicized I can click
+  on control U it underlines it similarly I can click on contrl Z and it undos
+  it and I can click on control Y and basically redo it so that is how you can
+  add key bindings to yourex editor now everything is great but this right now
+  was an uncontrolled component what we want is we want to make this a
+  controlled component so that first of all we can you know if there is a form I
+  can integrate this R text editor in a form and then you know basically if I
+  click on submit I can take the payload send it to the back end similarly if
+  the payload for the is Tex edor the string is coming from the back end I can
+  repopulate this is text editor so let me make it a controll component so for
+  that let me go to Rich Text Editor and let me add some props here so I would
+  go to the Rich Text Editor props let me copy this paste it here so first of
+  all value would be string on change would be a function which expects value
+  which is a string which would be a Setter for the state then let me have a
+  placeholder so I&#39;m basically making this a usable component now and this
+  would also be a string and here I would also have a name property so basically
+  if there are multiple dist editors in a form I want that their name space is
+  different so I&#39;ll copy this initial config and basically I&#39;ll put it
+  here so initial config I&#39;ll WB this with use memo and basically let me
+  import use memo here I would have value on change place folder name name would
+  go here and here similarly placeholder would go here let me make a form
+  component so I&#39;ll say new file form. ESX here I will have a box first of
+  all let me import the this text editor here let me have a state here so const
+  value set set value is equal to U State empty string on change would be set
+  value new value so new value would come from here here it would be value is
+  equal to value and name would be let&#39;s say post maybe this a blog post
+  form and let me also add a placeholder here I&#39;ll say select post now here
+  I will add a submission button also so its color scheme would be WhatsApp so
+  basically green size would be access here I&#39;ll would say save for now and
+  also let me give it a margin top of two that is good but I now have to
+  basically add these value and on change somewhere so basically I will have to
+  create a onchange plugin so let&#39;s create that and then I will add it here
+  so I&#39;ll go here to plugins let me create a plugin so custom on change
+  plugin. TSX I&#39;ll go here RFC now here let me basically have props so
+  custom on change plug-in props and basically the props should be the same as
+  for H text editor so value on change so I&#39;ll grab it I&#39;ll put it here
+  and then value on change let me add this plugin in the r text editor so I will
+  add it here so custom on change plugin value should go here on change should
+  go here now let&#39;s add the logic for setting the state which is our first
+  priority that is simple I will import the orang plugin so I&#39;ll say from
+  legal react on change plug-in I want to import the on plugin here I would
+  return it so onchange plugin inside onchange plugin I will add an on change
+  function this on change function would give me the editor State I&#39;ll say
+  editor state. read inside this read function I&#39;ll will call on change my
+  function I would import another function from the package so I&#39;ll say from
+  lexical HTML I will import generate HTML from nodes so generate HTML from
+  nodes that expects an editor instance so I will have to import that as well so
+  let me copy this so here I&#39;ll say laical composer context I&#39;ll import
+  the hook here I&#39;ll say const editor same thing which I did previously and
+  I&#39;ll call the hook and I&#39;ll pass the editor here let me add the dollar
+  sign here great so basically now I haven&#39;t CED for the value but whenever
+  I would type something this on change function would be called and the state
+  would be updated so now you can see you know it works the same way let me
+  console log the state so that we can know if it is working or not so I will
+  say console log value now inside the app component in start of this text
+  editor Let Me import the form component now you can see that you know I get
+  some value here now every time I would type something you can see that I get
+  some stringified HTML I you know bold it it alizes whatever it basically adds
+  the necessary stylings and tags here like the B tag I tag U tag and this is a
+  stringified HTML I can send it to the back end and it can be stored as a
+  normal string and then basically I can retrieve it so basically now I&#39;ll
+  add the logic for that where I can use the form to submit it and you know it
+  would send this string to the back end and then basically I can retrieve the
+  HTML on refresh and basically it would update the r text editor so let&#39;s
+  add that so basically I already have created a small server so basically this
+  is a normal Express server and I&#39;m not utilizing a database but basically
+  there is a variable here so every time I would post the data so when I would
+  click on the save button I would basically send the text here and every time I
+  would do that I would basically replace this text with the new text I&#39;m
+  sending from the front end and every time I would use the get method to get
+  the data I would basically return the updated text so basically this can be
+  seen as a server which is using a database and basically use storing the
+  string in in a database but I didn&#39;t want to complicate things so that is
+  our Demi server and also I have created a query and mutation beforehand
+  because I didn&#39;t want to comp things so basically this is a mutation
+  I&#39;ve created from T requery and I&#39;m calling this data mutation
+  function post and basically I would just send in the text and it would be
+  saved as the variable in the server here in the query I am basically just
+  getting the data and returning it first of all let me integrate the mutation
+  so I would go to the form component let me close all the files let me remove
+  this here I would create an on Save function so on Save would be let me import
+  the mutations so mutate a sync save text is equal to use update data and
+  basically I would just I would pass in the value here and on click I would
+  like to call this function and basically when the mutation would be called I
+  would get a spending variable during the time so basically in order to know if
+  the mutation is running I would change the text so if spending is true I would
+  add saving otherwise save so let me open the network tab let me add something
+  so you know whatever text let me add The Styling let me click save and now you
+  can see that I&#39;m basically sending in this stringified HTML and I&#39;m
+  getting a status true great now let me integrate the query as well to see if I
+  get the updated data so I&#39;ll say cons data is equal to use data so now let
+  me refresh this and the query is called and it returns meow basically the same
+  text which we sent in the signified HTML form with bold and superscript and
+  strike through Stelling so that is present here great now the only thing which
+  which we need to do is we need to take this stringified HTML and basically
+  show it in the r text editor so let&#39;s do that so let me go to the r text
+  editor file here and the custom on change plug-in function is where we will
+  add the remaining Logic for writing the query data here so I will have a state
+  so const is first render set is first render is equal to U state so initially
+  it would be true because it is the first lender then I will add a use effect
+  let me add a bis I will add here if there is no value or or if it&#39;s not
+  the first render then return I don&#39;t want to do anything here I would set
+  is render to fults because now it&#39;s not you know I ins start the US effect
+  here I again need the editor so I&#39;ll say editor do update let me add the
+  dependencies here so editor value is first trender here I would need another
+  function so just like I was generating HTML from nodes now I need generate
+  nodes from Dom so first I would like to generate the HML current HTML from the
+  editor just like I did here so I&#39;ll copy this if this current HTML is not
+  equal to the value then I want to update the this Tex editor with the value I
+  will get the get root function from lexical and I&#39;ll say clear then I will
+  get the parser from Dom parser I would pass the string so I&#39;ll say cons do
+  is equal to parser do parse from string value and the type would be text HTML
+  so I will get the nodes then so generate nodes from Dom first I&#39;ll pass
+  the editor instance and then the Dom and then I&#39;ll basically use the
+  insert nodes function from lexical and insert the nodes now one last thing is
+  remaining I will add use effect here so when the query data would come I would
+  want to update the state with the query data so that let me add the data here
+  I also need to add another use effect so if the value Ines then I want to set
+  the is first render to true now if I refresh you will see that the data
+  persists and the data coming from the back end is shown here which is great
+  now if you know I add any other thing like you know I add this dummy text I
+  basically make it coded I you know change it&#39;s text element Etc now if I
+  save it and refresh it you will see that you know the data persists and the
+  data is shown in the so that is it for the course I am pretty sure you liked
+  it there was not enough material for it on YouTube and I was using it my in my
+  job so I thought that I should make a video about it if you like the video
+  learned anything from it please make sure to subscribe to the channel it took
+  me a long while to make this course and also so it takes a long while to make
+  the video plus edit it Etc so it would be great if you would you know show
+  some support and you know like the video share it with your friends subscriber
+  Etc so that is it for the video and I&#39;ll see you in the next video bye
+</p>

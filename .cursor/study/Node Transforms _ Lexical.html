@@ -1,0 +1,161 @@
+<p>Skip to main contentPlaygroundDocsAPICommunityiOSGalleryGitHubiOS GitHub</p>
+<h3 id="node-transforms">Node Transforms</h3>
+<p>
+  Transforms are the most efficient mechanism to respond to changes to the
+  EditorState. For example: User types a character and you want to color the
+  word blue if the word is now equal to &#34;congrats&#34;. We programmatically
+  add an @Mention to the editor, the @Mention is immediately next to another
+  @Mention ( @Mention@Mention ). Since we believe this makes mentions hard to
+  read, we want to destroy/replace both mentions and render them as plain
+  TextNode&#39;s instead. const removeTransform = editor . registerNodeTransform
+  ( TextNode , ( textNode ) =&gt; { if ( textNode . getTextContent ( ) ===
+  &#39;blue&#39; ) { textNode . setTextContent ( &#39;green&#39; ) ; } } ) ;
+</p>
+<h4 id="syntax">Syntax</h4>
+<p>
+  editor . registerNodeTransform &lt; T : LexicalNode &gt; ( Class &lt; T &gt; ,
+  T ) : ( ) =&gt; void
+</p>
+<h4 id="lifecycle">Lifecycle</h4>
+<p>
+  Transforms are executed sequentially before changes are propagated to the DOM
+  and multiple transforms still lead to a single DOM reconciliation (the most
+  expensive operation in Lexical&#39;s lifecycle). Beware! While it is possible
+  to achieve the same or very similar result through an update listener followed
+  by an update, this is highly discouraged as it triggers an additional render
+  (the most expensive lifecycle operation). Additionally, each cycle creates a
+  brand new EditorState object which can interfere with plugins like
+  HistoryPlugin (undo-redo) if not handled correctly. editor .
+  registerUpdateListener ( ( ) =&gt; { editor . update ( ( ) =&gt; { //
+  Don&#39;t do this } ) ; } ) ;
+</p>
+<h5 id="dirty-nodes">Dirty Nodes</h5>
+<p>
+  <em>Dirty Leaves</em>
+  (any LexicalNode that is not an ElementNode) and
+  <em>Dirty Elements</em>
+  are tracked separately to support the transform heuristic. Internally, there
+  are two states for dirty nodes:
+</p>
+<ul>
+  <li>
+    Intentionally Dirty nodes (leaves or elements) had node.getWritable() or
+    node.markDirty() (an alias) called on them. Maintaining the
+    tree-of-doubly-linked-lists structure of a lexical document requires that
+    this Intentionally Dirty state will propagate to immediate siblings and in
+    some cases the parent node.
+  </li>
+  <li>
+    Unintentionally Dirty Element nodes are an ancestor of a dirty node that
+    were not explicitly marked as Intentionally Dirty Only elements can be
+    Unintentionally Dirty, because leaves by definition can not have children.
+    The reconciler works by starting at the RootNode (which is the ancestor of
+    any attached node, and thus always dirty whenever any attached node is
+    dirty). Intentionally Dirty nodes have their createDOM and/or updateDOM
+    called. Dirty Elements reconcile all of their children. Thus, reconciliation
+    stops at the highest node in a subtree that has no dirty nodes (unless it is
+    running with a flag to do a full reconciliation which considers all nodes as
+    Intentionally Dirty). info The transform heuristic depends on these internal
+    implementation details to find a fixed point where no more transforms are
+    required.
+  </li>
+</ul>
+<h5 id="transform-heuristic">Transform heuristic</h5>
+<ol>
+  <li>
+    We transform leaves first. If transforms generate additional dirty nodes we
+    repeat step 1 . The reasoning behind this is that marking a leaf as dirty
+    marks all its parent elements as dirty too. We transform elements.
+  </li>
+</ol>
+<ul>
+  <li>
+    If element transforms generate additional dirty nodes we repeat step 1 .
+  </li>
+  <li>
+    If element transforms only generate additional dirty elements we only repeat
+    step 2 . Node will be marked as dirty on any (or most) modifications done to
+    it, it&#39;s children or siblings in certain cases.
+  </li>
+</ul>
+<h4 id="preconditions">Preconditions</h4>
+<p>
+  Preconditions are fundamental for transforms to prevent them from running
+  multiple times and ultimately causing an infinite loop. Transforms are
+  designed to run when nodes have been modified (aka Intentionally Dirty). For
+  the most part, transforms only need to run once after the update but the
+  sequential nature of transforms makes it possible to have order bias. Hence,
+  transforms are run over and over until this particular type of Node is no
+  longer marked as intentionally dirty by any of the transforms. Hence, we have
+  to make sure that the transforms do not mark the node dirty unnecessarily. //
+  When a TextNode changes (marked as dirty) make it bold editor .
+  registerNodeTransform ( TextNode , textNode =&gt; { // Important: Check
+  current format state if ( ! textNode . hasFormat ( &#39;bold&#39; ) ) {
+  textNode . toggleFormat ( &#39;bold&#39; ) ; } }
+</p>
+<p>
+  But oftentimes, the order is not important. The below would always end up in
+  the result of the two transforms: // Plugin 1 editor . registerNodeTransform (
+  TextNode , textNode =&gt; { // This transform runs twice but does nothing the
+  first time because it doesn&#39;t meet the preconditions if ( textNode .
+  getTextContent ( ) === &#39;modified&#39; ) { textNode . setTextContent (
+  &#39;re-modified&#39; ) ; } } ) // Plugin 2 editor . registerNodeTransform (
+  TextNode , textNode =&gt; { // This transform runs only once if ( textNode .
+  getTextContent ( ) === &#39;original&#39; ) { textNode . setTextContent (
+  &#39;modified&#39; ) ; } } ) // App editor . addListener ( &#39;update&#39; ,
+  ( { editorState } ) =&gt; { const text = editorState . read ( $textContent ) ;
+  // text === &#39;re-modified&#39; } ) ; info The transform heuristic considers
+  RootNode to be Intentionally Dirty whenever any node is dirty, and it ensures
+  that this transform is applied last after all other transforms. In this way,
+  you can consider it a &#34;pre-update&#34; listener, which occurs before any
+  DOM reconciliation has happened. As with any other transform, it may get
+  called multiple times in a given update (especially if your RootNode transform
+  makes any node dirty).
+</p>
+<h4 id="transforms-on-parent-nodes">Transforms on parent nodes</h4>
+<p>
+  Transforms are very specific to a type of node. This applies to both the
+  declaration ( registerNodeTransform(ImageNode) ) and the times it triggers
+  during an update cycle. // Won&#39;t trigger editor . registerNodeTransform (
+  ParagraphNode , . . ) // Will trigger as TextNode was marked dirty editor .
+  registerNodeTransform ( TextNode , . . ) editor . update ( ( ) =&gt; { const
+  textNode = $getNodeByKey ( &#39;3&#39; ) ; textNode . setTextContent (
+  &#39;foo&#39; ) ; } ) ;
+</p>
+<p>
+  While the marked dirty rule is always true, there are some cases when it&#39;s
+  not immediately obvious and/or we force nearby nodes to become dirty for the
+  sake of easier transform logic: You add a node to an ElementNode, the
+  ElementNode and the newly added children are marked dirty, also its new
+  immediate siblings You remove a node, its parent is marked dirty, also the
+  node&#39;s immediate siblings prior to being removed You move a node via
+  replace , rules 2 and 1 are applied. editor . registerNodeTransform (
+  ParagraphNode , paragraph =&gt; { // Triggers } ) ; editor . update ( ( )
+  =&gt; { const paragraph = $getRoot ( ) . getFirstChild ( ) ; paragraph .
+  append ( $createTextNode ( &#39;foo&#39; ) ; } ) ;
+</p>
+<h4 id="registerlexicaltextentity">registerLexicalTextEntity</h4>
+<p>
+  It is common to have certain nodes that are created/destroyed based on their
+  text content and siblings. For example, #lexical is a valid hashtag whereas
+  #!lexical is not. This is a perfectly valid case for transforms but we have
+  gone ahead and already built a utility transform wrapper for you for this
+  specific case: registerLexicalTextEntity &lt; N : TextNode &gt; ( editor :
+  LexicalEditor , getMatch : ( text : string ) =&gt; null | EntityMatch ,
+  targetNode : Class &lt; N &gt; , createNode : ( textNode : TextNode ) =&gt; N
+  , ) : Array &lt; ( ) =&gt; void &gt; ;
+</p>
+<h4 id="examples">Examples</h4>
+<ol>
+  <li>Emojis</li>
+  <li>AutoLink</li>
+  <li>HashtagPlugin</li>
+</ol>
+<ul>
+  <li>Syntax</li>
+  <li>LifecycleDirty Nodes</li>
+  <li>
+    Transform heuristic Preconditions Transforms on parent nodes
+    registerLexicalTextEntity Examples
+  </li>
+</ul>

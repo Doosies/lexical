@@ -1,0 +1,297 @@
+<h3 id="lexical-5">
+  Lexical 강좌 5편. 코드 블럭 구현과 인라인 스타일, 마크다운과 같은 단축기
+  구현하기
+</h3>
+<p>
+  안녕하세요? 오늘은 Lexical 강좌 5편을 이어가도록 하겠습니다. 전체 강좌
+  리스트입니다. Lexical 강좌 1편. 간단한 소개와 기본적인 구현 Lexical 강좌 2편.
+  플러그인 구현과 undo, redo 기능 추가하기 Lexical 강좌 3편. H1, H2 같은
+  Headings 구현 Lexical 강좌 4편. 인용 블럭과 리스트 블럭 구현하기 Lexical 강좌
+  5편. 코드 블럭 구현과 인라인 스타일, 마크다운과 같은 단축기 구현하기 ** 목 차
+  **
+</p>
+<ul>
+  <li>
+    Lexical 강좌 5편. 코드 블럭 구현과 인라인 스타일, 마크다운과 같은 단축기
+    구현하기코드 블록 구현하기
+  </li>
+  <li>인라인 스타일 기능 구현</li>
+  <li>마크다운과 같은 단축키 도입</li>
+</ul>
+<h4 id="-">코드 블록 구현하기</h4>
+<p>
+  이제 조금은 어렵게 느껴질 수 있는 코드 입력 기능을 구현해봅시다. 여러분들이
+  블로그를 작성할 때 반드시 필요한 것이 코드 블록입니다. 지정된 프로그래밍
+  언어로 Syntax Highlight가 가능하고, 코드 에디터처럼 등폭 글꼴로 표시되는 편집
+  영역을 구현해보겠습니다. 항상 그렇듯이, Node 클래스의 등록부터 시작합니다.
+  CodeNode, CodeHighlightNode 두 가지 Node가 @lexical/code 에 준비되어 있습니다.
+  // src/nodes.ts import { HeadingNode , QuoteNode } from
+  &#34;@lexical/rich-text&#34; ; import { ListItemNode , ListNode } from
+  &#34;@lexical/list&#34; ; import { CodeNode , CodeHighlightNode } from
+  &#34;@lexical/code&#34; ; import { Klass , LexicalNode } from
+  &#34;lexical&#34; ; export const nodes : Klass &lt; LexicalNode &gt;[] = [
+  HeadingNode , QuoteNode , ListItemNode , ListNode , CodeNode ,
+  CodeHighlightNode , ]; Lexical은 List의 복잡한 로직을 공식 플러그인으로
+  준비해주었듯이, 코드 블록에 대해서도 로직을 만들어뒀는데요. 하지만, 어째서인지
+  ListPlugin처럼 React 컴포넌트로 만들어주지는 않았기 때문에 직접 만들 필요가
+  있습니다. // src/plugins/CodeHighlightPlugin.tsx import { FC , useEffect }
+  from &#34;react&#34; ; import { registerCodeHighlighting } from
+  &#34;@lexical/code&#34; ; import { useLexicalComposerContext } from
+  &#34;@lexical/react/LexicalComposerContext&#34; ; export const
+  CodeHighlightPlugin : FC = () =&gt; { const [editor] =
+  useLexicalComposerContext (); useEffect ( () =&gt; { return
+  registerCodeHighlighting (editor); }, [editor]); return null ; };
+  registerCodeHighlighting은 구문 강조를 위한 로직을 등록하기 위한 함수입니다.
+  내부적으로는 Prism.js가 사용되고 있습니다. registerXXX이므로 반환값은
+  unregister 함수이며, 그대로 useEffect의 클린업에 사용할 수 있습니다. 물론,
+  CodeHighlightPlugin도 LexicalComposer의 자식 컴포넌트에 넣으면 됩니다. //
+  src/Editor.tsx // 생략 import { CodeHighlightPlugin } from
+  &#34;./plugins/CodeHighlightPlugin&#34; ; export const Editor : FC = () =&gt;
+  { return ( &lt; LexicalComposer initialConfig = {initialConfig} &gt; {/
+  <em>생략</em>
+  /} &lt; CodeHighlightPlugin /&gt; &lt;/ LexicalComposer &gt; ); }; 이어서
+  툴바에 버튼을 추가하는 작업을 해보겠습니다. 블록 타입의 종류는
+  &#34;code&#34;로 합니다. // src/plugins/ToolbarPlugin.tsx const
+  SupportedBlockType = { // 생략 code : &#34;Code Block&#34; , } as const ; 이제
+  현재 커서 위치의 블록을 코드 블록으로 변환하는 함수와, 그것을 호출하는 버튼을
+  준비해야 하는데요. 감사하게도 인용 블록에서 했던 방식과 완전히 같은
+  형태입니다. $createCodeNode 는 @lexical/code 패키지에서 import할 수 있습니다.
+  // src/plugins/ToolbarPlugin.tsx import { MdChecklist , MdCode ,
+  MdFormatListBulleted , MdFormatListNumbered , MdFormatQuote , } from
+  &#34;react-icons/md&#34; ; import { $createCodeNode } from
+  &#34;@lexical/code&#34; ; export const ToolbarPlugin : FC = () =&gt; { // 생략
+  const formatCode = useCallback ( () =&gt; { if (blockType !== &#34;code&#34; )
+  { editor. update ( () =&gt; { const selection = $getSelection(); if
+  ($isRangeSelection(selection)) { $setBlocksType(selection, () =&gt;
+  $createCodeNode()); } }); } }, [blockType, editor]); // 생략 return ( &lt; div
+  className = {styles.toolbar} &gt; {/
+  <em>생략</em>
+  /} &lt; button type = &#34;button&#34; role = &#34;checkbox&#34; title =
+  {SupportedBlockType[ &#34; code &#34;]} aria-label = {SupportedBlockType[
+  &#34; code &#34;]} aria-checked = {blockType === &#34;code&#34; } onClick =
+  {formatCode} &gt; &lt; MdCode /&gt; &lt;/ button &gt; &lt;/ div &gt; ); };
+  그리고 다음으로 필요한게 렌더링되는 코드 블록의 스타일링입니다. 이 부분은 조금
+  까다로워서, Prism.js의 구현을 알아야 합니다. Prism.js의 CSS를 그대로 불러오면
+  색상이 지정되지 않기 때문에, Prism.js가 본래 부여할 클래스명을 키로 사용하여,
+  직접 준비한 클래스명을 전달합니다. 말로는 이해하기 어려울 수 있으니 코드를
+  보면서 살펴 보겠습니다. // src/editorTheme.ts export const theme :
+  EditorThemeClasses = { // 생략 code : styles. code , codeHighlight : { atrule
+  : styles. tokenAttr , attr : styles. tokenAttr , boolean : styles.
+  tokenProperty , builtin : styles. tokenSelector , cdata : styles. tokenComment
+  , char : styles. tokenSelector , class : styles. tokenFunction ,
+  &#34;class-name&#34; : styles. tokenFunction , comment : styles. tokenComment
+  , constant : styles. tokenProperty , deleted : styles. tokenProperty , doctype
+  : styles. tokenComment , entity : styles. tokenOperator , function : styles.
+  tokenFunction , important : styles. tokenVariable , inserted : styles.
+  tokenSelector , keyword : styles. tokenAttr , namespace : styles.
+  tokenVariable , number : styles. tokenProperty , operator : styles.
+  tokenOperator , prolog : styles. tokenComment , property : styles.
+  tokenProperty , punctuation : styles. tokenPunctuation , regex : styles.
+  tokenVariable , selector : styles. tokenSelector , string : styles.
+  tokenSelector , symbol : styles. tokenProperty , tag : styles. tokenProperty ,
+  url : styles. tokenOperator , variable : styles. tokenVariable , }, };
+  theme.code는 코드 블록 전체의 요소에 해당합니다. 그리고 theme.codeHighlight의
+  각 클래스명은 구문 강조로 색상이 지정되는 단어 단위에 해당합니다.
+  theme.codeHighlight의 타입 정의는 Record&lt;string, string&gt; 으로 되어 있어,
+  실제로 Prism.js의 구현을 조사하여 어떤 클래스명을 부여하는지 알아야 합니다.
+  그리고 해당하는 CSS에 대해, 앞서 전체 CSS 내용을 보여줬었는데요.
+  src/editorTheme.module.scss 이 파일을 다시 잘 보시면, .code { background-color
+  : #f7fafb ; font-family : Menlo, Consolas, Monaco, monospace; display : block;
+  padding : 8px 8px 8px 52px ; line-height : 1.6 ; font-size : 14px ; margin :
+  8px 0 ; tab-size : 2 ; overflow-x : auto; position : relative; &amp; ::before
+  { content : attr (data-gutter); color : #999 ; position : absolute; top : 0 ;
+  left : 0 ; background-color : #d9dddf ; padding : 8px ; min-width : 32px ;
+  height : 100% ; text-align : right; } } 위 코드에서 볼 수 있듯이, data-gutter
+  속성에 줄 번호가 개행된 상태로 들어가 있습니다. 그것을 ::before 의 content에
+  attr() 로 전달하고, 스타일링함으로써 줄 번호를 표시할 수 있습니다. 줄 번호가
+  필요 없다면 ::before 를 작성하지 않으면 되므로, CSS만으로 조정할 수 있는
+  것이죠. 이제 Syntax 하이라이트가 포함된 코드 블록으로 입력할 수 있게
+  되었습니다. 프로그래밍 언어 선택 기능은 아직 구현되지 않았지만, CodeNode의
+  언어 초기값이 &#34;javascript&#34;이므로 최소한 JavaScript의 하이라이트는
+  가능합니다. 위 그림과 같이 코드 블록에 JavaScript 코드가 구문 강조된 상태로
+  입력되어 있습니다. 그럼 이제 프로그래밍 언어 선택 기능을 구현해봅시다. 툴바의
+  코드 블록 버튼 옆에 언어 선택 드롭다운 리스트를 배치하기로 합시다. 구현은
+  Command 방식으로 해보겠습니다. Command와, 그것을 받으면 발동되는 프로그래밍
+  언어 변경 처리를 구현해두고, 드롭다운 리스트의 change 이벤트 시에 Command를
+  dispatch하는 구상입니다. 먼저 Command와 그에 대응하는 처리를 작성해봅시다. //
+  src/plugins/CodeHighlightPlugin.tsx import { FC , useEffect } from
+  &#34;react&#34; ; import { CodeNode , registerCodeHighlighting, $isCodeNode }
+  from &#34;@lexical/code&#34; ; import { useLexicalComposerContext } from
+  &#34;@lexical/react/LexicalComposerContext&#34; ; import { $getSelection,
+  $isRangeSelection, COMMAND_PRIORITY_CRITICAL , createCommand, LexicalEditor ,
+  } from &#34;lexical&#34; ; import { $getNearestNodeOfType } from
+  &#34;@lexical/utils&#34; ; export const CodeHighlightPlugin : FC = () =&gt; {
+  const [editor] = useLexicalComposerContext (); useEffect ( () =&gt; { return
+  registerCodeHighlighting (editor); }, [editor]); return null ; }; export const
+  CODE_LANGUAGE_COMMAND = createCommand
+</p>
+<h4 id="--2">인라인 스타일 기능 구현</h4>
+<p>
+  마지막으로 인라인 스타일 기능을 구현해봅시다. 이미 RichTextPlugin을 사용하고
+  있고, Lexical 자체적으로 단축키가 이미 구현되어 있어서, 에디터에 입력된
+  텍스트를 몇 글자 선택하고 cmd+B(ctrl+B)를 누르면 볼드체로 변합니다. Lexical이
+  기본적으로 지원하는 인라인 스타일은 다음과 같은 7가지입니다.
+</p>
+<ul>
+  <li>bold</li>
+  <li>underline</li>
+  <li>strikethrough</li>
+  <li>italic</li>
+  <li>code</li>
+  <li>subscript</li>
+  <li>
+    superscript 표준 이외의 인라인 스타일(색깔 있는 텍스트 등)을 적용하고
+    싶다면, Node 클래스의 독자적인 구현이 필요합니다. 여기서 구현할 것은 버튼
+    클릭으로 선택된 텍스트에 인라인 장식을 적용하는 기능입니다. 번거로움을
+    피하기 위해 블록 레벨의 툴바 아래에 고정된 인라인 툴바를 배치하겠습니다.
+    InlineToolbarPlugin이라는 컴포넌트를 준비합니다. 그리고 현재 Selection이
+    가리키는 Node가 각각의 인라인 스타일을 가지고 있는지의 상태를 선언합니다.
+    인라인 스타일은 블록 타입과 달리 중복 적용이 가능하므로, 각 스타일이
+    적용되었는지 여부를 boolean으로 각각 선언합니다. //
+    src/plugins/InlineToolbarPlugin.tsx import { FC , useState } from
+    &#34;react&#34; ; import { useLexicalComposerContext } from
+    &#34;@lexical/react/LexicalComposerContext&#34; ; import styles from
+    &#34;./InlineToolbarPlugin.module.scss&#34; ; export const
+    InlineToolbarPlugin : FC = () =&gt; { const [editor] =
+    useLexicalComposerContext (); const [isBold, setIsBold] = useState ( false
+    ); const [isUnderline, setIsUnderline] = useState ( false ); const
+    [isStrikethrough, setIsStrikethrough] = useState ( false ); const [isItalic,
+    setIsItalic] = useState ( false ); const [isCode, setIsCode] = useState (
+    false ); const [isSubscript, setIsSubscript] = useState ( false ); const
+    [isSuperscript, setIsSuperscript] = useState ( false ); return &lt; div
+    className = {styles.inlineToolbar} &gt; &lt;/ div &gt; ; }; 텍스트를
+    장식하는 버튼을 만듭니다. 텍스트에 장식을 적용하려면,
+    FORMAT_TEXT_COMMAND라는 Command와 함께 인라인 스타일 이름을 dispatch해야
+    합니다. FORMAT_TEXT_COMMAND는 lexical 패키지에서 import할 수 있습니다. //
+    src/plugins/InlineToolbarPlugin.tsx import { FC , useState } from
+    &#34;react&#34; ; import { useLexicalComposerContext } from
+    &#34;@lexical/react/LexicalComposerContext&#34; ; import {
+    FORMAT_TEXT_COMMAND } from &#34;lexical&#34; ; import styles from
+    &#34;./InlineToolbarPlugin.module.scss&#34; ; import { MdCode , MdFormatBold
+    , MdFormatItalic , MdFormatStrikethrough , MdFormatUnderlined , MdSubscript
+    , MdSuperscript , } from &#34;react-icons/md&#34; ; export const
+    InlineToolbarPlugin : FC = () =&gt; { const [editor] =
+    useLexicalComposerContext (); const [isBold, setIsBold] = useState ( false
+    ); const [isUnderline, setIsUnderline] = useState ( false ); const
+    [isStrikethrough, setIsStrikethrough] = useState ( false ); const [isItalic,
+    setIsItalic] = useState ( false ); const [isCode, setIsCode] = useState (
+    false ); const [isSubscript, setIsSubscript] = useState ( false ); const
+    [isSuperscript, setIsSuperscript] = useState ( false ); return ( &lt; div
+    className = {styles.inlineToolbar} &gt; &lt; button type = &#34;button&#34;
+    aria-label = &#34;format bold&#34; role = &#34;checkbox&#34; aria-checked =
+    {isBold} onClick = {() =&gt; editor.dispatchCommand(FORMAT_TEXT_COMMAND,
+    &#34;bold&#34;)} &gt; &lt; MdFormatBold /&gt; &lt;/ button &gt; &lt; button
+    type = &#34;button&#34; aria-label = &#34;format underline&#34; role =
+    &#34;checkbox&#34; aria-checked = {isUnderline} onClick = {() =&gt;
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, &#34;underline&#34;)} &gt; &lt;
+    MdFormatUnderlined /&gt; &lt;/ button &gt; &lt; button type =
+    &#34;button&#34; aria-label = &#34;format strikethrough&#34; role =
+    &#34;checkbox&#34; aria-checked = {isStrikethrough} onClick = {() =&gt;
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, &#34;strikethrough&#34;) } &gt;
+    &lt; MdFormatStrikethrough /&gt; &lt;/ button &gt; &lt; button type =
+    &#34;button&#34; aria-label = &#34;format italic&#34; role =
+    &#34;checkbox&#34; aria-checked = {isItalic} onClick = {() =&gt;
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, &#34;italic&#34;)} &gt; &lt;
+    MdFormatItalic /&gt; &lt;/ button &gt; &lt; button type = &#34;button&#34;
+    aria-label = &#34;format code&#34; role = &#34;checkbox&#34; aria-checked =
+    {isCode} onClick = {() =&gt; editor.dispatchCommand(FORMAT_TEXT_COMMAND,
+    &#34;code&#34;)} &gt; &lt; MdCode /&gt; &lt;/ button &gt; &lt; button type =
+    &#34;button&#34; aria-label = &#34;format subscript&#34; role =
+    &#34;checkbox&#34; aria-checked = {isSubscript} onClick = {() =&gt;
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, &#34;subscript&#34;)} &gt; &lt;
+    MdSubscript /&gt; &lt;/ button &gt; &lt; button type = &#34;button&#34;
+    aria-label = &#34;format superscript&#34; role = &#34;checkbox&#34;
+    aria-checked = {isSuperscript} onClick = {() =&gt;
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, &#34;superscript&#34;) } &gt;
+    &lt; MdSuperscript /&gt; &lt;/ button &gt; &lt;/ div &gt; ); }; CSS를 위한
+    InlineToolbarPlugin.module.scss 파일입니다. .inlineToolbar { padding : 8px
+    24px ; display : flex; align-items : center; gap : 8px ; } .inlineToolbar
+    button { display : inline-flex; align-items : center; justify-content :
+    center; width : 40px ; height : 40px ; font-size : 24px ; border-radius :
+    4px ; color : #cdcdcd ; &amp; :hover { background-color : #eeeeee ; } &amp;
+    [aria-checked= &#34;true&#34; ] { color : #111111 ; } } 이제 각 버튼을
+    클릭함으로써 선택한 텍스트의 인라인 스타일을 변경할 수 있게 되었는데요. 이제
+    InlineToolbarPlugin도 Editor.tsx에서 호출해야 합니다. // src/Editor.tsx //
+    생략 import { InlineToolbarPlugin } from
+    &#34;./plugins/InlineToolbarPlugin&#34; ; // 생략 export const Editor : FC =
+    () =&gt; { return ( &lt; LexicalComposer initialConfig = {initialConfig}
+    &gt; &lt; ToolbarPlugin /&gt; &lt; InlineToolbarPlugin /&gt; {/* 생략 */}
+    &lt;/ LexicalComposer &gt; ); }; 마지막으로, 각 인라인 스타일이 적용되었는지
+    여부를 업데이트하는 부분입니다. 이번에도 editor.registerUpdateListener를
+    사용하여, EditorState가 변경될 때마다 실행되는 리스너를 등록합니다.
+    Selection은 EditorState에 포함되므로, 그 변화도 감지할 수 있습니다. //
+    src/plugins/InlineToolbarPlugin.tsx import { FC , useEffect, useState } from
+    &#34;react&#34; ; import { useLexicalComposerContext } from
+    &#34;@lexical/react/LexicalComposerContext&#34; ; import { $getSelection,
+    $isRangeSelection, FORMAT_TEXT_COMMAND } from &#34;lexical&#34; ; // 생략
+    useEffect ( () =&gt; { editor. registerUpdateListener ( ( { editorState } )
+    =&gt; { editorState. read ( () =&gt; { const selection = $getSelection(); if
+    (!$isRangeSelection(selection)) return ; setIsBold (selection. hasFormat (
+    &#34;bold&#34; )); setIsUnderline (selection. hasFormat (
+    &#34;underline&#34; )); setIsStrikethrough (selection. hasFormat (
+    &#34;strikethrough&#34; )); setIsItalic (selection. hasFormat (
+    &#34;italic&#34; )); setIsCode (selection. hasFormat ( &#34;code&#34; ));
+    setIsSubscript (selection. hasFormat ( &#34;subscript&#34; ));
+    setIsSuperscript (selection. hasFormat ( &#34;superscript&#34; )); }); });
+    }, [editor]); RangeSelection은 selection.hasFormat이라는, 인라인 스타일을
+    체크하는 메소드를 가지고 있습니다. 이를 실행한 결과를 각 상태의 업데이트
+    함수에 전달함으로써, 각 인라인 스타일이 적용되었는지 여부를 확인할 수
+    있습니다. 인라인 스타일에 대한 CSS는 다음과 같이 적용됩니다. //
+    src/editorTheme.ts export const theme : EditorThemeClasses = { // 생략 text
+    : { bold : styles. textBold , code : styles. textCode , italic : styles.
+    textItalic , strikethrough : styles. textStrikethrough , subscript : styles.
+    textSubscript , superscript : styles. textSuperscript , underline : styles.
+    textUnderline , underlineStrikethrough : styles. textUnderlineStrikethrough
+    , }, }; &#34;underline&#34;과 &#34;strikethrough&#34;가 동시에 적용될 때
+    전용 클래스가 준비되어 있습니다. CSS에서 text-decoration을 여러 개 지정하고
+    싶을 때는, .textUnderlineStrikethrough { text-decoration : underline
+    line-through; } 이와 같이 하나의 속성에 여러 값을 지정해야 하므로,
+    underlineStrikethrough라는 클래스명이 준비되어 있다고 생각됩니다. 실행
+    결과는 아래와 같습니다. 아주 잘 적용되고 있네요.
+  </li>
+</ul>
+<h4 id="--3">마크다운과 같은 단축키 도입</h4>
+<p>
+  여러분들은 프로그래머라서 평소에 마크다운 형식으로 문서를 작성하는 경우가
+  많으며, 익숙해져 있을 것입니다. 또한, 작업 효율을 중시한다면, 매번 툴바로
+  마우스를 옮겨 클릭하는 것이 번거롭다고 생각할 수도 있습니다. 그럴 때
+  마크다운과 같은 텍스트를 입력하면 블록 타입이 변환되거나 인라인 스타일이
+  적용되면 좋겠다고 생각하는데요. 다행히도 그 기능은 공식 플러그인으로 구현되어
+  있으며, 플러그인을 추가하기만 하면 사용할 수 있습니다. //
+  src/plugins/MarkdownPlugin.tsx import { FC } from &#34;react&#34; ; import {
+  TRANSFORMERS } from &#34;@lexical/markdown&#34; ; import {
+  MarkdownShortcutPlugin } from
+  &#34;@lexical/react/LexicalMarkdownShortcutPlugin&#34; ; export const
+  MarkdownPlugin : FC = () =&gt; { return &lt; MarkdownShortcutPlugin
+  transformers = {TRANSFORMERS} /&gt; ; }; MarkdownShortcutPlugin에는 마크다운과
+  같은 입력을 감지하여 스타일을 변환하는 기능이 구현되어 있습니다. props로
+  전달된 TRANSFORMERS는 변환 규칙 배열로, @lexical/markdown 에서는 더 세밀하게
+  지정하기 위한 인라인 스타일만 변환할 수 있는 규칙이나 블록 레벨만 변환할 수
+  있는 규칙 등이 준비되어 있습니다. 또한, Transformer 타입 객체를 직접 준비하면,
+  오리지널 변환 규칙도 구현할 수 있습니다. 이제 MarkdownPlugin을 Editor에
+  추가합니다. // src/Editor.tsx // 생략 import { MarkdownPlugin } from
+  &#34;./plugins/MarkdownPlugin&#34; ; export const Editor : FC = () =&gt; {
+  return ( &lt; LexicalComposer initialConfig = {initialConfig} &gt; {/
+  <em>생략</em>
+  /} &lt; MarkdownPlugin /&gt; &lt;/ LexicalComposer &gt; ); }; 마지막으로
+  nodes.ts 파일에 LinkNode를 추가하면 됩니다. import { HeadingNode , QuoteNode }
+  from &#34;@lexical/rich-text&#34; ; import { ListItemNode , ListNode } from
+  &#34;@lexical/list&#34; ; import { CodeNode , CodeHighlightNode } from
+  &#34;@lexical/code&#34; ; import { Klass , LexicalNode } from
+  &#34;lexical&#34; ; import { LinkNode } from &#39;@lexical/link&#39; ; export
+  const nodes : Klass &lt; LexicalNode &gt;[] = [ HeadingNode , QuoteNode ,
+  ListItemNode , ListNode , CodeNode , CodeHighlightNode , LinkNode ]; 이제
+  &#39;#&#39;을 입력하면 Heading으로, &#39;&gt;&#39;를 입력하면 Quote로 변환할
+  수 있는 완벽한 마크다운 에디터가 되었네요. 지금까지 Lexical을 사용하여 간단한
+  리치 텍스트 에디터를 만들면서 Lexical의 API와 사용법에 대해 배웠는데요. 필요할
+  것 같은 기능은 공식 플러그인으로 풍부하게 제공되어 있어 쉽게 원하는 기능을
+  추가할 수 있습니다. Lexical Playground에는 더 많은 기능이 구현된 너무나 리치한
+  텍스트 에디터가 배포되어 있습니다. 이미지나 YouTube의 임베드 블록 기능 등도
+  있습니다. 이 부분은 직접 구현해 보시는 걸 추천드립니다. 그럼.
+</p>
+<h5
+  id="lexicalcode-blockinline-stylemarkdown-shortcut-docker-1-docker-lexical-4">
+  lexicalcode blockinline stylemarkdown shortcut다음 글 : Docker 강좌 1편.
+  가상화와 Docker 기초 개념 이해하기목록 보기이전 글 : Lexical 강좌 4편. 인용
+  블럭과 리스트 블럭 구현하기
+</h5>

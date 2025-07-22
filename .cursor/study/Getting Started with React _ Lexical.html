@@ -1,0 +1,137 @@
+<p>Skip to main contentPlaygroundDocsAPICommunityiOSGalleryGitHubiOS GitHub</p>
+<h3 id="getting-started-with-react">Getting Started with React</h3>
+<h4 id="video-tutorials">Video Tutorials</h4>
+<p>
+  For a detailed walkthrough of setting up a basic editor with Lexical in React,
+  check out these videos:
+</p>
+<ul>
+  <li>Getting Started with Lexical &amp; React</li>
+  <li>Themes, Nodes, and Rich Text</li>
+  <li>Headings, Lists, Toolbar</li>
+  <li>
+    Creating Nodes and Plugins Keep in mind that some of these videos may be
+    partially outdated as we do not update them as often as textual
+    documentation.
+  </li>
+</ul>
+<h4 id="creating-basic-rich-text-editor">Creating Basic Rich Text Editor</h4>
+<p>
+  To simplify Lexical integration with React we provide the @lexical/react
+  package that wraps Lexical APIs with React components so the editor itself as
+  well as all the plugins now can be easily composed using JSX. Furthermore, you
+  can lazy load plugins if desired, so you don&#39;t pay the cost for plugins
+  until you actually use them. To start, install lexical and @lexical/react :
+  npm install --save lexical @lexical/react
+</p>
+<p>
+  Below is an example of a basic rich text editor using lexical and
+  @lexical/react . import { $getRoot , $getSelection } from &#39;lexical&#39; ;
+  import { useEffect } from &#39;react&#39; ; import { AutoFocusPlugin } from
+  &#39;@lexical/react/LexicalAutoFocusPlugin&#39; ; import { LexicalComposer }
+  from &#39;@lexical/react/LexicalComposer&#39; ; import { RichTextPlugin } from
+  &#39;@lexical/react/LexicalRichTextPlugin&#39; ; import { ContentEditable }
+  from &#39;@lexical/react/LexicalContentEditable&#39; ; import { HistoryPlugin
+  } from &#39;@lexical/react/LexicalHistoryPlugin&#39; ; import {
+  LexicalErrorBoundary } from &#39;@lexical/react/LexicalErrorBoundary&#39; ;
+  const theme = { // Theme styling goes here //... } // Catch any errors that
+  occur during Lexical updates and log them // or throw them as needed. If you
+  don&#39;t throw them, Lexical will // try to recover gracefully without losing
+  user data. function onError ( error ) { console . error ( error ) ; } function
+  Editor ( ) { const initialConfig = { namespace : &#39;MyEditor&#39; , theme ,
+  onError , } ; return ( &lt; LexicalComposer initialConfig = { initialConfig }
+  &gt; &lt; RichTextPlugin contentEditable = { &lt; ContentEditable
+  aria-placeholder = { &#39;Enter some text...&#39; } placeholder = { &lt; div
+  &gt; Enter some text... &lt;/ div &gt; } /&gt; } ErrorBoundary = {
+  LexicalErrorBoundary } /&gt; &lt; HistoryPlugin /&gt; &lt; AutoFocusPlugin
+  /&gt; &lt;/ LexicalComposer &gt; ) ; }
+</p>
+<h4 id="adding-ui-to-control-text-formatting">
+  Adding UI to control text formatting
+</h4>
+<p>
+  Out of the box Lexical doesn&#39;t provide any type of UI as it&#39;s not a
+  ready to use editor but rather a framework for creation of your own editor.
+  Below you can find an example of the integration from the previous chapter
+  that now features 2 new plugins:
+</p>
+<ul>
+  <li>ToolbarPlugin - renders UI to control text formatting</li>
+  <li>
+    TreeViewPlugin - renders debug view below the editor so we can see its state
+    in real time However no UI can be created w/o CSS and Lexical is not an
+    exception here. Pay attention to ExampleTheme.ts and how it&#39;s used in
+    this example, with corresponding styles defined in styles.css .
+  </li>
+</ul>
+<h4 id="saving-lexical-state">Saving Lexical State</h4>
+<p>
+  tip While we attempt to write our own plugin here for demonstration purposes,
+  in real life projects it&#39;s better to opt for LexicalOnChangePlugin. Now
+  that we have a simple editor in React, the next thing we might want to do is
+  access the content of the editor to, for instance, save it in a database. We
+  can do this via the an update listener, which will execute every time the
+  editor state changes and provide us with the latest state. In React, we
+  typically use the plugin system to set up listeners like this, since it
+  provides us easy access to the LexicalEditor instance via a React Context. So,
+  let&#39;s write our own plugin that notifies us when the editor updates. //
+  When the editor changes, you can get notified via the // OnChangePlugin!
+  function MyOnChangePlugin ( { onChange } ) { // Access the editor through the
+  LexicalComposerContext const [ editor ] = useLexicalComposerContext ( ) ; //
+  Wrap our listener in useEffect to handle the teardown and avoid stale
+  references. useEffect ( ( ) =&gt; { // most listeners return a teardown
+  function that can be called to clean them up. return editor .
+  registerUpdateListener ( ( { editorState } ) =&gt; { // call onChange here to
+  pass the latest state up to the parent. onChange ( editorState ) ; } ) ; } , [
+  editor , onChange ] ) ; return null ; }
+</p>
+<p>
+  Now, we can implement this in our editor and save the EditorState in a React
+  state variable: function MyOnChangePlugin ( { onChange } ) { const [ editor ]
+  = useLexicalComposerContext ( ) ; useEffect ( ( ) =&gt; { return editor .
+  registerUpdateListener ( ( { editorState } ) =&gt; { onChange ( editorState )
+  ; } ) ; } , [ editor , onChange ] ) ; return null ; } function Editor ( ) { //
+  ... const [ editorState , setEditorState ] = useState ( ) ; function onChange
+  ( editorState ) { setEditorState ( editorState ) ; } return ( &lt;
+  LexicalComposer initialConfig = { initialConfig } &gt; &lt; RichTextPlugin
+  contentEditable = { &lt; ContentEditable aria-placeholder = { &#39;Enter some
+  text...&#39; } placeholder = { &lt; div &gt; Enter some text... &lt;/ div &gt;
+  } /&gt; } ErrorBoundary = { LexicalErrorBoundary } /&gt; &lt; HistoryPlugin
+  /&gt; &lt; MyCustomAutoFocusPlugin /&gt; &lt; MyOnChangePlugin onChange = {
+  onChange } /&gt; &lt;/ LexicalComposer &gt; ) ; }
+</p>
+<p>
+  Ok, so now we&#39;re saving the EditorState object in a React state variable,
+  but we can&#39;t save a JavaScript object to our database - so how do we
+  persist the state so we can load it later? We need to serialize it to a
+  storage format. For this purpose (among others) Lexical provides several
+  serialization APIs that convert EditorState to a string that can be sent over
+  the network and saved to a database. Building on our previous example, we can
+  do that this way: function MyOnChangePlugin ( { onChange } ) { const [ editor
+  ] = useLexicalComposerContext ( ) ; useEffect ( ( ) =&gt; { return editor .
+  registerUpdateListener ( ( { editorState } ) =&gt; { onChange ( editorState )
+  ; } ) ; } , [ editor , onChange ] ) ; return null ; } function Editor ( ) { //
+  ... const [ editorState , setEditorState ] = useState ( ) ; function onChange
+  ( editorState ) { // Call toJSON on the EditorState object, which produces a
+  serialization safe string const editorStateJSON = editorState . toJSON ( ) ;
+  // However, we still have a JavaScript object, so we need to convert it to an
+  actual string with JSON.stringify setEditorState ( JSON . stringify (
+  editorStateJSON ) ) ; } return ( &lt; LexicalComposer initialConfig = {
+  initialConfig } &gt; { /
+  <em>...</em>
+  / } &lt; MyOnChangePlugin onChange = { onChange } /&gt; &lt;/ LexicalComposer
+  &gt; ) ;
+</p>
+<p>
+  From there, it&#39;s straightforward to wire up a submit button or some other
+  UI trigger that will take the state from the React state variable and send it
+  to a server for storage in a database. One important thing to note: Lexical is
+  generally meant to be uncontrolled, so avoid trying to pass the EditorState
+  back into Editor.setEditorState or something along those lines.
+</p>
+<ul>
+  <li>Video Tutorials</li>
+  <li>Creating Basic Rich Text Editor</li>
+  <li>Adding UI to control text formatting</li>
+  <li>Saving Lexical State</li>
+</ul>

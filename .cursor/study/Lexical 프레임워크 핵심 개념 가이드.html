@@ -1,0 +1,610 @@
+<h1 id="lexical">Lexical 프레임워크 스터디 가이드</h1>
+<h2 id="-">퀴즈 (단답형 질문)</h2>
+<p>각 질문에 대해 2-3문장으로 간결하게 답하세요.</p>
+<ol>
+  <li>
+    Lexical에서
+    <code>$function</code>
+    컨벤션이 필요한 이유는 무엇이며, ESLint 플러그인이 이 컨벤션을 어떻게
+    시행하나요?
+  </li>
+  <li>
+    Lexical에서 EditorState를 &#34;소스 오브 트루스&#34;로 간주하는 주된 이유는
+    무엇이며, HTML과 비교했을 때 어떤 이점이 있나요?
+  </li>
+  <li>
+    <code>@lexical/headless</code>
+    패키지는 어떤 용도로 사용되며, 일반 Lexical 에디터와 어떤 주요 차이점이
+    있나요?
+  </li>
+  <li>
+    <code>editor.update()</code>
+    와
+    <code>editor.registerNodeTransform()</code>
+    의 주된 차이점은 무엇이며, 성능 측면에서 어떤 것을 선호해야 하나요?
+  </li>
+  <li>
+    <code>@lexical/history</code>
+    패키지에서
+    <code>registerHistory</code>
+    함수는 어떤 역할을 하며, 어떤 명령어를 처리하나요?
+  </li>
+  <li>
+    <code>@lexical/html</code>
+    패키지에서 Lexical 노드를 HTML로 내보낼 때
+    <code>exportDOM()</code>
+    메서드의 역할은 무엇인가요?
+  </li>
+  <li>
+    Lexical의
+    <code>NodeState</code>
+    API는 기존 노드 속성 정의 방식과 비교하여 어떤 이점을 제공하나요?
+  </li>
+  <li>
+    Lexical에서
+    <code>RootNode</code>
+    는 다른
+    <code>ElementNode</code>
+    서브클래스와 어떻게 다른 특성을 가지나요?
+  </li>
+  <li>
+    협업 환경에서 Yjs 모델을 &#34;소스 오브 트루스&#34;로 사용하는 것이 권장되는
+    이유는 무엇인가요?
+  </li>
+  <li>
+    Lexical에서 &#39;연속적인 타이핑&#39;에 대한 되돌리기(undo)
+    병합(coalescing)은 무엇을 의미하며, 어떤 요소들이 연속성을 끊을 수 있나요?
+  </li>
+</ol>
+<h2 id="--2">퀴즈 정답</h2>
+<ol>
+  <li>
+    Lexical에서
+    <code>$function</code>
+    컨벤션은 특정 컨텍스트(예:
+    <code>editor.update()</code>
+    클로저 내부)에서만 호출될 수 있는 함수를 명확하게 표시하기 위해 사용됩니다.
+    <code>@lexical/eslint-plugin</code>
+    은 이 컨벤션을 강제하여 개발자가 올바른 컨텍스트에서 이러한 함수를
+    사용하도록 돕고 런타임 오류를 방지합니다.
+  </li>
+  <li>
+    Lexical에서 EditorState는 DOM이 아닌 자체적인 내부 상태 모델을 소스 오브
+    트루스로 유지합니다. 이는 HTML이 텍스트 편집에 너무 유연하여 다양한 표기법이
+    동일한 결과물을 내는 비정규화 문제를 해결하고, 콘텐츠 구조와 포맷팅을
+    분리하여 정규화된 문서 구조를 유지하는 데 이점이 있습니다.
+  </li>
+  <li>
+    <code>@lexical/headless</code>
+    패키지는 DOM에 의존하지 않는 환경(예: Node.js)에서 Lexical 에디터와 상호
+    작용할 수 있도록 해줍니다. 이를 통해 서버 측에서 에디터 상태를 생성,
+    업데이트, 순회하거나 마크다운 변환과 같은 작업을 수행할 수 있습니다.
+  </li>
+  <li>
+    <code>editor.update()</code>
+    는 에디터 상태를 변형하기 위해 함수를 전달받는 주요 방법이지만, DOM 조정을
+    비동기적으로 스케줄링하여 성능을 최적화합니다. 반면
+    <code>editor.registerNodeTransform()</code>
+    는 노드 변경에 반응하여 동일한 업데이트의 일부로 변형을 수행하므로 추가적인
+    렌더링을 유발하지 않아 성능상 더 효율적입니다.
+  </li>
+  <li>
+    <code>@lexical/history</code>
+    패키지의
+    <code>registerHistory</code>
+    함수는 실행 취소/다시 실행(undo/redo) 기록 스택과 관련 에디터 명령어를
+    관리하는 데 필요한 리스너를 등록합니다. 이 패키지는
+    <code>UNDO_COMMAND</code>
+    ,
+    <code>REDO_COMMAND</code>
+    ,
+    <code>CLEAR_HISTORY_COMMAND</code>
+    를 처리하며, 기록 상태가 변경될 때
+    <code>CAN_UNDO_COMMAND</code>
+    와
+    <code>CAN_REDO_COMMAND</code>
+    명령어를 트리거합니다.
+  </li>
+  <li>
+    <code>exportDOM()</code>
+    메서드는
+    <code>LexicalNode</code>
+    가 HTML로 어떻게 표현되어야 하는지를 제어합니다. 이 메서드는 에디터 상태를
+    HTML로 변환할 때 각 노드를
+    <code>HTMLElement</code>
+    로 변환하기 위해 호출되며, 변환 후 추가적인 처리를 위한 &#39;after&#39;
+    API도 제공합니다.
+  </li>
+  <li>
+    <code>NodeState</code>
+    API는 Lexical v0.26.0에 도입되어 어떤 노드에든 임의의 상태를 즉석에서 추가할
+    수 있도록 합니다. 이는 JSON 직렬화, 기록(history), 조정(reconciliation)에
+    자동으로 참여하며, 기존 방식보다 보일러플레이트 코드를 줄이고 루트 노드에
+    문서 수준 메타데이터를 저장하는 등 유연성을 높입니다.
+  </li>
+  <li>
+    <code>RootNode</code>
+    는
+    <code>EditorState</code>
+    에 단 하나만 존재하며 항상 최상위에 있고, 부모나 형제 노드를 가지지
+    않습니다.
+    <code>ElementNode</code>
+    의 서브클래스와 달리 서브클래싱되거나 교체될 수 없으며, 변형 리스너가 아닌
+    루트 레벨 또는 업데이트 리스너를 통해 문서 수준의 변경 사항을 관찰해야
+    합니다.
+  </li>
+  <li>
+    Yjs 모델을 소스 오브 트루스로 사용하는 것이 권장되는 이유는 클라이언트가
+    인터넷 연결 없이도 서버와 안정적으로 동기화하고 참여할 수 있는 유일한
+    방법이기 때문입니다. 또한, 데이터베이스와 달리 Yjs 모델 자체에 협업에 필요한
+    모든 정보가 포함되어 있어 상태 관리가 용이합니다.
+  </li>
+  <li>
+    &#39;연속적인 타이핑&#39;에 대한 되돌리기 병합은 사용자가 연속적으로 문자를
+    입력하거나 지우는 등의 동작을 하나의 되돌리기 세션으로 묶어, 한 번의
+    되돌리기 동작으로 해당 연속적인 편집을 모두 취소할 수 있도록 하는
+    기능입니다. 시간 초과, 사용자 선택 변경, 키보드 포커스 변경, 그리고 복사 및
+    붙여넣기와 같은 동작은 연속성을 끊고 새로운 되돌리기 세션을 시작하게 합니다.
+  </li>
+</ol>
+<h2 id="--3">에세이 형식 질문</h2>
+<ol>
+  <li>
+    Lexical의 핵심 디자인 원칙인 &#34;소스 오브 트루스는 DOM이 아닌 내부 상태
+    모델&#34;이라는 개념이 에디터의 신뢰성, 접근성, 성능에 어떻게 기여하는지
+    설명하고, 이로 인해 얻을 수 있는 개발자 경험의 이점을 논하세요.
+  </li>
+  <li>
+    Lexical에서 플러그인을 생성하는 두 가지 주요 방법(프레임워크 독립적인
+    플러그인과 React 플러그인)을 비교하고, 각각의 장단점 및 적절한 사용
+    시나리오에 대해 설명하세요. 특히,
+    <code>LexicalComposer</code>
+    와
+    <code>useLexicalComposerContext</code>
+    의 역할에 초점을 맞추세요.
+  </li>
+  <li>
+    Lexical의 명령(Command) 시스템이 에디터의 확장성과 유연성에 어떻게
+    기여하는지 설명하고,
+    <code>createCommand()</code>
+    ,
+    <code>dispatchCommand()</code>
+    ,
+    <code>registerCommand()</code>
+    함수가 상호 작용하여 에디터 기능을 구현하는 과정을 구체적인 예시와 함께
+    서술하세요.
+  </li>
+  <li>
+    Lexical의 노드(Node) 시스템에서
+    <code>Key Management</code>
+    의 중요성을 설명하고, 노드의
+    <code>__key</code>
+    속성이 내부적으로 어떻게 사용되는지, 그리고 개발자가
+    <code>__key</code>
+    를 직접 조작하지 않아야 하는 이유와 올바른 노드 복제(
+    <code>$copyNode</code>
+    ) 및 수정(
+    <code>getWritable()</code>
+    ) 방법을 설명하세요.
+  </li>
+  <li>
+    Lexical의
+    <code>Node Transforms</code>
+    는 에디터 상태 변경에 반응하는 가장 효율적인 메커니즘으로 설명됩니다.
+    <code>Node Transforms</code>
+    의
+    <code>Transform heuristic</code>
+    과
+    <code>Preconditions</code>
+    개념을 상세히 설명하고,
+    <code>update listener</code>
+    를 사용하는 것이 왜 권장되지 않는지 성능상의 이유와 함께 설명하세요.
+  </li>
+</ol>
+<h2 id="--4">용어 사전</h2>
+<ul>
+  <li>
+    <strong>@lexical/clipboard</strong>
+    : Lexical의 클립보드 기능(복사 및 붙여넣기)을 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/code</strong>
+    : Lexical의 코드 블록 및 코드 하이라이팅 기능을 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/code-shiki</strong>
+    : shikijs 엔진을 사용하여 Lexical의 코드 하이라이터를 제공하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/devtools-core</strong>
+    : Lexical 디버깅 및 개발에 필요한 도구를 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/dragon</strong>
+    : Dragon NaturallySpeaking 접근성 도구와의 호환성을 제공하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/eslint-plugin</strong>
+    : Lexical의
+    <code>$function</code>
+    컨벤션을 강제하는 ESLint 플러그인입니다.
+  </li>
+  <li>
+    <strong>@lexical/file</strong>
+    : Lexical의 파일 가져오기/내보내기 기능을 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/hashtag</strong>
+    : Lexical 해시태그 기능을 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/headless</strong>
+    : DOM에 의존하지 않는(예: Node.js) 환경에서 Lexical과 상호 작용할 수 있도록
+    하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/history</strong>
+    : Lexical의 되돌리기/다시 실행 기록 스택을 관리하는 기능을 포함하는
+    패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/html</strong>
+    : Lexical &lt;-&gt; HTML 변환 유틸리티 함수를 내보내는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/link</strong>
+    : Lexical 링크 기능을 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/list</strong>
+    : Lexical에서 목록(리스트)을 구현하기 위한 기본 기능을 제공하는
+    패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/mark</strong>
+    : Lexical에서 콘텐츠를 마크로 감싸는 데 사용되는 헬퍼 및 노드를 포함하는
+    패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/markdown</strong>
+    : Lexical의 마크다운 가져오기, 내보내기, 단축키 기능을 포함하는
+    패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/offset</strong>
+    : Lexical의 선택 오프셋 헬퍼를 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/overflow</strong>
+    : Lexical의 선택 오버플로 헬퍼 및 노드를 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/plain-text</strong>
+    : 기본적인 텍스트 편집 동작(입력, 삭제, 복사/붙여넣기)을 위한 리스너를
+    등록하여 Lexical 사용을 시작할 수 있는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/react</strong>
+    : React 애플리케이션에서 텍스트 편집을 위한 Lexical 컴포넌트 및 훅 세트를
+    제공하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/rich-text</strong>
+    : 기본적인 텍스트 편집 동작 외에 제목, 서식 있는 텍스트, 인용구 등 리치
+    텍스트 기능을 위한 기본 동작을 제공하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/selection</strong>
+    : Lexical의 선택 헬퍼를 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/table</strong>
+    : Lexical의 테이블 기능을 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/text</strong>
+    : Lexical 텍스트 처리를 위한 유틸리티 및 헬퍼를 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/utils</strong>
+    : Lexical의 기타 유틸리티를 포함하는 패키지입니다.
+  </li>
+  <li>
+    <strong>@lexical/yjs</strong>
+    : Lexical을 사용한 협업 편집을 위한 Y.js 바인딩 세트를 제공하는
+    패키지입니다.
+  </li>
+  <li>
+    <strong>$function</strong>
+    : Lexical에서 특정 컨텍스트(예:
+    <code>editor.update()</code>
+    또는
+    <code>editor.read()</code>
+    클로저 내부)에서만 호출될 수 있는 함수들을 가리키는 컨벤션입니다. 함수 이름
+    앞에 달러 기호($)가 붙습니다.
+  </li>
+  <li>
+    <strong>$getSelection()</strong>
+    : 현재 EditorState의 선택(Selection) 객체를 가져오는
+    <code>$function</code>
+    입니다.
+  </li>
+  <li>
+    <strong>$getRoot()</strong>
+    : EditorState의 루트 노드(RootNode)를 가져오는
+    <code>$function</code>
+    입니다.
+  </li>
+  <li>
+    <strong>$copyNode()</strong>
+    : 기존 노드의 새 복사본을 새 키로 생성하는 공개 API입니다.
+  </li>
+  <li>
+    <strong>$generateHtmlFromNodes()</strong>
+    : Lexical 에디터의 노드로부터 HTML 문자열을 생성하는 함수입니다.
+  </li>
+  <li>
+    <strong>$generateNodesFromDOM()</strong>
+    : DOM 인스턴스에서 Lexical 노드를 생성하는 함수입니다.
+  </li>
+  <li>
+    <strong>$getState()</strong>
+    : 특정 노드에서 NodeState 값을 가져오는 함수입니다.
+  </li>
+  <li>
+    <strong>$setState()</strong>
+    : 특정 노드에 NodeState 값을 설정하는 함수입니다.
+  </li>
+  <li>
+    <strong><code>__key</code></strong>
+    : Lexical 에디터 내 각 노드에 할당된 고유 식별자로, 노드 추적 및 효율적인
+    상태 관리에 사용됩니다.
+  </li>
+  <li>
+    <strong><code>$applyNodeReplacement</code></strong>
+    : 새로운 노드를 생성하고 노드 교체 설정을 적용하는 데 사용되는 유틸리티
+    함수입니다.
+  </li>
+  <li>
+    <strong><code>editor.dispatchCommand()</code></strong>
+    : Lexical 명령을 실행하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.getEditorState()</code></strong>
+    : 현재 에디터의 최신 EditorState 객체를 반환하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.isEditable()</code></strong>
+    : 에디터의 현재 편집 모드(읽기/편집)를 반환하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.parseEditorState()</code></strong>
+    : 문자열화된 EditorState JSON을 파싱하여 EditorState 객체를 생성하는
+    메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.registerCommand()</code></strong>
+    : 특정 Lexical 명령에 대한 리스너를 등록하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.registerDecoratorListener()</code></strong>
+    : 에디터의 데코레이터 객체 변경 시 알림을 받는 리스너입니다.
+  </li>
+  <li>
+    <strong><code>editor.registerEditableListener()</code></strong>
+    : 에디터의 편집 모드 변경 시 알림을 받는 리스너입니다.
+  </li>
+  <li>
+    <strong><code>editor.registerMutationListener()</code></strong>
+    : 특정 유형의 Lexical 노드가 변형(생성, 파괴, 업데이트)될 때 알림을 받는
+    리스너입니다.
+  </li>
+  <li>
+    <strong><code>editor.registerNodeTransform()</code></strong>
+    : 노드 유형의 변경에 반응하여 에디터 상태를 효율적으로 변형하는 리스너를
+    등록합니다.
+  </li>
+  <li>
+    <strong><code>editor.registerRootListener()</code></strong>
+    : 에디터의 루트 DOM 요소 변경 시 알림을 받는 리스너입니다.
+  </li>
+  <li>
+    <strong><code>editor.registerTextContentListener()</code></strong>
+    : 에디터의 텍스트 콘텐츠가 변경될 때 알림을 받는 리스너입니다.
+  </li>
+  <li>
+    <strong><code>editor.registerUpdateListener()</code></strong>
+    : Lexical이 DOM에 업데이트를 커밋할 때 알림을 받는 리스너입니다.
+  </li>
+  <li>
+    <strong><code>editor.setEditable()</code></strong>
+    : 에디터의 편집 모드를 설정하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.setEditorState()</code></strong>
+    : 현재 에디터 상태를 인수로 전달된 상태로 대체하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.setRootElement()</code></strong>
+    : 에디터 인스턴스를
+    <code>contenteditable</code>
+    DOM 요소에 연결하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>editor.update()</code></strong>
+    : 에디터 상태를 변형하기 위한 가장 일반적인 방법으로, 클로저 내에서
+    <code>$function</code>
+    을 사용하여 작업을 수행합니다.
+  </li>
+  <li>
+    <strong><code>exportJSON()</code></strong>
+    : LexicalNode가 JSON으로 어떻게 표현되어야 하는지 제어하는 메서드입니다.
+  </li>
+  <li>
+    <strong><code>getWritable()</code></strong>
+    : 노드의 변경 가능한 버전을 가져오는 내부 API입니다. 노드 메서드 내에서
+    사용됩니다.
+  </li>
+  <li>
+    <strong><code>importDOM()</code></strong>
+    :
+    <code>HTMLElement</code>
+    가 Lexical에서 어떻게 표현되어야 하는지 제어하는
+    <code>LexicalNode</code>
+    의 정적 메서드입니다.
+  </li>
+  <li>
+    <strong><code>importJSON()</code></strong>
+    : JSON으로부터 LexicalNode가 어떻게 역직렬화되어 노드로 변환되는지 제어하는
+    메서드입니다.
+  </li>
+  <li>
+    <strong><code>initialConfig</code></strong>
+    : Lexical 에디터를 초기화할 때 사용되는 구성 객체로, 네임스페이스, 테마,
+    노드 등록, 오류 처리 등을 정의합니다.
+  </li>
+  <li>
+    <strong><code>LexicalCommand</code></strong>
+    : Lexical의 명령 시스템에서 사용되는 명령 유형으로, 특정 액션을 나타냅니다.
+  </li>
+  <li>
+    <strong><code>LexicalComposer</code></strong>
+    : React 애플리케이션에서 Lexical 에디터를 설정하기 위한 최상위
+    컴포넌트입니다. 에디터 인스턴스를 컨텍스트로 제공합니다.
+  </li>
+  <li>
+    <strong><code>LexicalEditor</code></strong>
+    : 모든 Lexical 기능의 핵심 인스턴스입니다.
+    <code>contenteditable</code>
+    DOM 요소에 연결됩니다.
+  </li>
+  <li>
+    <strong><code>LexicalErrorBoundary</code></strong>
+    : React 컴포넌트에서 Lexical 업데이트 중 발생하는 오류를 처리하기 위한 오류
+    경계 컴포넌트입니다.
+  </li>
+  <li>
+    <strong><code>LexicalNode</code></strong>
+    : Lexical의 핵심 기본 노드로, 에디터의 시각적 뷰와 기본 데이터 모델을
+    형성합니다.
+  </li>
+  <li>
+    <strong><code>LexicalPlainTextPlugin</code></strong>
+    :
+    <code>@lexical/plain-text</code>
+    의 React 래퍼로, 일반 텍스트 편집 기능을 제공합니다.
+  </li>
+  <li>
+    <strong><code>LexicalRichTextPlugin</code></strong>
+    :
+    <code>@lexical/rich-text</code>
+    의 React 래퍼로, 리치 텍스트 편집 기능을 제공합니다.
+  </li>
+  <li>
+    <strong><code>ListNode</code></strong>
+    : Lexical에서 목록을 나타내는 노드입니다.
+  </li>
+  <li>
+    <strong><code>ListItemNode</code></strong>
+    : Lexical에서 목록 항목을 나타내는 노드입니다.
+  </li>
+  <li>
+    <strong><code>NodeCaret</code></strong>
+    : Lexical 문서 트리를 효율적으로 탐색하기 위한 통일된 API입니다. 문서 내
+    특정 지점을
+    <code>origin</code>
+    ,
+    <code>direction</code>
+    ,
+    <code>type</code>
+    으로 표현합니다.
+  </li>
+  <li>
+    <strong><code>NodeReplacement</code></strong>
+    : 에디터 내에서 주어진 노드의 모든 인스턴스를 서브클래스의 인스턴스로 교체할
+    수 있도록 하는 기능입니다.
+  </li>
+  <li>
+    <strong><code>NodeSelection</code></strong>
+    : 여러 개의 임의의 노드를 선택하는 것을 나타내는 선택 유형입니다.
+  </li>
+  <li>
+    <strong><code>NodeState</code></strong>
+    : Lexical v0.26.0에 도입된 API로, 임의의 상태를 노드에 즉석에서 추가할 수
+    있으며, 이는 조정(reconciliation), 기록(history), JSON 직렬화에 참여합니다.
+  </li>
+  <li>
+    <strong><code>PlainTextPlugin</code></strong>
+    :
+    <code>@lexical/plain-text</code>
+    를 감싸는 React 컴포넌트입니다.
+  </li>
+  <li>
+    <strong><code>RangeSelection</code></strong>
+    : 브라우저의 DOM Selection 및 Range API를 정규화한 가장 일반적인 선택
+    유형입니다.
+    <code>anchor</code>
+    ,
+    <code>focus</code>
+    ,
+    <code>format</code>
+    속성을 가집니다.
+  </li>
+  <li>
+    <strong><code>reconciliation</code></strong>
+    : Lexical이 EditorState 간의 &#34;차이(diff)&#34;를 적용하여 DOM의 변경이
+    필요한 부분만 업데이트하는 과정입니다.
+  </li>
+  <li>
+    <strong><code>RootNode</code></strong>
+    : EditorState에서 항상 최상위에 존재하는 단일 노드로,
+    <code>contenteditable</code>
+    요소 자체를 나타냅니다. 서브클래싱되거나 교체될 수 없습니다.
+  </li>
+  <li>
+    <strong><code>TableSelection</code></strong>
+    : 테이블과 같은 그리드 형태의 선택을 나타내는 선택 유형입니다.
+  </li>
+  <li>
+    <strong><code>TextNode</code></strong>
+    : 텍스트를 포함하는 리프(leaf) 유형의 노드입니다.
+    <code>format</code>
+    ,
+    <code>mode</code>
+    ,
+    <code>style</code>
+    등의 텍스트 관련 속성을 가집니다.
+  </li>
+  <li>
+    <strong><code>Transformer</code></strong>
+    : 마크다운 가져오기, 내보내기, 또는 타이핑 중 특정 텍스트나 노드가 처리되는
+    방식을 정의하는 객체입니다.
+  </li>
+  <li>
+    <strong><code>updateFromJSON()</code></strong>
+    :
+    <code>importJSON</code>
+    구현을 단순화하기 위해 Lexical 0.23에 도입된 메서드로, JSON을 기반으로
+    노드의 속성을 설정합니다.
+  </li>
+  <li>
+    <strong><code>Update Tags</code></strong>
+    : 업데이트에 첨부할 수 있는 문자열 식별자로, 업데이트의 유형이나 목적을
+    나타내고 리스너에 의해 처리 방식을 제어하는 데 사용됩니다.
+  </li>
+  <li>
+    <strong><code>useLexicalComposerContext()</code></strong>
+    : React Context를 통해
+    <code>LexicalEditor</code>
+    인스턴스에 접근할 수 있도록 하는 React 훅입니다.
+  </li>
+  <li>
+    <strong><code>Y.Doc</code></strong>
+    : Y.js의 핵심 데이터 구조로, 여러 클라이언트 간에 상태를 공유하고 동기화하는
+    데 사용됩니다.
+  </li>
+  <li>
+    <strong><code>Yjs</code></strong>
+    : 실시간 협업 편집을 위한 프레임워크입니다.
+  </li>
+</ul>

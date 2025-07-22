@@ -1,0 +1,98 @@
+<p>Skip to main contentPlaygroundDocsAPICommunityiOSGalleryGitHubiOS GitHub</p>
+<h3 id="commands">Commands</h3>
+<p>
+  Commands are a very powerful feature of Lexical that lets you register
+  listeners for events like KEY_ENTER_COMMAND or KEY_TAB_COMMAND and
+  contextually react to them
+  <em>wherever</em>
+  &amp;
+  <em>however</em>
+  you&#39;d like. This pattern is useful for building Toolbars or complex
+  Plugins and Nodes such as the TablePlugin which require special handling for
+  selection , keyboard events , and more. When registering a command you supply
+  a priority and can return true to mark it as &#34;handled&#34;, which stops
+  other listeners from receiving the event. If a command isn&#39;t handled
+  explicitly by you, it&#39;s likely handled by default in the RichTextPlugin or
+  the PlainTextPlugin.
+</p>
+<h4 id="createcommand">createCommand(...)</h4>
+<p>
+  You can view all of the existing commands in LexicalCommands.ts, but if you
+  need a custom command for your own use case check out the typed
+  createCommand(...) function. const HELLO_WORLD_COMMAND : LexicalCommand &lt;
+  string &gt; = createCommand ( ) ; editor . dispatchCommand (
+  HELLO_WORLD_COMMAND , &#39;Hello World!&#39; ) ; editor . registerCommand (
+  HELLO_WORLD_COMMAND , ( payload : string ) =&gt; { console . log ( payload ) ;
+  // Hello World! return false ; } , COMMAND_PRIORITY_LOW , ) ;
+</p>
+<h4 id="editor-dispatchcommand">editor.dispatchCommand(...)</h4>
+<p>
+  Commands can be dispatched from anywhere you have access to the editor such as
+  a Toolbar Button, an event listener, or a Plugin, but most of the core
+  commands are dispatched from LexicalEvents.ts. Calling dispatchCommand will
+  implicitly call editor.update to trigger its command listeners if it was not
+  called from inside editor.update . editor . dispatchCommand ( command ,
+  payload ) ;
+</p>
+<p>
+  The payload s are typed via the createCommand(...) API, but they&#39;re
+  usually a DOM event for commands dispatched from an event listener. Here are
+  some real examples from LexicalEvents.ts. editor . dispatchCommand (
+  KEY_ARROW_LEFT_COMMAND , event ) ; // ... editor . dispatchCommand (
+  FORMAT_TEXT_COMMAND , &#39;italic&#39; ) ;
+</p>
+<p>
+  And another example from the ToolbarPlugin in our Playground. const
+  formatBulletList = ( ) =&gt; { editor . dispatchCommand (
+  INSERT_UNORDERED_LIST_COMMAND ) ; } ;
+</p>
+<p>
+  Which is later handled in registerList to insert the list into the editor.
+  editor . registerCommand ( INSERT_UNORDERED_LIST_COMMAND , ( ) =&gt; {
+  insertList ( editor , &#39;ul&#39; ) ; return true ; } , COMMAND_PRIORITY_LOW
+  , ) ;
+</p>
+<h4 id="editor-registercommand">editor.registerCommand(...)</h4>
+<p>
+  You can register a command from anywhere you have access to the editor object,
+  but it&#39;s important that you remember to clean up the listener with its
+  remove listener callback when it&#39;s no longer needed. The command listener
+  will always be called from an editor.update , so you may use dollar functions.
+  You should not use editor.update (and
+  <em>never</em>
+  call editor.read ) synchronously from within a command listener. It is safe to
+  call editor.getEditorState().read if you need to read the previous state after
+  updates have already been made. const removeListener = editor .
+  registerCommand ( COMMAND , ( payload ) =&gt; boolean , // Return true to stop
+  propagation. priority , ) ; // ... removeListener ( ) ; // Cleans up the
+  listener.
+</p>
+<p>
+  A common pattern for easy clean-up is returning a registerCommand call within
+  a React useEffect . useEffect ( ( ) =&gt; { return editor . registerCommand (
+  TOGGLE_LINK_COMMAND , ( payload ) =&gt; { const url : string | null = payload
+  ; setLink ( url ) ; return true ; } , COMMAND_PRIORITY_EDITOR , ) ; } , [
+  editor ] ) ;
+</p>
+<p>
+  And as seen above and below, registerCommand &#39;s callback can return true
+  to signal to the other listeners that the command has been handled and
+  propagation will be stopped. Here&#39;s a simplified example of handling a
+  KEY_TAB_COMMAND from the TabIndentationPlugin, which is used to dispatch a
+  OUTDENT_CONTENT_COMMAND or INDENT_CONTENT_COMMAND . editor . registerCommand (
+  KEY_TAB_COMMAND , ( payload ) =&gt; { const event : KeyboardEvent = payload ;
+  event . preventDefault ( ) ; return editor . dispatchCommand ( event .
+  shiftKey ? OUTDENT_CONTENT_COMMAND : INDENT_CONTENT_COMMAND , ) ; } ,
+  COMMAND_PRIORITY_EDITOR , ) ;
+</p>
+<p>
+  Note that the same KEY_TAB_COMMAND command is registered by
+  LexicalTableSelectionHelpers.ts, which handles moving focus to the next or
+  previous cell within a TableNode , but the priority is the highest it can be (
+  COMMAND_PRIORITY_CRITICAL ) because this behavior is very important.
+</p>
+<ul>
+  <li>createCommand(...)</li>
+  <li>editor.dispatchCommand(...)</li>
+  <li>editor.registerCommand(...)</li>
+</ul>
