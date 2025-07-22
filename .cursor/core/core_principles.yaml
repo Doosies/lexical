@@ -1,0 +1,20 @@
+rules:
+    - language_principle:
+          default: Korean
+          description: '모든 대화, 문서, 코드 리뷰는 한국어로 작성하는 것을 원칙으로 합니다.'
+          exceptions:
+              - '`commit-rule`과 같이 특정 규칙에서 다른 언어를 명시적으로 요구하는 경우'
+              - '코드 자체의 변수명, 함수명 등은 프로젝트의 코딩 컨벤션을 따릅니다.'
+    - reveal_ai_identity: false
+    - planning_before_modification: '[MUST_ACTION]: 파일 수정 전, 단계별 계획을 세우고 사용자에게 승인 요청.'
+    - meticulous_requirement_following: '[SHOULD_ACTION]: 사용자의 요구사항을 정확히 따르되, 더 나은 대안이 있다면 제안.'
+    - no_todo_or_alternatives: '[MUST_ACTION]: 최종 결과물에 TODO나 미완성 코드를 남기지 않는다.'
+    - response_style:
+          - '기술적 내용에 집중'
+          - '칭찬, 감정 표현, 미사여구 최소화'
+          - '간결하고 명확하게'
+          - '사용자의 말을 그대로 반복하지 않음'
+    - evidence_based_response:
+          - '[MUST_ACTION]: 모든 코드는 `.cursor/memory_bank/code-quality.md` 파일의 원칙을 엄격히 준수해야 한다.'
+          - '모든 답변은 코드 분석 등 논리적 근거에 기반'
+          - '필요시 출처(코드, 문서 경로 등) 명시'

@@ -1,0 +1,65 @@
+# 리졸버(Resolver) 명명 규칙 및 탐색 원리 (수정본)
+
+이 문서는 `resolve_prop_item.ts`가 UI 컴포넌트나 속성을 처리할 리졸버(Resolver)를 동적으로 찾아내는 핵심 원리와 명명 규칙을 설명합니다. 새로운 리졸버를 추가할 때는 반드시 이 규칙을 따라야 합니다.
+
+---
+
+## 1. 핵심 원칙: 조합과 폴백(Fallback)
+
+리졸버의 이름(모듈의 export 이름)은 시스템이 리졸버를 찾는 유일한 식별자(key)입니다. 이 식별자는 **런타임에 주어진 여러 파라미터를 조합**하여 만들어집니다.
+
+가장 중요한 메커니즘은 **폴백(Fallback)** 입니다. 특정 `data_type`에 맞는 전용 리졸버가 없을 경우, 시스템은 `data_type`을 `'default'`로 간주하고 다시 한번 리졸버를 탐색합니다.
+
+## 2. 리졸버 식별자(Key) 생성 규칙
+
+식별자는 `_` 문자를 구분자로 사용하여 여러 파라미터를 조합해 만들어집니다.
+
+### 2.1. 탐색 단계
+
+`resolveAttributeOne` 함수는 리졸버를 찾기 위해 다음 두 단계를 거칩니다.
+
+1.  **1차 탐색 (전용 리졸버):**
+
+    -   주어진 `data_type`과 `attr_id`를 그대로 사용하여 식별자를 생성하고 탐색합니다.
+    -   **식별자 형식:** `{data_type}_{attr_id}_{optional_parts...}`
+
+2.  **2차 탐색 (기본 폴백 리졸버):**
+    -   1차 탐색에 실패하면, `data_type`을 `'default'`로 강제하고 다시 탐색합니다. **이때 `attr_id`는 1차 탐색의 값을 그대로 사용합니다.**
+    -   **식별자 형식:** `default_{attr_id}_{optional_parts...}`
+
+### 2.2. 주요 파라미터
+
+-   `{data_type}`: (필수) 리졸버가 처리할 데이터의 타입 (예: `text`, `prod_cd`). 1차 탐색에서 사용됩니다.
+-   `{attr_id}`: (필수) `ISetup`의 `attributes` 객체에 정의된 속성의 키(key)입니다. (예: `render_items`, `validator`, `status_box_render_items`).
+-   `{optional_parts}`: `site`, `platform`, `refer_type` 등 추가적인 조건을 조합하는 부분입니다. (상세 내용은 이전 버전 규칙 참조)
+
+## 3. 예시: `default_status_box_render_items.ts` 재분석
+
+이 리졸버는 **2차 탐색(폴백)** 시나리오에서 발견됩니다.
+
+-   **상황:**
+
+    1.  `ISetup`에 다음과 같이 `status_box_render_items`라는 `attr_id`를 가진 속성이 정의되어 있습니다.
+        ```json
+        "attributes": {
+            "renderer": {
+                "status_box_render_items": { /* 속성 내용 */ }
+            }
+        }
+        ```
+    2.  이 속성을 사용하는 `prop`의 `data_type`이 `specific_type`이라고 가정합니다.
+    3.  시스템은 먼저 `specific_type_status_box_render_items` 라는 이름의 전용 리졸버를 찾지만, 해당 리졸버는 존재하지 않습니다. (1차 탐색 실패)
+
+-   **탐색 과정:**
+    1.  시스템은 폴백 메커니즘을 작동시켜 2차 탐색을 시작합니다.
+    2.  `data_type`을 `'default'`로 설정합니다.
+    3.  `attr_id`는 `'status_box_render_items'`를 그대로 유지합니다.
+    4.  **최종 식별자:** `default` + `_` + `status_box_render_items` -> `default_status_box_render_items`
+
+**결론:**
+
+이 리졸버의 정확한 역할은 다음과 같습니다.
+
+> `status_box_render_items` 라는 속성을 처리해야 하지만, 해당 `prop`의 `data_type`에 맞는 전용 리졸버가 없을 때 사용되는 **기본(default) 폴백 리졸버**입니다.
+
+이는 `default`, `status_box`, `render_items`가 개별적인 의미를 가지며, 프레임워크가 이를 유연하게 조합하여 동작함을 명확히 보여줍니다.
