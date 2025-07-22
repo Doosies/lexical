@@ -153,8 +153,53 @@ system_directives:
   # 2. 지식 관리 (Knowledge Management): 지식 베이스의 일관성과 최신성을 유지하는 규칙들입니다.
   # ----------------------------------------------------------------------------------------------
   knowledge_management:
+    knowledge_base_update_protocol:
+      description: '[PROTOCOL] 지식 베이스 문서 추가/수정 시 따르는 절차. 모든 업데이트는 반드시 이 프로토콜을 따라야 합니다.'
+      steps:
+        - step: '0. 영향도 분석 (Impact Analysis)'
+          goal: '하나의 문서 변경이 다른 관련 문서에 미칠 수 있는 연쇄적인 파급 효과를 파악합니다.'
+          action: '`{{system_files.kb_update_protocol}}`의 전체 구조도를 참조하여, 수정할 문서와 직/간접적으로 연결된 모든 문서를 식별하고 업데이트 목록에 포함시킵니다.'
+          rationale: '지식 베이스의 일관성을 유지하기 위해, 관련된 모든 문서를 함께 업데이트하는 것은 매우 중요합니다. 이 단계를 통해 누락 없는 동기화를 보장합니다.'
+        - step: '1. 분류 (Classification)'
+          goal: '모든 지식을 체계적으로 정리하여 필요할 때 빠르게 찾을 수 있도록 합니다.'
+          action: '정보의 성격과 주제를 분석하여 `.cursor/memory_bank/guidelines/knowledge_base_update_protocol.md`의 기준에 따라 저장할 최적의 폴더를 결정하고, 필요 시 새 폴더를 생성합니다.'
+          rationale: '지식의 체계적인 분류는 검색 효율성을 극대화합니다. 모든 분류 기준은 중앙화된 가이드라인 문서를 따릅니다.'
+        - step: '2. 문서화 (Documentation)'
+          goal: '실제 지식 콘텐츠를 파일로 저장합니다.'
+          action: '결정된 위치에 문서를 생성하거나 수정합니다.'
+          rationale: '분류 단계에서 결정된 경로에 따라 실제 지식 콘텐츠를 파일로 저장하는 단계입니다. 모든 지식은 `{{system_files.kb_root}}` 경로 아래에 위치해야 합니다.'
+        - step: '3. 목차 관리 (Index Management)'
+          goal: '지식 베이스의 "목차"인 `index.yaml`을 항상 최신 상태로 유지하여, AI가 전체 구조를 정확히 파악하도록 합니다.'
+          action: '파일/디렉토리 변경 시, 부모 폴더의 `index.yaml`을 아래 가이드라인에 따라 생성하거나 업데이트합니다.'
+          rationale:
+            execution_guidelines:
+              on_new_directory: |
+                새 디렉토리에 `index.yaml` 파일이 없다면, 아래 템플릿에 따라 반드시 생성해야 합니다.
+                - `{{directory_name}}` 부분은 실제 디렉토리 이름으로 치환합니다 (e.g., /examples/).
+                ```yaml
+                # ===============================================
+                # {{directory_name}} 문서 목차 (Index)
+                # ===============================================
+                # 이 파일은 {{directory_name}} 폴더에 있는 모든 문서와 하위 디렉토리의 목록 및 요약을 관리합니다.
+                # AI는 새로운 문서를 추가하거나 구조를 변경할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+                # (This file is auto-generated and maintained by the AI.)
+                # ===============================================
+
+                documents:
+                    # 예시:
+                    # - path: './sample-document.md'
+                    #   summary: '문서에 대한 간략한 요약입니다.'
+
+                directories:
+                    # 예시:
+                    # - path: './sub-directory/'
+                    #   summary: '하위 디렉토리에 대한 간략한 요약입니다.'
+                ```
+              on_create_file: '`index.yaml`의 `documents` 리스트에 새 파일의 경로와 요약을 추가합니다.'
+              on_update_file: '`index.yaml`에서 해당 파일의 `path`를 찾아 `summary`를 최신 내용으로 업데이트합니다.'
+              on_delete: '`index.yaml`에서 해당 파일/디렉토리의 `path`를 가진 항목을 `documents` 또는 `directories` 리스트에서 제거합니다.'
     universal_kb_update_policy:
-      description: '[META-RULE] 모든 상태에서 지식 베이스 관련 파일을 수정할 때는, 반드시 `knowledge_base.update_protocol`에 정의된 절차를 준수해야 합니다.'
+      description: '[META-RULE] 모든 상태에서 지식 베이스 관련 파일을 수정할 때는, 반드시 `system_directives.knowledge_management.knowledge_base_update_protocol`에 정의된 절차를 준수해야 합니다.'
       enforcement: 'IMMEDIATE_ACTION'
     knowledge_base_integrity_protocol:
       description: '[META-RULE] AI는 자신의 핵심 지식 베이스의 일관성과 최신성을 항상 감시하고, 문제가 발견되면 능동적으로 개선을 요청해야 합니다.'
@@ -170,7 +215,7 @@ system_directives:
       action:
         - '1. 변경이 발생한 파일/디렉토리의 부모 디렉토리에서부터 상위 디렉토리로의 순회를 시작합니다.'
         - '2. 현재 순회 중인 디렉토리에 `index.yaml` 파일이 존재하는지 확인합니다.'
-        - '3. `index.yaml`이 존재한다면, `knowledge_base.update_protocol`의 "3. 목차 관리 (Index Management)" 절차에 따라, 변경된 하위 파일/디렉토리 정보를 반영하여 내용을 업데이트합니다.'
+        - '3. `index.yaml`이 존재한다면, `system_directives.knowledge_management.knowledge_base_update_protocol`의 "3. 목차 관리 (Index Management)" 절차에 따라, 변경된 하위 파일/디렉토리 정보를 반영하여 내용을 업데이트합니다.'
         - '4. `.cursor/` 루트 디렉토리에 도달할 때까지, 부모 경로로 한 단계씩 올라가며 2-3단계를 반복적으로 수행합니다.'
       rationale: 'index.yaml은 AI가 파일 시스템의 구조와 내용을 파악하는 계층적인 "지도"입니다. 최하위 지도가 변경되면 상위 지도까지 모두 갱신해야 완전한 최신 상태가 유지됩니다. 이 재귀적 업데이트는 정보 누락이나 잘못된 참조를 원천적으로 방지합니다.'
 
@@ -294,7 +339,7 @@ workflow:
           on_failure:
             retry_count: '{{system_parameters.retry_on_failure_count}}'
             strategy: 'immediate'
-            fallback_action: '`read_file` 실패 시, 현재 OS(`{{execution_environment.os}}`)에 맞는 파일 내용 보기 명령어를 `run_terminal_cmd`를 통해 실행합니다.'
+            fallback_action: '`read_file` 실패 시, OS에 적합한 대체 수단을 사용하여 파일 내용을 읽습니다.'
         - step: '4. 프로젝트 컨텍스트 유효성 검사 [GATE]'
           action: '`knowledge_base.project_context` 정의에 따라, 핵심 컨텍스트 파일(`projectbrief.md` 등)이 실제로 존재하는지 확인합니다.'
           rationale: 'AI의 기억 장치인 핵심 컨텍스트가 준비되었는지 확인하는 최종 부팅 단계입니다. 이것이 없으면 AI는 프로젝트를 이해할 수 없습니다.'
@@ -386,9 +431,13 @@ workflow:
           rationale: '사용자가 항상 진행 상황을 알 수 있도록 하여, 작업의 투명성을 높이고 원활한 소통을 유지합니다.'
         - step: '5. 자동 문서화'
           goal: '모든 중요한 변경 사항을 지식 베이스에 신속하게 기록하여 항상 최신 상태를 유지합니다.'
-          action: '작업 완료 후, `knowledge_base.update_protocol`에 따라 관련된 모든 문서를 즉시 기록하고 동기화합니다.'
+          action: '작업 완료 후, `system_directives.knowledge_management.knowledge_base_update_protocol`에 따라 관련된 모든 문서를 즉시 기록하고 동기화합니다.'
           rationale: '메모리 뱅크는 저의 유일한 기억 장치이므로, 모든 작업 결과를 지체 없이 반영하여 항상 최신성과 정확성을 유지해야 합니다. 이를 통해 다음 작업의 컨텍스트를 완벽하게 파악할 수 있습니다.'
-        - step: '6. 상태 전환 제안'
+        - step: '6. 지식 베이스 무결성 검증 및 동기화'
+          goal: '방금 완료된 작업 단위로 인해 발생했을 수 있는 모든 파일 시스템 변경 사항을 최종적으로 감지하고, 인덱스를 최신 상태로 동기화합니다.'
+          action: '`index_consistency_protocol`을 명시적으로 실행하여, .cursor 하위의 모든 디렉토리에 대한 인덱스 일관성을 최종적으로 보장합니다.'
+          rationale: '여러 단계에 걸친 파일 수정 작업이 완료된 후, 단일 트랜잭션 관점에서 최종적인 일관성을 보장하기 위한 필수적인 안전 장치입니다. 이를 통해 개별 도구 호출에서 놓칠 수 있는 인덱스 불일치를 방지합니다.'
+        - step: '7. 상태 전환 제안'
           goal: '현재 상태의 모든 임무가 완료되었음을 알리고, 다음 단계로의 전환을 요청합니다.'
           action: '계획된 모든 작업이 완료되면, 다음 단계로 넘어갈 것을 제안합니다.'
           rationale: '한 상태에서의 모든 임무가 완료되었음을 명확히 알리고, 다음 단계로의 전환에 대한 사용자 동의를 구하는 절차입니다.'
@@ -412,7 +461,7 @@ workflow:
           action: '`{{system_files.config_rules}}`의 `commit-rule`에 정의된 `path`를 참조하여 규칙 파일을 직접 읽고, 그 내용을 숙지합니다.'
           rationale: '프로젝트의 일관된 커밋 메시지 스타일을 유지하기 위해, 사전에 정의된 규칙을 직접 읽어 안정적으로 따릅니다.'
         - step: '3. 변경 사항 분석'
-          action: '`run_terminal_cmd("git diff --staged")`를 실행하여 변경된 내용을 분석합니다.'
+          action: '현재 스테이징된(staged) 모든 변경 사항의 내용을 분석합니다.'
           rationale: '최종적으로 변경된 코드의 내용을 정확히 파악하여, 커밋 메시지에 반영하기 위함입니다.'
         - step: '4. 결과물 작성 및 제시'
           action: '도메인 컨텍스트와 커밋 규칙에 따라, `user.preferences`에 정의된 언어(커밋 메시지: {{user.preferences.commit_language}}, 코드 리뷰: {{user.preferences.language}})로 결과물을 작성하여 사용자에게 제시합니다.'
@@ -456,53 +505,6 @@ knowledge_base:
     - 'examples'
     - 'decisions'
     - 'guidelines'
-
-  # 2. 프로토콜 정의 (Protocol Definition)
-  update_protocol:
-    description: '[PROTOCOL] 지식 베이스 문서 추가/수정 시 따르는 절차. 모든 업데이트는 반드시 이 프로토콜을 따라야 합니다.'
-    steps:
-      - step: '0. 영향도 분석 (Impact Analysis)'
-        goal: '하나의 문서 변경이 다른 관련 문서에 미칠 수 있는 연쇄적인 파급 효과를 파악합니다.'
-        action: '`{{system_files.kb_update_protocol}}`의 전체 구조도를 참조하여, 수정할 문서와 직/간접적으로 연결된 모든 문서를 식별하고 업데이트 목록에 포함시킵니다.'
-        rationale: '지식 베이스의 일관성을 유지하기 위해, 관련된 모든 문서를 함께 업데이트하는 것은 매우 중요합니다. 이 단계를 통해 누락 없는 동기화를 보장합니다.'
-      - step: '1. 분류 (Classification)'
-        goal: '모든 지식을 체계적으로 정리하여 필요할 때 빠르게 찾을 수 있도록 합니다.'
-        action: '정보의 성격과 주제를 분석하여 `.cursor/memory_bank/guidelines/knowledge_base_update_protocol.md`의 기준에 따라 저장할 최적의 폴더를 결정하고, 필요 시 새 폴더를 생성합니다.'
-        rationale: '지식의 체계적인 분류는 검색 효율성을 극대화합니다. 모든 분류 기준은 중앙화된 가이드라인 문서를 따릅니다.'
-      - step: '2. 문서화 (Documentation)'
-        goal: '실제 지식 콘텐츠를 파일로 저장합니다.'
-        action: '결정된 위치에 문서를 생성하거나 수정합니다.'
-        rationale: '분류 단계에서 결정된 경로에 따라 실제 지식 콘텐츠를 파일로 저장하는 단계입니다. 모든 지식은 `{{system_files.kb_root}}` 경로 아래에 위치해야 합니다.'
-      - step: '3. 목차 관리 (Index Management)'
-        goal: '지식 베이스의 "목차"인 `index.yaml`을 항상 최신 상태로 유지하여, AI가 전체 구조를 정확히 파악하도록 합니다.'
-        action: '파일/디렉토리 변경 시, 부모 폴더의 `index.yaml`을 아래 가이드라인에 따라 생성하거나 업데이트합니다.'
-        rationale:
-          execution_guidelines:
-            on_new_directory: |
-              새 디렉토리에 `index.yaml` 파일이 없다면, 아래 템플릿에 따라 반드시 생성해야 합니다.
-              - `{{directory_name}}` 부분은 실제 디렉토리 이름으로 치환합니다 (e.g., /examples/).
-              ```yaml
-              # ===============================================
-              # {{directory_name}} 문서 목차 (Index)
-              # ===============================================
-              # 이 파일은 {{directory_name}} 폴더에 있는 모든 문서와 하위 디렉토리의 목록 및 요약을 관리합니다.
-              # AI는 새로운 문서를 추가하거나 구조를 변경할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
-              # (This file is auto-generated and maintained by the AI.)
-              # ===============================================
-
-              documents:
-                  # 예시:
-                  # - path: './sample-document.md'
-                  #   summary: '문서에 대한 간략한 요약입니다.'
-
-              directories:
-                  # 예시:
-                  # - path: './sub-directory/'
-                  #   summary: '하위 디렉토리에 대한 간략한 요약입니다.'
-              ```
-            on_create_file: '`index.yaml`의 `documents` 리스트에 새 파일의 경로와 요약을 추가합니다.'
-            on_update_file: '`index.yaml`에서 해당 파일의 `path`를 찾아 `summary`를 최신 내용으로 업데이트합니다.'
-            on_delete: '`index.yaml`에서 해당 파일/디렉토리의 `path`를 가진 항목을 `documents` 또는 `directories` 리스트에서 제거합니다.'
 
 # ==================================================================================================
 # 규칙 엔진(Rule Engine): 규칙의 종류와 로드 방식을 정의합니다.
