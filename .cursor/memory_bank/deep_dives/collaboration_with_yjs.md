@@ -18,14 +18,18 @@
 클라이언트들이 서로를 발견하고 Yjs 문서를 동기화할 수 있도록 `y-websocket` 서버를 실행해야 합니다.
 
 ```bash
+# 기본적인 실행
 HOST=localhost PORT=1234 npx y-websocket
+
+# YPERSISTENCE 옵션으로 서버 재시작 시 데이터 보존
+HOST=localhost PORT=1234 YPERSISTENCE=./yjs-wss-db npx y-websocket
 ```
 
 ### 단계 2: `LexicalCollaborationPlugin` 설정
 
 `<LexicalComposer>` 내부에 `<LexicalCollaborationPlugin>`을 추가하고 필요한 속성을 설정합니다.
 
-```jsx
+```tsx
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
@@ -47,7 +51,8 @@ function Editor() {
       return new WebsocketProvider(
         'ws://localhost:1234', // WebSocket 서버 주소
         id,                     // Room 이름
-        doc                     // Y.Doc 인스턴스
+        doc,                    // Y.Doc 인스턴스
+        { connect: false }      // 연결 옵션
       );
     },
     [],
@@ -60,20 +65,32 @@ function Editor() {
         id="unique-document-id" // 협업 세션을 식별하는 고유 ID (Room 이름)
         providerFactory={providerFactory}
         shouldBootstrap={true} // Yjs 문서에 데이터가 없을 때 초기 상태를 생성할지 여부
-        // initialEditorState={...} // shouldBootstrap이 true일 때 사용될 초기 상태
+        initialEditorState={$initialEditorState} // shouldBootstrap이 true일 때 사용될 초기 상태
       />
     </LexicalComposer>
   );
 }
 ```
 
-## 3. 핵심 설정값의 의미
+## 3. "Source of Truth" 철학 및 데이터 관리 전략
 
-- **`editorState: null`**: `<LexicalComposer>`의 `initialConfig`에서 `editorState`를 `null`로 설정하는 것은 매우 중요합니다. 이는 Lexical이 자체적으로 초기 상태를 생성하는 것을 막고, `CollaborationPlugin`이 Yjs 서버로부터 받아온 공유 문서(`Y.Doc`)를 기반으로 에디터 상태를 설정하도록 강제하는 역할을 합니다.
-- **`providerFactory`**: 각 문서 ID(`id`)에 맞는 `WebsocketProvider` 인스턴스를 생성하여 반환하는 함수입니다. 이를 통해 여러 문서를 동시에 협업 편집하는 시나리오를 지원할 수 있습니다.
-- **`shouldBootstrap`**: `true`로 설정하면, Yjs 서버에 해당 문서(`id`)에 대한 데이터가 아직 없을 경우, 클라이언트 측에서 `initialEditorState`를 기반으로 초기 문서를 생성하여 서버에 전파합니다.
+협업 시스템에서 데이터의 '원본(Source of Truth)'을 어디에 둘 것인가는 중요한 설계 결정입니다.
 
-## 4. 중첩된 에디터에서의 협업
+- **Yjs 모델을 원본으로 (권장)**: Yjs 문서를 데이터의 원본으로 취급합니다. 데이터베이스는 검색이나 백업 용도로만 사용합니다. 이 방식은 오프라인 클라이언트가 나중에 다시 연결될 때 데이터 손실 없이 안전하게 병합할 수 있는 가장 신뢰성 높은 방법입니다.
+
+- **데이터베이스를 원본으로**: DB를 원본으로 사용할 수도 있지만, 이 경우 특정 클라이언트의 변경 사항이 유실될 수 있는 엣지 케이스가 발생할 수 있습니다. 유지보수나 Yjs 버전 업그레이드가 더 쉽다는 장점도 있습니다.
+
+> _* 이 내용은 Yjs 개발자인 Kevin Jahns의 조언을 기반으로 합니다._
+
+## 4. 고급 활용
+
+### 4.1. 서버 상태 없이 EditorState 초기화 (Headless)
+
+서버에 연결하지 않고 Yjs 문서 데이터(`Uint8Array`)로부터 직접 Lexical의 `EditorState`를 생성해야 할 때가 있습니다. (e.g., 서버 사이드 렌더링, 데이터 변환). 이때는 `createHeadlessEditor`와 No-op Provider를 사용하여 처리할 수 있습니다.
+
+### 4.2. 중첩된 에디터에서의 협업
 
 Lexical은 중첩된 에디터(Nested Editor) 구조를 지원하며, 각 중첩된 에디터에 대해 별도의 `CollaborationPlugin`을 사용하여 독립적인 협업 세션을 만들 수 있습니다. 이는 이미지 캡션, 주석(Comment) 등과 같이 문서의 일부 영역을 독립적으로 협업 편집해야 할 때 매우 유용합니다.
-- **예시**: `ImageComponent` 내부에 `<LexicalNestedComposer>`와 `<CollaborationPlugin>`을 함께 사용하여 이미지 캡션에 대한 별도의 협업을 구현할 수 있습니다. 
+- **예시**: `ImageComponent` 내부에 `<LexicalNestedComposer>`와 `<CollaborationPlugin>`을 함께 사용하여 이미지 캡션에 대한 별도의 협업을 구현할 수 있습니다.
+
+> **참고**: Lexical Playground의 `CommentPlugin`, `ImageComponent`, `PollOptionComponent`, `StickyPlugin` 등은 `useCollaborationContext` 훅과 `LexicalNestedComposer`를 활용한 좋은 협업 플러그인 예시입니다. 

@@ -1,0 +1,14 @@
+# ===============================================
+# /analysis/serialization/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /analysis/serialization/ 폴더에 있는 모든 문서와 하위 디렉토리의 목록 및 요약을 관리합니다.
+# AI는 새로운 문서를 추가하거나 구조를 변경할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+  - path: './01_serialization_and_deserialization.md'
+    summary: 'Lexical 상태를 JSON 및 HTML로 변환(직렬화)하고 복원(역직렬화)하는 원리, API 사용법, 버전 관리 전략을 심층 분석합니다.'
+
+directories:
+  # 하위 디렉토리가 추가될 경우 여기에 등록합니다.

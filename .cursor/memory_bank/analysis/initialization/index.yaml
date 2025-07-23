@@ -1,0 +1,13 @@
+# ===============================================
+# /initialization/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /initialization/ 폴더에 있는 모든 분석 문서의 목록 및 요약을 관리합니다.
+# AI는 새로운 분석 문서를 추가할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+  - path: './01_initialization_overview.md'
+    summary: 'Lexical 에디터가 <LexicalComposer>와 initialConfig를 통해 어떻게 생성 및 초기화되는지, 그리고 플러그인을 통해 기능이 확장되는 방식을 분석합니다.'
+
+directories: []

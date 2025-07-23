@@ -5,16 +5,21 @@
 # AI는 파일 시스템 변경 시, `index_consistency_protocol`에 따라 이 파일을 자동으로 최신 상태로 유지해야 합니다.
 # ===============================================
 
-documents: []
+documents:
+  # 예시:
+  # - path: './sample-document.md'
+  #   summary: '문서에 대한 간략한 요약입니다.'
 
 directories:
-    - path: './project_context/'
-      summary: '프로젝트의 목표, 컨텍스트, 패턴, 진행 상황 등 핵심 문서를 포함합니다.'
-    - path: './deep_dives/'
-      summary: '특정 기술이나 아키텍처에 대한 심층 분석 문서를 포함합니다.'
-    - path: './examples/'
-      summary: '특정 작업을 수행하는 방법에 대한 구체적인 코드 예제를 포함합니다.'
-    - path: './decisions/'
-      summary: '중요한 기술적 결정(ADR)을 기록한 문서를 포함합니다.'
-    - path: './guidelines/'
-      summary: 'AI의 동작 원칙, 프로토콜 등 시스템의 핵심 가이드라인을 포함합니다.'
+  - path: './project_context/'
+    summary: '프로젝트의 목표, 기술 스택, 현재 상태 등 핵심 컨텍스트를 관리합니다.'
+  - path: './guidelines/'
+    summary: 'Lexical API, 노드 시스템, History 관리 등 기술적인 가이드라인을 제공합니다.'
+  - path: './analysis/'
+    summary: 'Lexical의 데이터 흐름, 노드 시스템(`__key` 포함), 플러그인 등 핵심 아키텍처를 심층 분석한 결과를 기록합니다.'
+  - path: './deep_dives/'
+    summary: '특정 기술이나 아키텍처에 대한 심층 분석 문서를 포함합니다.'
+  - path: './examples/'
+    summary: '특정 작업을 수행하는 방법에 대한 구체적인 코드 예제를 포함합니다.'
+  - path: './decisions/'
+    summary: '중요한 기술적 결정(ADR)을 기록한 문서를 포함합니다.'

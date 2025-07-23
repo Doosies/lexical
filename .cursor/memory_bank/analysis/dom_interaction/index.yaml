@@ -1,0 +1,14 @@
+# ===============================================
+# /analysis/dom_interaction/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /analysis/dom_interaction/ 폴더에 있는 모든 문서와 하위 디렉토리의 목록 및 요약을 관리합니다.
+# AI는 새로운 문서를 추가하거나 구조를 변경할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+  - path: './01_dom_event_handling.md'
+    summary: 'Lexical 노드와 연결된 실제 DOM 요소에 이벤트 리스너를 붙이는 세 가지 방법(이벤트 위임, 직접 연결, NodeEventPlugin)을 심층 분석합니다.'
+
+directories:
+  # 하위 디렉토리가 추가될 경우 여기에 등록합니다.

@@ -1,23 +1,63 @@
-# 진행 상황 (Progress)
+# 프로젝트 진행 상황 (Progress)
 
-이 문서는 프로젝트의 현재 상태, 완료된 작업, 앞으로 진행해야 할 작업, 그리고 알려진 이슈들을 추적합니다.
+## 현재 상태
+- **메모리 뱅크 기반 심층 코드 분석 진행 중 (4/4 단계)**
 
-## 현재 상태 (Current Status)
+## 완료된 작업
+- **심층 코드 분석 (4/4)**
+  - [x] 에디터 생성 및 초기화 과정 분석 (`editor_initialization_analysis.md` 생성)
+  - [x] 단방향 데이터 흐름 및 상태 업데이트 분석 (`data_flow_and_state_update_analysis.md` 생성)
+  - [x] 플러그인 아키텍처 및 커맨드 시스템 분석 (`plugin_and_command_system_analysis.md` 생성)
+  - [x] 노드 시스템 및 커스텀 노드 구현 분석 (`node_system_and_custom_nodes_analysis.md` 생성)
+- **분석 기반 문서 보강**
+  - [x] `systemPatterns.md` 보강 완료
+  - [x] `techContext.md` 보강 완료
+  - [x] `projectbrief.md` 및 `productContext.md` 보강 완료
+- **지식 베이스 리팩터링 (4/4)**
+  - [x] `systemPatterns.md` 파일 리팩터링 완료
+  - [x] `core_update_mechanism_analysis.md`를 5개의 상세 분석 문서로 분리 완료
+  - [x] `plugin_and_command_system_analysis.md`를 원리 분석과 제작 가이드로 분리 완료
+  - [x] `node_development_guide.md`를 핵심 가이드와 고급 분석으로 분리 완료
+- **지식 베이스 개선 (2/2)**
+  - [x] `node_system_and_custom_nodes_analysis.md` 다이어그램 개선
+  - [x] `node_system_and_custom_nodes_analysis.md` 다이어그램 문법 오류 수정
+- **시스템 견고성 강화 (1/1)**
+  - [x] `brain.yaml`에 `context_sync_verification_protocol` 추가 완료
+- **워크플로우 개선 (1/1)**
+  - [x] `brain.yaml`의 `ACTING` 상태 종료 시, 다음 행동을 명확히 묻도록 수정
+- **시스템 신뢰성 강화 (1/1)**
+  - [x] `brain.yaml`에 `mandatory_response_hooks`를 도입하여 AI의 프로토콜 준수 강제
 
-- **단계**: 초기 설정 및 아키텍처 설계 단계.
-- **요약**: 프로젝트의 목표와 기술적 기반을 정의하고, 핵심 컨텍스트 문서를 생성하여 메모리 뱅크를 구축했습니다. 현재는 `Lexical`을 활용한 범용 렌더링 엔진의 초기 아키텍처를 구상하고 있습니다.
-
-## 완료된 작업 (What Works)
-
-- **메모리 뱅크 구축**: AI의 효과적인 작업을 위한 핵심 문서(`projectbrief.md`, `productContext.md`, `techContext.md` 등)가 생성되었습니다.
-- **초기 기술 분석**: `package.json`과 `tsconfig.json` 분석을 통해 프로젝트의 기술 스택과 구조를 파악했습니다.
-
-## 남은 작업 (What's Left to Build)
-
-- **렌더링 파이프라인 프로토타입**: `Lexical`을 사용하여 기본적인 UI 컴포넌트를 렌더링하는 프로토타입 개발이 필요합니다.
-- **아키텍처 구체화**: 프로토타입 결과를 바탕으로 전체 렌더링 엔진의 아키텍처를 상세하게 설계해야 합니다.
-- **코어 컴포넌트 개발**: ERP 시스템에 필요한 핵심 UI 컴포넌트(그리드, 폼, 차트 등)를 `Lexical` 노드로 구현해야 합니다.
-
-## 알려진 이슈 (Known Issues)
-
-- 현재 알려진 이슈 없음. 
+## lexical-website/docs 문서 기반 지식 베이스 동기화 (24/34)
+- [x] `packages/lexical-website/docs/collaboration/faq.md`
+- [x] `packages/lexical-website/docs/collaboration/react.md`
+- [x] `packages/lexical-website/docs/concepts/commands.md`
+- [x] `packages/lexical-website/docs/concepts/dom-events.md`
+- [x] `packages/lexical-website/docs/concepts/editor-state.md`
+- [x] `packages/lexical-website/docs/concepts/history.md`
+- [x] `packages/lexical-website/docs/concepts/key-management.md`
+- [x] `packages/lexical-website/docs/concepts/listeners.md`
+- [x] `packages/lexical-website/docs/concepts/node-cloning.md`
+- [x] `packages/lexical-website/docs/concepts/node-replacement.md`
+- [x] `packages/lexical-website/docs/concepts/node-state.md`
+- [x] `packages/lexical-website/docs/concepts/nodes.mdx`
+- [x] `packages/lexical-website/docs/concepts/read-only.md`
+- [x] `packages/lexical-website/docs/concepts/selection.md`
+- [x] `packages/lexical-website/docs/concepts/serialization.md`
+- [x] `packages/lexical-website/docs/concepts/transforms.md`
+- [x] `packages/lexical-website/docs/concepts/traversals.md`
+- [x] `packages/lexical-website/docs/concepts/updates.md`
+- [x] `packages/lexical-website/docs/getting-started/creating-plugin.md`
+- [x] `packages/lexical-website/docs/getting-started/theming.md`
+- [x] `packages/lexical-website/docs/getting-started/devtools.md`
+- [x] `packages/lexical-website/docs/getting-started/quick-start.md`
+- [x] `packages/lexical-website/docs/getting-started/react.md`
+- [x] `packages/lexical-website/docs/getting-started/supported-browsers.md`
+- [x] `packages/lexical-website/docs/react/plugins.md`
+- [x] `packages/lexical-website/docs/react/create_plugin.md`
+- [x] `packages/lexical-website/docs/react/faq.md`
+- [x] `packages/lexical-website/docs/react/index.md`
+- [x] `packages/lexical-website/docs/design.md`
+- [x] `packages/lexical-website/docs/error.md`
+- [x] `packages/lexical-website/docs/faq.md`
+- [x] `packages/lexical-website/docs/intro.md`

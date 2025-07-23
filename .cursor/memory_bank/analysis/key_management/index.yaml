@@ -1,0 +1,14 @@
+# ===============================================
+# /analysis/key_management/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /analysis/key_management/ 폴더에 있는 모든 문서와 하위 디렉토리의 목록 및 요약을 관리합니다.
+# AI는 새로운 문서를 추가하거나 구조를 변경할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+  - path: './01_node_key_management.md'
+    summary: 'Lexical 노드의 고유 식별자인 NodeKey의 역할, 생명주기, 올바른 사용법, 그리고 상태 관리에서의 핵심 원리를 심층 분석합니다.'
+
+directories:
+  # 하위 디렉토리가 추가될 경우 여기에 등록합니다.
