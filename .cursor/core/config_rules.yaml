@@ -21,6 +21,9 @@ always_on_rules:
   - rule_id: 'code-quality-rule'
     path: '.cursor/rules/code-quality-rule.mdc'
     # 이 규칙은 항상 활성화되어 AI의 모든 코드 생성에 영향을 미칩니다.
+  - rule_id: 'ai-bootstrap-protocol'
+    path: '.cursor/core/protocols/ai_bootstrap_protocol.md'
+    # 이 규칙은 AI의 부팅 및 설정 과정을 정의하며, 파일 스키마 검증 정보를 포함합니다.
 
 # ==================================================================================================
 # 요청 기반 규칙 (On-Demand Rules): 특정 상황에 따라 동적으로 로드되는 규칙들입니다.
