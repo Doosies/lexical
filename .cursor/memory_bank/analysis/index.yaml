@@ -6,7 +6,9 @@
 # (This file is auto-generated and maintained by the AI.)
 # ===============================================
 
-documents: []
+documents:
+  - path: './_readme.md'
+    summary: 'analysis 폴더 전체의 분석 주제 목록과 각 주제에 대한 설명을 제공하는 중앙 목차(Table of Contents) 문서입니다.'
 
 directories:
   - path: './initialization/'

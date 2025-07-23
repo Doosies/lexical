@@ -13,11 +13,9 @@ documents:
     summary: 'Lexical의 상태 업데이트가 시작되는 두 가지 주요 진입점과 콜백 실행 순서를 비교 분석합니다.'
   - path: './03_begin_update_transaction.md'
     summary: '`editor.update()`의 핵심 로직인 `beginUpdate` 트랜잭션의 내부 동작, 특히 `$applyAllTransforms`의 원리를 심층 분석합니다.'
-  - path: './04_update_tags.md'
-    summary: 'Lexical의 업데이트 동작을 세밀하게 제어하는 핵심 메커니즘인 `업데이트 태그`의 개념, 종류, 그리고 활용 방법을 심층적으로 분석합니다.'
   - path: './04_commit_pending_updates.md'
     summary: '$beginUpdate 트랜잭션의 결과를 실제 DOM에 반영하고, 변경 사항을 외부에 전파하는 최종 단계인 $commitPendingUpdates 함수와 전체 워크플로우를 상세히 분석합니다.'
-  - path: './index.yaml'
-    summary: '/analysis/update_mechanism/ 문서 목차 (Index)'
+  - path: './05_update_tags.md'
+    summary: 'Lexical의 업데이트 동작을 세밀하게 제어하는 핵심 메커니즘인 업데이트 태그의 개념, 종류, 활용 방법을 심층적으로 분석합니다.'
 
 directories: []

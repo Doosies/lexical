@@ -10,30 +10,30 @@
 
 Lexical 플러그인은 크게 두 가지 방식으로 에디터와 상호작용하며 기능을 구현합니다.
 
-1.  **커맨드 시스템 (능동적)**: 특정 행동을 **유발**하거나 다른 플러그인에게 작업을 **요청**할 때 사용합니다. (e.g., "리스트를 만들어라!")
+1.  **[커맨드 시스템 (능동적)](../command_system/01_command_system_overview.md)**: 특정 행동을 **유발**하거나 다른 플러그인에게 작업을 **요청**할 때 사용합니다. (e.g., "리스트를 만들어라!")
 2.  **리스너 (수동적/반응적)**: 에디터 내부에서 발생한 특정 상태 변화를 **감지**하고 그에 **반응**하여 로직을 수행합니다. (e.g., "노드가 삭제되었을 때 후속 작업을 처리해라.")
 
 ## 2. 능동적 상호작용: 커맨드 시스템
 
-Lexical의 커맨드 시스템은 '이벤트 버스(Event Bus)' 디자인 패턴을 기반으로 합니다. 이를 통해 플러그인들은 서로의 내부 구현을 알 필요 없이, 오직 사전에 정의된 '커맨드(이벤트)'를 통해 상호작용합니다. 이는 플러그인 간의 의존성을 극도로 낮춰(느슨한 결합), 각 기능을 독립적으로 개발, 테스트, 유지보수할 수 있게 해주는 핵심적인 아키텍처입니다.
+Lexical의 [커맨드 시스템](../command_system/01_command_system_overview.md)은 '이벤트 버스(Event Bus)' 디자인 패턴을 기반으로 합니다. 이를 통해 플러그인들은 서로의 내부 구현을 알 필요 없이, 오직 사전에 정의된 '커맨드(이벤트)'를 통해 상호작용합니다. 이는 플러그인 간의 의존성을 극도로 낮춰(느슨한 결합), 각 기능을 독립적으로 개발, 테스트, 유지보수할 수 있게 해주는 핵심적인 아키텍처입니다.
 
 > **[심층 분석]** 커맨드 시스템의 우선순위, 전파 제어, 주요 API 등 더 자세한 내용은 아래 문서를 참고하세요.
 >
-> -   **[Lexical 커맨드 시스템 심층 분석](./command_system/01_command_system_overview.md)**
+> -   **[Lexical 커맨드 시스템 심층 분석](../command_system/01_command_system_overview.md)**
 
 ## 3. 반응적 상호작용: 리스너를 통한 상태 감지
 
 플러그인은 커맨드를 통해 외부의 요청을 처리하는 것 외에도, 에디터 내부의 변화를 스스로 감지하고 반응해야 하는 경우가 많습니다. 이때 사용되는 것이 **리스너**입니다. 각 리스너는 특정 종류의 상태 변화를 감지하여 목적에 맞는 처리를 가능하게 합니다.
 
--   **`registerUpdateListener`**: 가장 일반적인 리스너로, 에디터 상태가 변경될 때마다 호출됩니다.
--   **`registerMutationListener`**: 특정 노드의 생성, 수정, 삭제(`created`, `updated`, `destroyed`)를 감지합니다.
--   **`registerTextContentListener`**: 텍스트 내용의 변경만을 감지합니다.
--   **기타 리스너**: `registerEditableListener`, `registerRootListener` 등 특정 상태 변화에 대응하는 다양한 리스너가 제공됩니다.
+-   **`registerUpdateListener`**: 가장 일반적인 리스너로, [에디터 상태](../update_mechanism/01_editor_state.md#4-상태-변경-감지-registerupdatelistener)가 변경될 때마다 호출됩니다.
+-   **`registerMutationListener`**: 특정 [노드의 생성, 수정, 삭제](../dom_interaction/01_dom_event_handling.md) (`created`, `updated`, `destroyed`)를 감지합니다.
+-   **`registerTextContentListener`**: [텍스트 내용의 변경](../dom_interaction/01_dom_event_handling.md)만을 감지합니다.
+-   **기타 리스너**: `registerEditableListener`, `registerRootListener` 등 [특정 상태 변화에 대응하는 다양한 리스너](../dom_interaction/01_dom_event_handling.md)가 제공됩니다.
 
 > **[심층 분석]** `Update` 및 `Mutation` 리스너의 상세한 동작 원리와 실제 DOM 이벤트 처리 방법은 아래 문서들을 참고하세요.
 >
-> -   **[Lexical EditorState 심층 분석](./update_mechanism/01_editor_state.md#4-상태-변경-감지-registerupdatelistener)**
-> -   **[Lexical DOM 이벤트 처리 심층 분석](./dom_interaction/01_dom_event_handling.md)**
+> -   **[Lexical EditorState 심층 분석](../update_mechanism/01_editor_state.md#4-상태-변경-감지-registerupdatelistener)**
+> -   **[Lexical DOM 이벤트 처리 심층 분석](../dom_interaction/01_dom_event_handling.md)**
 
 ## 4. 결론: 커맨드와 리스너의 조화
 

@@ -14,7 +14,7 @@ directories:
   - path: './project_context/'
     summary: '프로젝트의 목표, 기술 스택, 현재 상태 등 핵심 컨텍스트를 관리합니다.'
   - path: './guidelines/'
-    summary: 'Lexical API, 노드 시스템, History 관리 등 기술적인 가이드라인을 제공합니다.'
+    summary: 'AI 시스템 아키텍처(`brain.yaml`), Lexical API, 노드/플러그인 개발 등 핵심 개발 가이드라인을 제공합니다.'
   - path: './analysis/'
     summary: 'Lexical의 데이터 흐름, 노드 시스템(`__key` 포함), 플러그인 등 핵심 아키텍처를 심층 분석한 결과를 기록합니다.'
   - path: './deep_dives/'

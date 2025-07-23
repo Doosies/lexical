@@ -12,8 +12,8 @@
 
 Lexical의 모든 상태 변경은 다음과 같은 예측 가능한 단방향 흐름을 따릅니다.
 
-1.  **시작점 (Input)**: 사용자 입력이나 `dispatchCommand`와 같은 명시적인 API 호출로 업데이트가 시작됩니다.
-2.  **상태 변경 (State Mutation)**: `editor.update()` 내부에서 새로운 `EditorState` 불변 객체가 생성됩니다.
+1.  **시작점 (Input)**: 사용자 입력이나 [`dispatchCommand`](../command_system/01_command_system_overview.md)와 같은 명시적인 API 호출로 업데이트가 시작됩니다.
+2.  **상태 변경 (State Mutation)**: `editor.update()` 내부에서 새로운 [`EditorState`](../update_mechanism/01_editor_state.md) 불변 객체가 생성됩니다.
 3.  **렌더링 (Rendering)**: Lexical의 조정자(Reconciler)가 이전 `EditorState`와 새로운 `EditorState`를 비교하여, 변경이 필요한 최소한의 부분만 실제 DOM에 반영합니다.
 4.  **전파 (Propagation)**: 모든 변경이 완료된 후, `registerUpdateListener`와 같은 리스너들을 통해 상태 변경 사실이 외부(e.g., React 컴포넌트)로 전파됩니다.
 
@@ -46,7 +46,7 @@ graph TD
 ## 2. 핵심 브릿지: `OnChangePlugin`과 `registerUpdateListener`
 
 -   **`registerUpdateListener`**: DOM에 모든 변경 사항이 반영된 **후**에 실행되는 콜백을 등록하는 가장 기본적인 메커니즘입니다.
--   **`OnChangePlugin`**: `@lexical/react`에서 제공하는 이 플러그인은, 내부적으로 `registerUpdateListener`를 사용하여 Lexical의 내부 상태 변경을 외부 React 환경으로 전파하는 핵심적인 '다리' 역할을 수행합니다.
+-   **[`OnChangePlugin`](../plugins/01_plugin_architecture_overview.md)**: `@lexical/react`에서 제공하는 이 플러그인은, 내부적으로 `registerUpdateListener`를 사용하여 Lexical의 내부 상태 변경을 외부 React 환경으로 전파하는 핵심적인 '다리' 역할을 수행합니다.
 
 이 메커니즘을 통해 Lexical의 내부 상태와 외부 UI가 항상 동기화될 수 있습니다.
 
@@ -56,8 +56,8 @@ graph TD
 
 Lexical의 업데이트 흐름 각 단계는 매우 정교하게 설계되어 있습니다. 각 단계의 상세한 내부 동작 원리는 아래의 전문 분석 문서들을 참고하세요.
 
--   **업데이트의 시작**: [**EditorState 심층 분석**](./update_mechanism/01_editor_state.md)
--   **상태 변경의 핵심 로직**: [**`beginUpdate` 트랜잭션 심층 분석**](./update_mechanism/03_begin_update_transaction.md)
--   **Node Transform의 역할**: [**`beginUpdate` 트랜잭션 심층 분석**](./update_mechanism/03_begin_update_transaction.md#2-단계-상태-안정화-stabilization)
--   **DOM 렌더링**: [**최종 커밋 및 DOM 반영 심층 분석**](./update_mechanism/04_commit_pending_updates.md)
--   **리스너 종류 및 실행 순서**: [**업데이트 흐름 및 진입점 분석**](./update_mechanism/02_update_flow_and_entrypoints.md#12-콜백-실행-순서)
+-   **업데이트의 시작**: [**EditorState 심층 분석**](../update_mechanism/01_editor_state.md)
+-   **상태 변경의 핵심 로직**: [**`beginUpdate` 트랜잭션 심층 분석**](../update_mechanism/03_begin_update_transaction.md)
+-   **Node Transform의 역할**: [**`beginUpdate` 트랜잭션 심층 분석**](../update_mechanism/03_begin_update_transaction.md#2-단계-상태-안정화-stabilization)
+-   **DOM 렌더링**: [**최종 커밋 및 DOM 반영 심층 분석**](../update_mechanism/04_commit_pending_updates.md)
+-   **리스너 종류 및 실행 순서**: [**업데이트 흐름 및 진입점 분석**](../update_mechanism/02_update_flow_and_entrypoints.md#12-콜백-실행-순서)

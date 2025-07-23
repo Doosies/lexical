@@ -27,37 +27,20 @@
   - [x] `brain.yaml`의 `ACTING` 상태 종료 시, 다음 행동을 명확히 묻도록 수정
 - **시스템 신뢰성 강화 (1/1)**
   - [x] `brain.yaml`에 `mandatory_response_hooks`를 도입하여 AI의 프로토콜 준수 강제
+- **메모리 뱅크 견고성 강화 (4/4)**
+  - [x] `brain.yaml` 프로토콜 강화 (중앙 목차, 상호 연결, 무결성 검증 규칙 추가)
+  - [x] 메모리 뱅크 무결성 검사 프로토콜 실행 및 오류 수정
+  - [x] `analysis` 폴더 중앙 목차 (`_readme.md`) 생성 및 주요 문서 구조화
+  - [x] 주요 분석 문서 상호 연결성 강화 (초기화, 데이터 흐름, 플러그인)
 
-## lexical-website/docs 문서 기반 지식 베이스 동기화 (24/34)
-- [x] `packages/lexical-website/docs/collaboration/faq.md`
-- [x] `packages/lexical-website/docs/collaboration/react.md`
-- [x] `packages/lexical-website/docs/concepts/commands.md`
-- [x] `packages/lexical-website/docs/concepts/dom-events.md`
-- [x] `packages/lexical-website/docs/concepts/editor-state.md`
-- [x] `packages/lexical-website/docs/concepts/history.md`
-- [x] `packages/lexical-website/docs/concepts/key-management.md`
-- [x] `packages/lexical-website/docs/concepts/listeners.md`
-- [x] `packages/lexical-website/docs/concepts/node-cloning.md`
-- [x] `packages/lexical-website/docs/concepts/node-replacement.md`
-- [x] `packages/lexical-website/docs/concepts/node-state.md`
-- [x] `packages/lexical-website/docs/concepts/nodes.mdx`
-- [x] `packages/lexical-website/docs/concepts/read-only.md`
-- [x] `packages/lexical-website/docs/concepts/selection.md`
-- [x] `packages/lexical-website/docs/concepts/serialization.md`
-- [x] `packages/lexical-website/docs/concepts/transforms.md`
-- [x] `packages/lexical-website/docs/concepts/traversals.md`
-- [x] `packages/lexical-website/docs/concepts/updates.md`
-- [x] `packages/lexical-website/docs/getting-started/creating-plugin.md`
-- [x] `packages/lexical-website/docs/getting-started/theming.md`
-- [x] `packages/lexical-website/docs/getting-started/devtools.md`
-- [x] `packages/lexical-website/docs/getting-started/quick-start.md`
-- [x] `packages/lexical-website/docs/getting-started/react.md`
-- [x] `packages/lexical-website/docs/getting-started/supported-browsers.md`
-- [x] `packages/lexical-website/docs/react/plugins.md`
-- [x] `packages/lexical-website/docs/react/create_plugin.md`
-- [x] `packages/lexical-website/docs/react/faq.md`
-- [x] `packages/lexical-website/docs/react/index.md`
-- [x] `packages/lexical-website/docs/design.md`
-- [x] `packages/lexical-website/docs/error.md`
-- [x] `packages/lexical-website/docs/faq.md`
-- [x] `packages/lexical-website/docs/intro.md`
+## 향후 개선 과제 (Future Enhancements)
+- [ ] **지능형 전문가 추천 시스템 구현**
+현황: 현재 전문가 호출은 trigger_conditions라는 고정된 규칙에 의해 결정됩니다.
+개선 방향: 이제 AI는 부팅 시 모든 전문가의 페르소나 (역할, 배경, 특성)를 인지하고 있습니다. 이 정보를 활용하여, PLANNING 단계에서 사용자의 요청을 분석하고, 가장 적합한 전문가가 누구일지 능동적으로 추론하고 추천하는 기능을 추가할 수 있습니다.
+예시: 사용자가 "결제 로직의 안정성을 높이고 싶어"라고 요청하면, AI는 qa_engineer의 페르소나(품질 수호자, 잠재적 버그 식별)를 기반으로 "이 작업은 QA 엔지니어 전문가의 검토를 받으면 잠재적 버그를 사전에 찾는 데 큰 도움이 될 것입니다. 검토를 진행할까요?" 와 같이 지능적인 제안을 할 수 있습니다. 이는 시스템을 훨씬 더 능동적이고 유용하게 만들 것입니다.
+- [ ] **전문가 관리 워크플로우 구축**:
+현황: 새로운 전문가를 추가하려면 YAML 파일을 수동으로 만들어야 합니다.
+개선 방향: AI와의 대화를 통해 새로운 전문가를 손쉽게 추가, 수정, 삭제할 수 있는 관리 워크플로우를 만들 수 있습니다. AI가 사용자에게 페르소나와 작동 규칙에 대해 질문하고, 그 답변을 바탕으로 전문가 YAML 파일을 자동으로 생성해 주는 기능입니다.
+- [ ] **시스템 자체 문서화 강화**: 
+현황: 우리는 시스템 아키텍처에 많은 중요한 변경을 가했습니다.
+개선 방향: 우리가 방금 역할과 페르소나를 부여한 tech_writer 전문가를 실제로 활용하여, 지금까지 변경된 brain.yaml의 구조와 새로운 전문가 시스템의 작동 방식에 대한 문서를 memory_bank에 기록하는 작업을 진행할 수 있습니다. 이는 시스템의 이해도를 높이고 유지보수성을 향상시키는 좋은 선례가 될 것입니다.

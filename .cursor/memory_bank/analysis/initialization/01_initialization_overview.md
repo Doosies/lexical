@@ -13,11 +13,11 @@
 
 `LexicalComposer`에 전달되는 `initialConfig` 객체는 에디터의 모든 것을 정의합니다.
 
--   **`editorState` (초기 콘텐츠)**: 에디터가 처음 로드될 때 표시될 내용을 정의합니다. 함수(`$prepopulatedRichText`)를 전달하여 동적으로 초기 상태를 생성할 수 있으며, 이는 '상태가 모든 것의 시작'이라는 Lexical의 단방향 데이터 흐름 철학을 보여줍니다.
+-   **`editorState` (초기 콘텐츠)**: 에디터가 처음 로드될 때 표시될 내용을 정의합니다. 함수(`$prepopulatedRichText`)를 전달하여 동적으로 초기 상태를 생성할 수 있으며, 이는 '상태가 모든 것의 시작'이라는 Lexical의 [단방향 데이터 흐름](../data_flow/01_data_flow_overview.md) 철학을 보여줍니다. (관련 심층 분석: **[EditorState](../update_mechanism/01_editor_state.md)**)
 -   **`namespace` (고유 식별자)**: 에디터 인스턴스를 식별하는 고유한 문자열입니다.
 -   **`nodes` (커스텀 노드 등록)**
     -   **위치**: `packages/lexical-playground/src/nodes/PlaygroundNodes.ts`
-    -   **분석**: `ImageNode`, `PollNode`, `ExcalidrawNode` 등 플레이그라운드에서 사용되는 모든 커스텀 노드의 클래스가 배열 형태로 등록됩니다. 이 배열을 `initialConfig`에 전달하는 것만으로 에디터는 해당 노드들을 인식하고 렌더링 및 직렬화할 수 있게 됩니다. 이는 Lexical의 뛰어난 확장성을 보여주는 핵심 패턴입니다.
+    -   **분석**: `ImageNode`, `PollNode`, `ExcalidrawNode` 등 플레이그라운드에서 사용되는 모든 커스텀 노드의 클래스가 배열 형태로 등록됩니다. 이 배열을 `initialConfig`에 전달하는 것만으로 에디터는 해당 노드들을 인식하고 렌더링 및 [직렬화](../serialization/01_serialization_and_deserialization.md)할 수 있게 됩니다. 이는 Lexical의 뛰어난 확장성을 보여주는 핵심 패턴입니다. (관련 심층 분석: **[노드 시스템](../node_system/)**)
 -   **`theme` (테마 및 스타일링)**
     -   **위치**: `packages/lexical-playground/src/themes/PlaygroundEditorTheme.ts`
     -   **분석**: `EditorThemeClasses` 타입의 객체로, Lexical의 각 노드 및 텍스트 포맷(`h1`, `paragraph`, `text.bold` 등)에 매핑될 CSS 클래스 이름을 정의합니다. 실제 스타일은 함께 import된 `.css` 파일에 정의되어 있으며, 이를 통해 에디터의 모든 시각적 요소를 완벽하게 제어할 수 있습니다.
@@ -29,7 +29,7 @@
 -   **위치**: `packages/lexical-playground/src/Editor.tsx`
 -   **`useLexicalComposerContext()`**: `<Editor />` 컴포넌트는 이 훅을 사용하여 상위 `<LexicalComposer>`가 생성한 `editor` 인스턴스에 접근합니다. 이 인스턴스는 모든 하위 플러그인 컴포넌트에 전파되어 에디터의 상태를 읽고 수정하는 데 사용됩니다.
 -   **조건부 렌더링**: `isRichText` 설정 값에 따라 `RichTextPlugin` 또는 `PlainTextPlugin`과 그에 따른 하위 플러그인들을 선택적으로 렌더링합니다. 이는 '필요한 기능만 비용을 지불한다(pay-for-what-you-need)'는 Lexical의 핵심 설계 철학을 명확히 보여주는 부분입니다.
--   **플러그인의 역할**: `<HistoryPlugin>`, `<ListPlugin>`, `<TablePlugin>` 등 각 플러그인은 하나의 독립적인 기능을 캡슐화한 React 컴포넌트입니다. 개발자는 이 컴포넌트들을 조합하는 것만으로 원하는 기능의 에디터를 손쉽게 구성할 수 있습니다.
+-   **플러그인의 역할**: `<HistoryPlugin>`, `<ListPlugin>`, `<TablePlugin>` 등 각 플러그인은 하나의 독립적인 기능을 캡슐화한 React 컴포넌트입니다. 개발자는 이 컴포넌트들을 조합하는 것만으로 원하는 기능의 에디터를 손쉽게 구성할 수 있습니다. (관련 심층 분석: **[플러그인 아키텍처](../plugins/01_plugin_architecture_overview.md)**, **[HistoryPlugin](../history/01_history_and_undo_coalescing.md)**)
 
 **결론**
 
@@ -72,7 +72,7 @@ React 환경에서는 `@lexical/react` 패키지가 제공하는 컴포넌트를
 - **`LexicalComposer`**: 에디터의 컨텍스트를 제공하는 최상위 컴포넌트입니다. `initialConfig` prop을 통해 `createEditor`와 동일한 설정 객체를 전달받습니다.
 - **`RichTextPlugin`**: 풍부한 텍스트 편집에 필요한 기본적인 플러그인들을 설정합니다.
 - **`ContentEditable`**: 실제 사용자가 텍스트를 입력하는 `contenteditable` `div`를 렌더링합니다.
-- **`HistoryPlugin`**: 실행 취소/다시 실행 기능을 위한 히스토리 스택을 관리합니다.
+- **`HistoryPlugin`**: 실행 취소/다시 실행 기능을 위한 [히스토리 스택 관리](../history/01_history_and_undo_coalescing.md)를 합니다.
 - **`AutoFocusPlugin`**: 에디터가 처음 렌더링될 때 자동으로 포커스를 줍니다.
 
 ### React 예제
@@ -108,7 +108,7 @@ function Editor() {
 
 ## 핵심 개념: `EditorState`
 
-Lexical에서 **진리의 원천(source of truth)은 DOM이 아니라, 에디터가 내부적으로 관리하는 `EditorState` 객체**입니다. 이 상태 모델은 에디터의 현재 콘텐츠와 선택 영역 등을 포함하는 불변(immutable) 객체입니다.
+Lexical에서 **진리의 원천(source of truth)은 DOM이 아니라, 에디터가 내부적으로 관리하는 [`EditorState`](../update_mechanism/01_editor_state.md) 객체**입니다. 이 상태 모델은 에디터의 현재 콘텐츠와 [선택 영역](../selection/01_selection_and_focus_management.md) 등을 포함하는 불변(immutable) 객체입니다.
 
 - **상태 가져오기**: `editor.getEditorState()`를 통해 최신 `EditorState`를 얻을 수 있습니다.
-- **직렬화/역직렬화**: `EditorState`는 `toJSON()` 메서드를 통해 JSON 형식으로 직렬화할 수 있으며, `editor.parseEditorState(stringifiedJSON)`를 통해 다시 `EditorState` 객체로 변환할 수 있습니다. 이는 에디터 상태를 저장하고 불러오는 데 핵심적인 역할을 합니다. 
+- **직렬화/역직렬화**: `EditorState`는 `toJSON()` 메서드를 통해 JSON 형식으로 [직렬화](../serialization/01_serialization_and_deserialization.md)할 수 있으며, `editor.parseEditorState(stringifiedJSON)`를 통해 다시 `EditorState` 객체로 변환할 수 있습니다. 이는 에디터 상태를 저장하고 불러오는 데 핵심적인 역할을 합니다. 
