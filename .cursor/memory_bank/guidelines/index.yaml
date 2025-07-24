@@ -1,28 +1,12 @@
-# ===============================================
 # guidelines 문서 목차 (Index)
-# ===============================================
-# 이 파일은 guidelines 폴더에 있는 모든 문서와 하위 디렉토리의 목록 및 요약을 관리합니다.
-# AI는 새로운 문서를 추가하거나 구조를 변경할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
-# (This file is auto-generated and maintained by the AI.)
-# ===============================================
+# 이 문서는 /guidelines 폴더 내의 모든 문서와 하위 폴더의 구조를 정의합니다.
 
-documents:
-  - path: './node_development_guide.md'
-    summary: 'Lexical의 노드(Node) 시스템에 대한 모든 것을 다루는 통합 가이드입니다. 노드의 기초, 커스텀 노드 생성, 고급 기능 및 핵심 API 사용법을 포함합니다.'
-  - path: './plugin_creation_guide.md'
-    summary: '실제 커스텀 플러그인을 개발하는 실용적인 방법과 예제를 제공하는 가이드입니다. Vanilla JS와 React 환경을 모두 다룹니다.'
-  - path: './01_react_plugins_reference.md'
-    summary: '`@lexical/react` 패키지에서 제공하는 주요 플러그인 컴포넌트들의 API와 사용법을 정리한 레퍼런스입니다.'
-  - path: './02_serialization_reference.md'
-    summary: 'EditorState를 HTML 또는 JSON으로 변환하는 직렬화 및 역직렬화 관련 API 레퍼런스입니다.'
-  - path: './03_editor_state_reference.md'
-    summary: 'EditorState, 테마, 선택(Selection) 등 에디터의 핵심 상태 관리 API에 대한 레퍼런스입니다.'
-  - path: './04_dom_interaction_reference.md'
-    summary: '네이티브 DOM 이벤트 처리 및 노드 자동 변환(Node Transform) 관련 API 레퍼런스입니다.'
-  - path: './05_utility_functions_reference.md'
-    summary: '`mergeRegister` 등 개발에 유용한 핵심 유틸리티 함수에 대한 레퍼런스입니다.'
-  - path: './react_troubleshooting.md'
-    summary: 'Lexical을 React 환경에서 사용할 때 발생할 수 있는 주요 문제들과 해결 방안을 정리한 문서입니다.'
-  - path: './contributing_guide.md'
-    summary: 'Lexical 모노레포의 구조, 규약, 개발, 테스트 및 배포 절차 등 프로젝트 기여자 및 메인테이너를 위한 핵심 정보를 정리합니다.'
-directories: []
+documents: []
+
+directories:
+  - path: 1_getting_started/
+    summary: 'Lexical 프로젝트에 기여하고, 커스텀 노드 및 플러그인을 개발하는 방법을 안내하는 시작 가이드입니다.'
+  - path: 2_api_reference/
+    summary: 'Lexical의 핵심 API에 대한 기술적인 레퍼런스 문서 모음입니다.'
+  - path: 3_react_specifics/
+    summary: 'React 환경에서 Lexical을 사용할 때 필요한 유틸리티 및 문제 해결 가이드입니다.'

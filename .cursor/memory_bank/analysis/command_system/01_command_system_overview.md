@@ -70,41 +70,49 @@ removeListener();
 
 ## 3. 우선순위(Priority)와 전파 제어(Propagation Control)
 
-커맨드 시스템의 가장 강력한 특징 중 하나는 리스너의 실행 순서를 제어할 수 있다는 점입니다. `registerCommand`의 세 번째 인자로 우선순위를 전달하며, 우선순위가 높은 리스너가 먼저 실행됩니다.
+커맨드 시스템의 가장 강력한 특징 중 하나는 리스너의 실행 순서를 제어할 수 있다는 점입니다. `registerCommand`의 세 번째 인자로 우선순위를 전달할 수 있으며, **우선순위가 높은 리스너가 먼저 실행됩니다.**
 
-- `COMMAND_PRIORITY_CRITICAL` (0): 가장 높음
-- `COMMAND_PRIORITY_HIGH` (1)
-- `COMMAND_PRIORITY_NORMAL` (2)
-- `COMMAND_PRIORITY_LOW` (3)
-- `COMMAND_PRIORITY_EDITOR` (4): 가장 낮음. Lexical 내부 핵심 로직에 사용됨.
+-   `COMMAND_PRIORITY_CRITICAL` (4): **가장 높음 (가장 먼저 실행)**
+-   `COMMAND_PRIORITY_HIGH` (3)
+-   `COMMAND_PRIORITY_NORMAL` (2)
+-   `COMMAND_PRIORITY_LOW` (1)
+-   `COMMAND_PRIORITY_EDITOR` (0): **가장 낮음 (가장 나중에 실행)**
 
-어떤 리스너가 `true`를 반환하면, 해당 커맨드는 '처리된(handled)' 것으로 간주되고, 그보다 낮은 우선순위를 가진 리스너들은 더 이상 호출되지 않습니다.
+Lexical의 실제 실행 로직(`triggerCommandListeners` in `LexicalUpdates.ts`)은 `for (let i = 4; i >= 0; i--)` 루프를 사용하므로, 숫자 값이 큰 `CRITICAL`(4)부터 순차적으로 실행됩니다.
+
+어떤 리스너가 `true`를 반환하면, 해당 커맨드는 '처리된(handled)' 것으로 간주되고, 그 시점에서 이벤트 전파가 **즉시 중단**됩니다. 따라서, **자신보다 더 낮은 우선순위를 가진 리스너들은 실행될 기회를 잃게 됩니다.**
 
 #### 예시: Tab 키 처리
 
-`KEY_TAB_COMMAND`는 여러 플러그인에서 사용되는 좋은 예시입니다.
+이러한 실행 순서를 이해하면 `KEY_TAB_COMMAND` 처리 방식을 올바르게 해석할 수 있습니다.
 
-1.  **TablePlugin (`PRIORITY_CRITICAL`)**: 만약 현재 선택 영역이 테이블 내부에 있다면, Tab 키는 다음 셀로 포커스를 이동시켜야 합니다. 이 동작은 다른 어떤 Tab 동작보다 우선되어야 하므로 가장 높은 우선순위로 등록됩니다. 이 리스너는 테이블 내에서 Tab이 눌렸을 때 `true`를 반환하여, 다른 리스너(들여쓰기 등)가 실행되는 것을 막습니다.
-2.  **TabIndentationPlugin (`PRIORITY_EDITOR`)**: 테이블 내부가 아니라면, Tab 키는 보통 들여쓰기(indent) 또는 내어쓰기(outdent)를 수행합니다. 이 플러그인은 낮은 우선순위로 등록되어, 테이블과 같은 특수한 컨텍스트가 아닐 때만 동작합니다.
+1.  **TablePlugin (`PRIORITY_CRITICAL` = 4, 가장 높음):**
+    가장 우선순위가 높으므로 이 리스너가 가장 먼저 실행됩니다.
+    -   만약 현재 컨텍스트가 테이블 **내부라면**, 다음 셀로 이동하는 고유 로직을 수행하고 `true`를 반환합니다. 이벤트 처리가 여기서 끝나고, 더 낮은 우선순위의 `TabIndentationPlugin`은 실행되지 않습니다.
+    -   만약 현재 컨텍스트가 테이블 **내부가 아니라면**, 이 리스너는 아무것도 처리하지 않고 `false`를 반환하여, 자신보다 낮은 우선순위의 플러그인이 이벤트를 처리할 수 있도록 전파를 계속합니다.
+
+2.  **TabIndentationPlugin (`PRIORITY_EDITOR` = 0, 가장 낮음):**
+    이 리스너는 `TablePlugin`을 포함한 모든 상위 우선순위 플러그인들이 이벤트를 처리하지 않고 `false`를 반환했을 때만 실행될 기회를 갖습니다.
+    -   따라서 이 리스너는 현재 컨텍스트가 테이블이 아니라고 확신할 수 있으며, 일반적인 들여쓰기/내어쓰기 로직을 수행하고 `true`를 반환하여 커맨드 처리를 최종적으로 완료합니다.
 
 ```javascript
-// TabIndentationPlugin의 예시
+// TablePlugin의 로직 추론
 editor.registerCommand(
   KEY_TAB_COMMAND,
   (event: KeyboardEvent) => {
-    // 기본 동작(포커스 이동 등)을 막고,
-    event.preventDefault();
-    // 다른 커맨드를 발생시킴
-    const command = event.shiftKey ? OUTDENT_CONTENT_COMMAND : INDENT_CONTENT_COMMAND;
-    editor.dispatchCommand(command, undefined);
-    // 이 리스너가 Tab 이벤트를 처리했으므로 true를 반환하여 전파를 중단
-    return true;
+    const selection = $getSelection();
+    if (!isSelectionInTable(selection)) { // selection이 테이블 안에 있는지 확인하는 가상 함수
+      return false; // 테이블 컨텍스트가 아니므로, 더 낮은 우선순위로 전파
+    }
+    // 테이블 내에서 다음 셀로 이동하는 로직 수행
+    // ...
+    return true; // Tab 이벤트를 최종 처리했으므로 전파 중단
   },
-  COMMAND_PRIORITY_EDITOR,
+  COMMAND_PRIORITY_CRITICAL, // 4: 가장 높은 우선순위
 );
 ```
 
-이러한 우선순위 기반의 전파 제어 메커니즘 덕분에, 각 플러그인은 자신의 컨텍스트에만 집중하여 로직을 구현할 수 있으며, 전체 시스템은 예측 가능하게 동작합니다.
+이러한 우선순위 기반의 전파 제어 메커니즘 덕분에, 각 플러그인은 자신의 컨텍스트에만 집중하여 로직을 구현할 수 있으며, 전체 시스템은 예측 가능하게 동작합니다. 핵심은 높은 우선순위의 플러그인이 특정 조건에서 이벤트를 '양보'(`false` 반환)하는 것입니다.
 
 ---
 

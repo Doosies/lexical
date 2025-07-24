@@ -1,0 +1,9 @@
+# 1_getting_started 문서 목차 (Index)
+documents:
+  - path: 01_contributing_guide.md
+    summary: 'Lexical 모노레포의 구조, 규약, 개발 및 배포 절차 등 프로젝트 기여자 및 메인테이너를 위한 핵심 정보를 정리합니다.'
+  - path: 02_plugin_creation_guide.md
+    summary: 'Lexical의 플러그인 시스템을 활용하여 실제 커스텀 플러그인을 만드는 방법을 단계별로 안내하는 실용적인 가이드입니다.'
+  - path: 03_node_development_guide.md
+    summary: 'Lexical의 핵심 개념인 노드(Node) 시스템에 대한 모든 것을 다루는 통합 가이드입니다.'
+directories: []

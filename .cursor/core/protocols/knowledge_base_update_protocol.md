@@ -19,9 +19,16 @@
 
 ### **2. 분류(Classification) 상세 기준**
 
-#### **2.1. 판단 기준 (Judgement Criteria)**
+-   새로운 지식을 분류할 때, 가장 먼저 정보의 성격에 따라 아래 테이블의 기준에 맞춰 저장할 최적의 폴더를 결정해야 합니다.
 
--   새로운 지식을 분류할 때, 가장 먼저 정보의 성격에 따라 **`.cursor/core/brain.yaml`의 `knowledge_base.topical_directories`** 에 정의된 카테고리 중 어디에 속하는지 판단해야 합니다.
+| 디렉토리           | 핵심 질문 (Key Question)                   | 목적                                                                       |
+| :----------------- | :----------------------------------------- | :------------------------------------------------------------------------- |
+| `/project_context` | **"이 프로젝트는 무엇인가? (What is this project?)"** | 프로젝트의 목표, 기술 스택, 현재 상태 등 **핵심 정체성**을 정의합니다.      |
+| `/analysis`        | **"어떻게 동작하는가? (How does it work?)"**       | 내부 동작 원리, 아키텍처, 디자인 철학 등 **개념과 원리**를 심층 분석합니다. |
+| `/guidelines`      | **"어떻게 사용해야 하는가? (How to use it?)"**      | API 사용법, 모범 사례, 단계별 절차 등 **실용적인 개발 지침**을 제공합니다.   |
+| `/decisions`       | **"왜 이렇게 만들었는가? (Why did we build it this way?)"** | 중요한 기술적 결정과 그 배경을 ADR(Architecture Decision Record) 형식으로 기록합니다. |
+| `/examples`        | **"어떻게 구현하는가? (How to implement it?)"**    | 특정 기능을 구현하는 구체적이고 바로 실행 가능한 코드 예제를 제공합니다.     |
+| `/deep_dives`      | **"특정 주제를 깊게 파보자 (Let's deep dive)"** | `analysis`보다 더 세부적이거나 특정 기술에 국한된 탐구 내용을 기록합니다.     |
 
 #### **2.2. 폴더 생성 휴리스틱 (Folder Creation Heuristics)**
 

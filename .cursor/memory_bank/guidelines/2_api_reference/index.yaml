@@ -1,0 +1,13 @@
+# 2_api_reference 문서 목차 (Index)
+documents:
+  - path: 01_react_plugins.md
+    summary: '@lexical/react 패키지에서 제공하는 주요 플러그인 컴포넌트들의 API와 사용법을 정리한 레퍼런스입니다.'
+  - path: 02_serialization.md
+    summary: 'EditorState를 외부(DB, 파일)에 저장하거나 다른 시스템과 교환하기 위한 직렬화/역직렬화 API 레퍼런스입니다.'
+  - path: 03_editor_state.md
+    summary: '에디터의 핵심 데이터 구조인 EditorState와 관련된 주요 API 및 테마 시스템에 대해 설명합니다.'
+  - path: 04_dom_interaction.md
+    summary: 'Lexical이 네이티브 DOM과 상호작용하는 방식과 Node Transform 기능에 대해 설명합니다.'
+  - path: 05_utility_functions.md
+    summary: 'Lexical 개발 시 유용하게 사용할 수 있는 핵심 유틸리티 함수들을 정리합니다.'
+directories: []

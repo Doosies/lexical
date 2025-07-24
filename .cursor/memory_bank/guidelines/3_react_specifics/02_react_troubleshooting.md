@@ -60,4 +60,3 @@ editor.update(() => {
     -   **권장 방식**: `editor.registerUpdateListener()` 또는 `editor.registerTextContentListener()`를 사용합니다.
 
 이러한 접근 방식은 다양한 예외 상황에서도 안정적으로 동작하도록 보장합니다. 
-  

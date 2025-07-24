@@ -21,42 +21,12 @@ verification_checklist:
 
 **따라서, 저는 모든 작업 시작 시 `brain.yaml`의 `BOOTING` 상태에 정의된 절차에 따라, 이 문서를 포함한 모든 핵심 규칙과 지식 베이스를 반드시 먼저 읽고 숙지해야 합니다. 이것은 저의 가장 최상위 규칙입니다.**
 
-## 2. 메모리 뱅크 구조 (Memory Bank Architecture)
+## 2. 메모리 뱅크 구조 및 역할 정의 (Memory Bank Architecture & Roles)
 
-메모리 뱅크는 프로젝트의 모든 지식을 체계적으로 저장하는 중앙 허브입니다.
+메모리 뱅크는 프로젝트의 모든 지식을 체계적으로 저장하는 중앙 허브입니다. 모든 문서와 디렉토리는 명확하게 정의된 단일 책임을 가집니다.
 
--   **[중요]** 메모리 뱅크의 **모든 구조적 정의(폴더, 핵심 파일 목록)는 `.cursor/core/brain.yaml` 파일의 `knowledge_base` 섹션을 유일한 원본(Single Source of Truth)으로 삼습니다.**
--   **[보조 자료]** 아래 다이어그램은 이 구조를 시각적으로 이해하는 데 도움을 주는 보조 자료이며, `brain.yaml`의 정의와 항상 동기화되어야 합니다.
--   **[업데이트 절차]** 이 구조를 업데이트하거나 새로운 지식을 추가할 때는, 반드시 **`.cursor/memory_bank/guidelines/knowledge_base_update_protocol.md`** 에 정의된 상세 절차를 따라야 합니다.
-
-```mermaid
-graph TD
-    subgraph "Memory Bank"
-        A["project_context/"]
-        B["Topical Deep Dives"]
-        A -- "Provides context for" --> B
-    end
-
-    subgraph "A: project_context/"
-        A1["projectbrief.md<br>(프로젝트 개요)"]
-        A2["productContext.md<br>(제품 컨텍스트)"]
-        A3["systemPatterns.md<br>(시스템 패턴)"]
-        A4["techContext.md<br>(기술 컨텍스트)"]
-        A5["activeContext.md<br>(현재 컨텍스트)"]
-        A6["progress.md<br>(진행 상황)"]
-
-        A1 --> A2 & A3 & A4
-        A2 & A3 & A4 --> A5
-        A5 --> A6
-    end
-
-    subgraph "B: Topical Directories"
-        B1["deep_dives/"]
-        B2["examples/"]
-        B3["decisions/"]
-        B4["guidelines/"]
-    end
-```
+-   **[중요]** 모든 구조적 정의(폴더, 핵심 파일 목록)는 **`.cursor/core/brain.yaml` 파일의 `knowledge_base` 섹션을 유일한 원본(Single Source of Truth)으로 삼습니다.**
+-   **[업데이트 절차]** 새로운 지식을 추가하거나 구조를 변경할 때는, 반드시 **`.cursor/core/protocols/knowledge_base_update_protocol.md`** 에 정의된 상세 절차와 분류 기준을 따라야 합니다.
 
 ### 핵심 파일 (Core Files)
 

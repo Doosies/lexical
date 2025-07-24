@@ -1,0 +1,7 @@
+# 3_react_specifics 문서 목차 (Index)
+documents:
+  - path: 01_mergeRefs_utility.md
+    summary: '여러 개의 React ref를 하나의 단일 ref 콜백으로 병합해주는 `mergeRefs` 유틸리티 함수 사용 가이드입니다.'
+  - path: 02_react_troubleshooting.md
+    summary: 'React, 특히 `StrictMode` 및 HMR 환경에서 Lexical을 사용할 때 발생할 수 있는 일반적인 문제와 해결 방법을 정리합니다.'
+directories: []
