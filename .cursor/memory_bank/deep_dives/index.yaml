@@ -18,6 +18,8 @@ documents:
       version: '1.0'
 
 directories:
+    - path: './components/'
+      summary: '프로젝트 내 특정 컴포넌트의 내부 동작 원리를 심층 분석합니다.'
     # 예시:
     # - path: './sub-directory/'
     #   summary: '하위 디렉토리에 대한 간략한 요약입니다.'

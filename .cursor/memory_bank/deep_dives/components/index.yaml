@@ -1,0 +1,20 @@
+# ===============================================
+# /components/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /components/ 폴더에 있는 모든 분석 문서의 목록 및 요약을 관리합니다.
+# AI는 새로운 분석 문서를 추가할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_ECDecimal_analysis.md'
+      summary: '순수한 View의 역할을 하는 제어 컴포넌트 `ECDecimal`을 심층 분석합니다.'
+      version: '2.1'
+    - path: './02_LexicalDecimalNode_analysis.md'
+      summary: 'View와 Logic을 잇는 Bridge 역할을 하는 `LexicalDecimalNode`와 전체 아키텍처를 심층 분석합니다.'
+      version: '1.0'
+
+directories: []

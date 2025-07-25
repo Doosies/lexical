@@ -1,8 +1,5 @@
 # 프로젝트 진행 상황 (Progress)
 
-## 현재 상태
-- **메모리 뱅크 기반 심층 코드 분석 진행 중 (4/4 단계)**
-
 ## 완료된 작업
 - **심층 코드 분석 (4/4)**
   - [x] 에디터 생성 및 초기화 과정 분석 (`editor_initialization_analysis.md` 생성)
@@ -32,6 +29,15 @@
   - [x] 메모리 뱅크 무결성 검사 프로토콜 실행 및 오류 수정
   - [x] `analysis` 폴더 중앙 목차 (`_readme.md`) 생성 및 주요 문서 구조화
   - [x] 주요 분석 문서 상호 연결성 강화 (초기화, 데이터 흐름, 플러그인)
+- **지식 베이스 구조 개선 (3/3)**
+  - [x] `01_ECDecimal_analysis.md` 문서를 단일 책임 원칙에 따라 분리
+  - [x] `02_LexicalDecimalNode_analysis.md` 파일 신규 생성
+  - [x] `components` 폴더의 `index.yaml` 및 `README.md` 업데이트
+
+## 현재 진행 중인 작업
+- **컴포넌트 리팩터링 (0/2)**
+  - [ ] `ECDecimal.tsx` Command 패턴 적용
+  - [ ] 관련 플러그인 로직 수정
 
 ## 향후 개선 과제 (Future Enhancements)
 - [ ] **지능형 전문가 추천 시스템 구현**
