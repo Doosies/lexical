@@ -1,12 +1,15 @@
 # guidelines 문서 목차 (Index)
 # 이 문서는 /guidelines 폴더 내의 모든 문서와 하위 폴더의 구조를 정의합니다.
 
-documents: []
+documents:
+    - path: './README.md'
+      summary: '이 폴더의 목적과 하위 디렉토리 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
 
 directories:
-  - path: 1_getting_started/
-    summary: 'Lexical 프로젝트에 기여하고, 커스텀 노드 및 플러그인을 개발하는 방법을 안내하는 시작 가이드입니다.'
-  - path: 2_api_reference/
-    summary: 'Lexical의 핵심 API에 대한 기술적인 레퍼런스 문서 모음입니다.'
-  - path: 3_react_specifics/
-    summary: 'React 환경에서 Lexical을 사용할 때 필요한 유틸리티 및 문제 해결 가이드입니다.'
+    - path: 1_getting_started/
+      summary: 'Lexical 프로젝트에 기여하고, 커스텀 노드 및 플러그인을 개발하는 방법을 안내하는 시작 가이드입니다.'
+    - path: 2_api_reference/
+      summary: 'Lexical의 핵심 API에 대한 기술적인 레퍼런스 문서 모음입니다.'
+    - path: 3_react_specifics/
+      summary: 'React 환경에서 Lexical을 사용할 때 필요한 유틸리티 및 문제 해결 가이드입니다.'

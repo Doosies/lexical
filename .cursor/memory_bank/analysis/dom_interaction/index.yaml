@@ -7,8 +7,11 @@
 # ===============================================
 
 documents:
-  - path: './01_dom_event_handling.md'
-    summary: 'Lexical 노드와 연결된 실제 DOM 요소에 이벤트 리스너를 붙이는 세 가지 방법(이벤트 위임, 직접 연결, NodeEventPlugin)을 심층 분석합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_dom_event_handling.md'
+      summary: 'Lexical 노드와 연결된 실제 DOM 요소에 이벤트 리스너를 붙이는 세 가지 방법(이벤트 위임, 직접 연결, NodeEventPlugin)을 심층 분석합니다.'
 
 directories:
-  # 하위 디렉토리가 추가될 경우 여기에 등록합니다.
+    # 하위 디렉토리가 추가될 경우 여기에 등록합니다.

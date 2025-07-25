@@ -112,3 +112,88 @@ Lexical에서 **진리의 원천(source of truth)은 DOM이 아니라, 에디터
 
 - **상태 가져오기**: `editor.getEditorState()`를 통해 최신 `EditorState`를 얻을 수 있습니다.
 - **직렬화/역직렬화**: `EditorState`는 `toJSON()` 메서드를 통해 JSON 형식으로 [직렬화](../serialization/01_serialization_and_deserialization.md)할 수 있으며, `editor.parseEditorState(stringifiedJSON)`를 통해 다시 `EditorState` 객체로 변환할 수 있습니다. 이는 에디터 상태를 저장하고 불러오는 데 핵심적인 역할을 합니다. 
+
+## 4. 심층 분석: EditorState 초기화 (`initializeEditor` & `setEditorState`)
+
+`LexicalComposer` 내부에서는 `createEditor`가 호출되고, 이어서 에디터의 초기 상태(AST)를 설정하는 `initializeEditor` 함수가 실행됩니다. 또한, 런타임 중에 에디터 상태를 외부에서 주입하기 위해 `setEditorState` 함수가 사용됩니다. 이 두 함수는 `EditorState` 처리의 핵심적인 관문입니다.
+
+### 4.1. `initializeEditor` (최초 상태 설정)
+
+- **역할**: 에디터가 처음 생성될 때, `initialConfig`의 `editorState` 값을 기반으로 초기 AST를 설정합니다.
+- **위치**: `packages/lexical-react/src/LexicalComposer.tsx`
+
+#### 논리적 흐름
+
+`initializeEditor`의 로직은 `initialEditorState` prop의 타입과 값에 따라 명확한 의사결정 트리를 따릅니다.
+
+```mermaid
+graph TD
+    A["Start: initializeEditor"] --> B{"initialEditorState 값 확인"};
+
+    B -- "=== null" --> C["종료: 아무것도 안 함"];
+    B -- "=== undefined (기본값)" --> D{"루트 노드가 비었는가?"};
+    B -- "is not null or undefined" --> E{"typeof initialEditorState?"};
+
+    D -- "Yes" --> D1["빈 단락 생성 및 추가"];
+    D1 --> D2{"포커스 상태인가?"};
+    D2 -- "Yes" --> D3["단락 선택(커서 위치)"];
+    D2 -- "No" --> F["완료"];
+    D3 --> F;
+    
+    D -- "No" --> F;
+
+    E -- "string" --> E1["문자열 파싱 (JSON to EditorState)"];
+    E1 --> E2["setEditorState"];
+    E2 --> F;
+
+    E -- "object" --> E3["setEditorState (객체 바로 사용)"];
+    E3 --> F;
+
+    E -- "function" --> E4{"루트 노드가 비었는가?"};
+    E4 -- "Yes" --> E4_1["사용자 정의 함수 실행"];
+    E4_1 --> F;
+    E4 -- "No" --> F;
+```
+
+- **핵심 기능**:
+    - **다양한 초기 상태 지원**: `undefined`(기본 단락), `null`(완전 빈 상태), `string`(JSON 직렬화 상태), `object`(`EditorState` 객체), `function`(프로그래매틱 생성) 등 다양한 형식의 초기 상태를 유연하게 처리합니다.
+    - **안전성**: 이미 콘텐츠가 있는 경우 초기 상태를 덮어쓰지 않아 데이터 유실을 방지합니다.
+
+### 4.2. `setEditorState` (외부 상태 주입)
+
+- **역할**: 런타임 중에 현재 에디터의 내용을 완전히 새로운 `EditorState`로 교체합니다. 데이터베이스 로딩, 히스토리 복원 등 외부로부터 상태를 주입받을 때 사용됩니다.
+- **위치**: `packages/lexical/src/LexicalEditor.ts`
+
+#### 논리적 흐름
+
+`setEditorState`는 업데이트의 안정성과 데이터 일관성을 보장하는 데 초점을 맞춥니다.
+
+```mermaid
+graph TD
+    A["Start: setEditorState"] --> B{"editorState가 비었는가?"};
+    B -- "Yes" --> C["오류 발생 (invariant)"];
+    B -- "No" --> D{"editorState가 읽기 전용인가?"};
+    
+    D -- "Yes" --> E["쓰기 가능한 상태로 복제 (clone)"];
+    D -- "No" --> F["기존 상태 사용"];
+    
+    E --> G["flushRootMutations() 실행"];
+    F --> G;
+    
+    G --> H{"처리 대기 중인 업데이트(_pendingEditorState)가 있는가?"};
+    H -- "Yes" --> I["기존 업데이트를 먼저 커밋 ($commitPendingUpdates)"];
+    H -- "No" --> J;
+    I --> J["새로운 상태를 _pendingEditorState로 설정"];
+    
+    J --> K["전체 재조정 플래그 설정 (_dirtyType = FULL_RECONCILE)"];
+    
+    K --> L{"현재 업데이트 루프 중인가? (!_updating)"};
+    L -- "Yes" --> M["새로운 업데이트를 즉시 커밋 ($commitPendingUpdates)"];
+    L -- "No" --> N["완료 (기존 루프 끝에서 커밋됨)"];
+    M --> N;
+```
+
+- **핵심 기능**:
+    - **상태 주입(State Injection)**: 외부 데이터 소스로부터 에디터 상태를 안전하게 교체하는 공식적인 통로입니다.
+    - **업데이트 안정성**: `_readOnly` 상태 처리, `_pendingEditorState` 큐 관리, `_updating` 플래그 확인 등 여러 안전장치를 통해 어떤 상황에서 호출되어도 업데이트 충돌 없이 안정적으로 동작합니다.
+    - **전체 재조정(Full Reconciliation)**: `_dirtyType`을 `FULL_RECONCILE`로 설정하여, 부분 비교에서 발생할 수 있는 오류를 원천 차단하고 상태와 DOM의 완벽한 동기화를 보장합니다. 

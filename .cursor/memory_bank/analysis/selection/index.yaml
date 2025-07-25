@@ -7,8 +7,11 @@
 # ===============================================
 
 documents:
-  - path: './01_selection_and_focus_management.md'
-    summary: 'Lexical의 Selection 시스템 종류(Range, Node, Table), 조작 API, 그리고 "Focus Stealing" 문제와 `SKIP_DOM_SELECTION_TAG`를 이용한 해결책을 심층 분석합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_selection_and_focus_management.md'
+      summary: 'Lexical의 Selection 시스템 종류(Range, Node, Table), 조작 API, 그리고 "Focus Stealing" 문제와 `SKIP_DOM_SELECTION_TAG`를 이용한 해결책을 심층 분석합니다.'
 
 directories:
-  # 하위 디렉토리가 추가될 경우 여기에 등록합니다.
+    # 하위 디렉토리가 추가될 경우 여기에 등록합니다.

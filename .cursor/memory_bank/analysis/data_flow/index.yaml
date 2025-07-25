@@ -7,7 +7,10 @@
 # ===============================================
 
 documents:
-  - path: './01_data_flow_overview.md'
-    summary: 'Lexical의 단방향 데이터 흐름(Unidirectional Data Flow)이 OnChangePlugin과 editor.registerUpdateListener를 통해 어떻게 구현되는지 그 핵심 원리를 분석합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_data_flow_overview.md'
+      summary: 'Lexical의 단방향 데이터 흐름(Unidirectional Data Flow)이 OnChangePlugin과 editor.registerUpdateListener를 통해 어떻게 구현되는지 그 핵심 원리를 분석합니다.'
 
 directories: []

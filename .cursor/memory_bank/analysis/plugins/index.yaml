@@ -7,7 +7,10 @@
 # ===============================================
 
 documents:
-  - path: './01_plugin_architecture_overview.md'
-    summary: 'Lexical의 플러그인 아키텍처와, 기능 확장을 위한 두 가지 핵심 상호작용 메커니즘인 커맨드 시스템과 리스너의 개념을 높은 수준에서 개괄합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_plugin_architecture_overview.md'
+      summary: 'Lexical의 플러그인 아키텍처와, 기능 확장을 위한 두 가지 핵심 상호작용 메커니즘인 커맨드 시스템과 리스너의 개념을 높은 수준에서 개괄합니다.'
 
 directories: []

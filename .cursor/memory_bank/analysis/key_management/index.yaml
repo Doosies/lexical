@@ -7,8 +7,11 @@
 # ===============================================
 
 documents:
-  - path: './01_node_key_management.md'
-    summary: 'Lexical 노드의 고유 식별자인 NodeKey의 역할, 생명주기, 올바른 사용법, 그리고 상태 관리에서의 핵심 원리를 심층 분석합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_node_key_management.md'
+      summary: 'Lexical 노드의 고유 식별자인 NodeKey의 역할, 생명주기, 올바른 사용법, 그리고 상태 관리에서의 핵심 원리를 심층 분석합니다.'
 
 directories:
-  # 하위 디렉토리가 추가될 경우 여기에 등록합니다.
+    # 하위 디렉토리가 추가될 경우 여기에 등록합니다.

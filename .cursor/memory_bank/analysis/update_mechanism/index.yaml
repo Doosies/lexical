@@ -7,25 +7,29 @@
 # ===============================================
 
 documents:
-  - path: 01_update_mechanism_overview.md
-    summary: 'Lexical 업데이트의 전체적인 철학, 핵심 개념(EditorState, 트랜잭션), 그리고 전체 흐름을 설명하는 시작 문서입니다.'
-  - path: 02_entrypoints_and_listeners.md
-    summary: '업데이트를 시작하는 진입점(`updateEditor`, `updateEditorSync`)과, 업데이트 완료 후 실행되는 각종 리스너(`UpdateListener`, `onUpdate` 등)를 분석합니다.'
-  - path: 03_begin_update_transaction.md
-    summary: '업데이트 트랜잭션의 컨트롤 타워인 `$beginUpdate` 함수의 역할과 내부 동작을 단계별로 상세히 분석합니다.'
-  - path: 04_commit_pending_updates.md
-    summary: '트랜잭션의 결과를 실제 DOM에 반영하고 변경을 전파하는 최종 단계인 `$commitPendingUpdates` 함수를 분석합니다.'
-  - path: 05_dirty_node_marking.md
-    summary: "노드가 어떻게 'dirty'로 표시되는지, `getWritable()`과 `_cloneNotNeeded`를 중심으로 변경 감지의 시작점을 분석합니다."
-  - path: 06_node_transforms.md
-    summary: "'dirty' 노드에 변환 함수를 재귀적으로 적용하여 상태를 안정화시키는 `$applyAllTransforms` 엔진을 분석합니다."
-  - path: 07_nested_updates.md
-    summary: '`$beginUpdate` 트랜잭션 중에 발생하는 중첩 업데이트를 처리하는 `processNestedUpdates` 함수의 동작을 분석합니다.'
-  - path: 08_update_tags.md
-    summary: '업데이트에 컨텍스트를 부여하는 `UpdateTag`의 역할과, 히스토리 병합(coalescing) 등 실제 활용 사례를 설명합니다.'
-  - path: 09_dom_reconciliation_deep_dive.md
-    summary: 'Lexical 렌더링 엔진의 핵심인 `$reconcileRoot`와 `$reconcileNode`의 동작 원리를 총괄 PM/실행 팀장 모델로 심층 분석합니다.'
-  - path: 10_elementnode_and_reconciliation.md
-    summary: '`ElementNode`의 이중 연결 리스트와 `Reconciler`의 배열 기반 렌더링 엔진이 어떻게 상호작용하여 성능을 최적화하는지 분석합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_update_mechanism_overview.md'
+      summary: 'AST 변경이 시작되고 DOM에 반영되기까지의 전체 생명주기 개요'
+      version: '2.0'
+    - path: 02_entrypoints_and_listeners.md
+      summary: '업데이트를 시작하는 진입점(`updateEditor`, `updateEditorSync`)과, 업데이트 완료 후 실행되는 각종 리스너(`UpdateListener`, `onUpdate` 등)를 분석합니다.'
+    - path: 03_begin_update_transaction.md
+      summary: '업데이트 트랜잭션의 컨트롤 타워인 `$beginUpdate` 함수의 역할과 내부 동작을 단계별로 상세히 분석합니다.'
+    - path: 04_commit_pending_updates.md
+      summary: '트랜잭션의 결과를 실제 DOM에 반영하고 변경을 전파하는 최종 단계인 `$commitPendingUpdates` 함수를 분석합니다.'
+    - path: 05_dirty_node_marking.md
+      summary: "노드가 어떻게 'dirty'로 표시되는지, `getWritable()`과 `_cloneNotNeeded`를 중심으로 변경 감지의 시작점을 분석합니다."
+    - path: 06_node_transforms.md
+      summary: "'dirty' 노드에 변환 함수를 재귀적으로 적용하여 상태를 안정화시키는 `$applyAllTransforms` 엔진을 분석합니다."
+    - path: 07_nested_updates.md
+      summary: '`$beginUpdate` 트랜잭션 중에 발생하는 중첩 업데이트를 처리하는 `processNestedUpdates` 함수의 동작을 분석합니다.'
+    - path: 08_update_tags.md
+      summary: '업데이트에 컨텍스트를 부여하는 `UpdateTag`의 역할과, 히스토리 병합(coalescing) 등 실제 활용 사례를 설명합니다.'
+    - path: 09_dom_reconciliation_deep_dive.md
+      summary: 'Lexical 렌더링 엔진의 핵심인 `$reconcileRoot`와 `$reconcileNode`의 동작 원리를 총괄 PM/실행 팀장 모델로 심층 분석합니다.'
+    - path: 10_elementnode_and_reconciliation.md
+      summary: '`ElementNode`의 이중 연결 리스트와 `Reconciler`의 배열 기반 렌더링 엔진이 어떻게 상호작용하여 성능을 최적화하는지 분석합니다.'
 
 directories: []

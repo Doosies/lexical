@@ -1,8 +1,13 @@
 # ===============================================
+
 # Lexical 커맨드 시스템 심층 분석
+
 # ===============================================
+
 # 이 문서는 Lexical의 커맨드 시스템의 핵심 개념, API, 그리고 모범 사례를 분석합니다.
+
 # 원본: packages/lexical-website/docs/concepts/commands.md
+
 # ===============================================
 
 ## 1. 커맨드(Command) 시스템 개요
@@ -50,16 +55,16 @@ editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
 
 ```javascript
 const removeListener = editor.registerCommand(
-  HELLO_WORLD_COMMAND,
-  (payload: string) => {
-    // payload는 dispatch 시 전달된 값입니다.
-    console.log(payload); // "Hello World!"
+	HELLO_WORLD_COMMAND,
+	(payload: string) => {
+		// payload는 dispatch 시 전달된 값입니다.
+		console.log(payload); // "Hello World!"
 
-    // `true`를 반환하면 이벤트 전파가 여기서 중단됩니다.
-    // `false`를 반환하면 더 낮은 우선순위의 다른 리스너로 전파됩니다.
-    return false;
-  },
-  COMMAND_PRIORITY_LOW, // 우선순위 설정
+		// `true`를 반환하면 이벤트 전파가 여기서 중단됩니다.
+		// `false`를 반환하면 더 낮은 우선순위의 다른 리스너로 전파됩니다.
+		return false;
+	},
+	COMMAND_PRIORITY_LOW // 우선순위 설정
 );
 
 // 리스너가 더 이상 필요 없을 때 반드시 정리해야 합니다.
@@ -88,6 +93,7 @@ Lexical의 실제 실행 로직(`triggerCommandListeners` in `LexicalUpdates.ts`
 
 1.  **TablePlugin (`PRIORITY_CRITICAL` = 4, 가장 높음):**
     가장 우선순위가 높으므로 이 리스너가 가장 먼저 실행됩니다.
+
     -   만약 현재 컨텍스트가 테이블 **내부라면**, 다음 셀로 이동하는 고유 로직을 수행하고 `true`를 반환합니다. 이벤트 처리가 여기서 끝나고, 더 낮은 우선순위의 `TabIndentationPlugin`은 실행되지 않습니다.
     -   만약 현재 컨텍스트가 테이블 **내부가 아니라면**, 이 리스너는 아무것도 처리하지 않고 `false`를 반환하여, 자신보다 낮은 우선순위의 플러그인이 이벤트를 처리할 수 있도록 전파를 계속합니다.
 
@@ -98,17 +104,18 @@ Lexical의 실제 실행 로직(`triggerCommandListeners` in `LexicalUpdates.ts`
 ```javascript
 // TablePlugin의 로직 추론
 editor.registerCommand(
-  KEY_TAB_COMMAND,
-  (event: KeyboardEvent) => {
-    const selection = $getSelection();
-    if (!isSelectionInTable(selection)) { // selection이 테이블 안에 있는지 확인하는 가상 함수
-      return false; // 테이블 컨텍스트가 아니므로, 더 낮은 우선순위로 전파
-    }
-    // 테이블 내에서 다음 셀로 이동하는 로직 수행
-    // ...
-    return true; // Tab 이벤트를 최종 처리했으므로 전파 중단
-  },
-  COMMAND_PRIORITY_CRITICAL, // 4: 가장 높은 우선순위
+	KEY_TAB_COMMAND,
+	(event: KeyboardEvent) => {
+		const selection = $getSelection();
+		if (!isSelectionInTable(selection)) {
+			// selection이 테이블 안에 있는지 확인하는 가상 함수
+			return false; // 테이블 컨텍스트가 아니므로, 더 낮은 우선순위로 전파
+		}
+		// 테이블 내에서 다음 셀로 이동하는 로직 수행
+		// ...
+		return true; // Tab 이벤트를 최종 처리했으므로 전파 중단
+	},
+	COMMAND_PRIORITY_CRITICAL // 4: 가장 높은 우선순위
 );
 ```
 
@@ -126,19 +133,19 @@ import { useEffect } from 'react';
 // ... 컴포넌트 내부
 
 useEffect(() => {
-  // 컴포넌트 마운트 시 리스너 등록
-  const removeListener = editor.registerCommand(
-    MY_CUSTOM_COMMAND,
-    (payload) => {
-      // 로직 처리...
-      return true; // 처리 완료
-    },
-    COMMAND_PRIORITY_NORMAL,
-  );
+	// 컴포넌트 마운트 시 리스너 등록
+	const removeListener = editor.registerCommand(
+		MY_CUSTOM_COMMAND,
+		(payload) => {
+			// 로직 처리...
+			return true; // 처리 완료
+		},
+		COMMAND_PRIORITY_NORMAL
+	);
 
-  // 컴포넌트 언마운트 시 리스너 자동 해제
-  return () => {
-    removeListener();
-  };
+	// 컴포넌트 언마운트 시 리스너 자동 해제
+	return () => {
+		removeListener();
+	};
 }, [editor]); // editor 객체가 변경될 때마다 이 effect를 다시 실행
-``` 
+```

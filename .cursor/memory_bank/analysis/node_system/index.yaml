@@ -7,11 +7,14 @@
 # ===============================================
 
 documents:
-  - path: './01_node_replacement.md'
-    summary: '특정 노드를 다른 종류의 노드로 교체하는 $replaceWith<T>() 메서드의 동작 방식, 제약 조건, 그리고 실제 활용 사례를 분석합니다.'
-  - path: './02_node_state_api.md'
-    summary: '노드에 동적으로 추가 상태(state)를 부여하고 관리하는 NodeState API의 개념, 사용법, 그리고 직렬화 과정에서의 동작을 분석합니다.'
-  - path: './03_node_traversal_with_nodecaret.md'
-    summary: '복잡한 노드 구조 내에서 효율적이고 안전하게 위치를 탐색하고 이동하는 NodeCaret API의 개념, 주요 메서드, 그리고 활용 사례를 분석합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_node_replacement.md'
+      summary: '특정 노드를 다른 종류의 노드로 교체하는 $replaceWith<T>() 메서드의 동작 방식, 제약 조건, 그리고 실제 활용 사례를 분석합니다.'
+    - path: './02_node_state_api.md'
+      summary: '노드에 동적으로 추가 상태(state)를 부여하고 관리하는 NodeState API의 개념, 사용법, 그리고 직렬화 과정에서의 동작을 분석합니다.'
+    - path: './03_node_traversal_with_nodecaret.md'
+      summary: '복잡한 노드 구조 내에서 효율적이고 안전하게 위치를 탐색하고 이동하는 NodeCaret API의 개념, 주요 메서드, 그리고 활용 사례를 분석합니다.'
 
 directories: []

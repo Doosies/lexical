@@ -7,12 +7,15 @@
 # ===============================================
 
 documents:
-  - path: './basic_editor_setup.md'
-    summary: 'Lexical의 여러 API와 플러그인을 조합하여 기본적인 리치 텍스트 에디터를 설정하는 실용적인 예시와 패턴(상태 동기화, 키 바인딩, 상태 저장/로드, 읽기/편집 모드 전환 포함)을 정리합니다.'
-  - path: './vanilla_js_setup.md'
-    summary: 'React와 같은 외부 프레임워크 없이, 순수 JavaScript 환경에서 Lexical을 설정하고 사용하는 핵심적인 단계를 정리합니다.'
+    - path: './basic_editor_setup.md'
+      summary: 'Lexical의 여러 API와 플러그인을 조합하여 기본적인 리치 텍스트 에디터를 설정하는 실용적인 예시와 패턴(상태 동기화, 키 바인딩, 상태 저장/로드, 읽기/편집 모드 전환 포함)을 정리합니다.'
+    - path: './vanilla_js_setup.md'
+      summary: 'React와 같은 외부 프레임워크 없이, 순수 JavaScript 환경에서 Lexical을 설정하고 사용하는 핵심적인 단계를 정리합니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
 
 directories:
-  # 예시:
-  # - path: './sub-directory/'
-  #   summary: '하위 디렉토리에 대한 간략한 요약입니다.'
+    # 예시:
+    # - path: './sub-directory/'
+    #   summary: '하위 디렉토리에 대한 간략한 요약입니다.'

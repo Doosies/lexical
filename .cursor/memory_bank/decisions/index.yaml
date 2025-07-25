@@ -7,11 +7,11 @@
 # ===============================================
 
 documents:
-    # 예시:
-    # - path: './sample-document.md'
-    #   summary: '문서에 대한 간략한 요약입니다.'
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
 
 directories:
     # 예시:
     # - path: './sub-directory/'
-    #   summary: '하위 디렉토리에 대한 간략한 요약입니다.' 
+    #   summary: '하위 디렉토리에 대한 간략한 요약입니다.'

@@ -1,73 +1,82 @@
-# 심층 분석 4.1: Lexical 업데이트 메커니즘 개요
+# 심층 분석 1: 업데이트 메커니즘 개요 - 전체 생명주기
 
-**문서 상태**: `v1.0` (신규 생성)
+**주제**: Lexical의 AST(EditorState) 처리 생명주기
 
-이 문서는 Lexical의 업데이트 메커니즘을 이해하기 위한 가장 중요한 출발점입니다. 여러 문서에 흩어져 있던 핵심 개념들을 통합하여, Lexical이 어떻게 상태를 관리하고, 변경사항을 처리하며, 최종적으로 DOM에 반영하는지에 대한 전체적인 그림을 제공합니다.
+이 문서는 `editor.update()` 호출부터 시작하여 변경된 상태가 최종적으로 DOM에 반영되기까지, Lexical의 AST가 처리되는 전체 생명주기를 다이어그램과 함께 단계별로 분석합니다. 이 흐름의 핵심 로직은 `packages/lexical/src/LexicalUpdates.ts` 파일에 구현되어 있습니다.
 
-- **핵심 관련 코드**: `packages/lexical/src/LexicalUpdates.ts`
+Lexical은 두 가지 상태, 즉 현재 사용자에게 보이는 **`_editorState`** 와 변경 작업이 일어나는 임시 복사본 **`_pendingEditorState`** 를 사용하여 업데이트의 안정성과 원자성을 보장합니다.
 
----
-
-## 1. 핵심 철학: 왜 DOM이 아닌 `EditorState`인가?
-
-Lexical에서 **신뢰성의 원천(Source of Truth)은 DOM이 아니라, Lexical이 내부적으로 관리하는 `EditorState` 모델**입니다.
-
-HTML은 리치 텍스트를 표현하는 데 뛰어나지만, 에디터의 상태를 관리하기엔 "지나치게 유연"합니다. 동일한 시각적 결과도 내부적으로는 다른 HTML 구조를 가질 수 있어 상태 관리를 예측 불가능하게 만듭니다.
-
-`EditorState`는 항상 일관된(canonical) 트리 구조를 유지하여, 어떤 순서로 스타일이 적용되든 예측 가능한 상태를 보장합니다.
-
----
-
-## 2. 이중 버퍼링(Double Buffering)과 트랜잭션
-
-`EditorState`는 특정 시점의 에디터 상태를 담고 있는 **불변(immutable) 스냅샷**입니다. Lexical은 상태 업데이트 시 '이중 버퍼링' 기법을 사용하여 안전하고 효율적으로 변경을 처리합니다.
-
--   **`editor._editorState` (Current EditorState)**: 현재 DOM에 렌더링된, **변경 불가능한(immutable)** 공식 상태입니다.
--   **`editor._pendingEditorState` (Pending EditorState)**: `editor.update()`가 실행되는 동안 `Current EditorState`가 복제되어 생성되는 **변경 가능한(mutable)** '작업 중인' 상태입니다.
-
-모든 변경 작업은 `pendingEditorState`에서 일어나며, 모든 작업이 완료된 후 새로운 `Current EditorState`가 되어 DOM에 한꺼번에 반영됩니다. 이 원자적(atomic)인 처리 단위를 **트랜잭션(Transaction)**이라고 부릅니다.
-
----
-
-## 3. 전체 업데이트 흐름 (High-Level Overview)
-
-Lexical의 업데이트는 "사용자 코드 실행 → 엔진의 자동 변환 → 최종 커밋" 이라는 명확한 단계를 따릅니다.
+## AST 처리 전체 흐름도
 
 ```mermaid
 graph TD
-    classDef primary fill:#2E6E9E,stroke:#1C4E7A,color:#fff;
-    classDef component fill:#3A7D7C,stroke:#2A6D6C,color:#fff;
-    classDef io fill:#A86D3A,stroke:#884D1A,color:#fff;
-
-    subgraph "Phase 1: 트랜잭션 시작 및 사용자 로직 실행"
-        A["editor.update() 호출"]:::io
-        B["$beginUpdate() 시작<br/>(pendingEditorState 생성)"]:::primary
-        C["사용자 정의 함수<br/><b>updateFn() 실행</b>"]:::component
-        D["중첩된 업데이트 처리<br/>(processNestedUpdates)"]:::component
+    subgraph "1\. 업데이트 시작 (Initiation)"
+        A["editor.update() 호출"]
+        B["setEditorState() 호출"]
+        C["dispatchCommand() 호출"]
     end
 
-    subgraph "Phase 2: 엔진의 자동 데이터 정규화"
-        E["<b>$applyAllTransforms()</b><br/>(Node Transforms 실행)"]:::primary
-    end
-
-    subgraph "Phase 3: 최종 커밋 및 DOM 반영"
-        F["$commitPendingUpdates()<br/>(DOM Reconciliation)"]:::primary
-        G["리스너 및 콜백 호출<br/>(Update/Mutation Listeners, onUpdate)"]:::io
+    subgraph "2\. 상태 변경 (Mutation)"
+        D["활성 EditorState 복제<br/>(_pendingEditorState 생성)"]
+        E["사용자 정의 함수 실행<br/>(e.g., $createNode, node.setTextContent)"]
     end
     
-    A --> B --> C --> D --> E --> F --> G
+    subgraph "3\. 커밋 (Commit) - 핵심 처리 단계"
+        F["$commitPendingUpdates() 실행"]
+        G["<b>Node Transforms 실행</b><br/>(e.g., ':)' -> EmojiNode)"]
+        H["TextNode 정규화<br/>(인접 노드 병합)"]
+        I["상태 교체<br/>(_pendingEditorState -> _editorState)"]
+    end
+
+    subgraph "4\. DOM 재조정 및 리스너 호출"
+        J["<b>DOM Reconciliation</b><br/>(이전/이후 상태 비교하여 DOM 업데이트)"]
+        K["Update/Mutation 등<br/>모든 리스너 호출"]
+    end
+
+    A --> D;
+    B --> F;
+    C --> D;
+    
+    D --> E --> F;
+    F --> G --> H --> I --> J --> K;
 ```
 
----
+## 단계별 심층 분석
 
-## 4. 개발자 업데이트 vs. 노드 변환: 결정적 차이
+### 1단계: 업데이트 시작 (Initiation)
 
-Lexical의 업데이트 로직은 크게 두 종류로 나뉩니다. 이 둘의 차이를 이해하는 것이 매우 중요합니다.
+모든 AST 변경은 다음 세 가지 진입점 중 하나를 통해 시작됩니다.
 
-| 구분 | **개발자 업데이트 (`updateFn`)** | **노드 변환 (Node Transforms)** |
-| :--- | :--- | :--- |
-| **주체** | **개발자**가 명시적으로 호출 (`update`, `dispatchCommand`) | **Lexical 엔진**이 내부적으로 자동 실행 |
-| **시점** | 트랜잭션의 **가장 처음**에 실행됨 | 모든 명시적 `update` 콜백 실행이 **끝난 후**, 커밋 직전에 실행됨 |
-| **목적** | 사용자의 의도를 직접적으로 상태에 반영 | 데이터의 일관성 보장 및 특정 패턴의 자동 변환 (e.g. 마크다운, 링크) |
+-   **`editor.update(updateFn)`**: 가장 일반적인 방법으로, 콜백 함수 내에서 AST를 직접 수정합니다. (상세 분석: **[업데이트 진입점 및 리스너](./02_entrypoints_and_listeners.md)**)
+-   **`editor.setEditorState(newState)`**: 외부(DB, 히스토리)에서 생성된 `EditorState`를 주입하여 에디터 내용을 완전히 교체합니다. (상세 분석: **[에디터 초기화](../initialization/01_initialization_overview.md)**)
+-   **`editor.dispatchCommand(COMMAND, payload)`**: 특정 커맨드를 실행하며, 내부적으로 `editor.update`를 호출합니다. (상세 분석: **[커맨드 시스템](../command_system/01_command_system_overview.md)**)
 
-**요약**: 개발자는 `updateFn`을 통해 "무엇을 바꿀지"에 대한 **의도**를 표현하고, 그 후 Lexical 엔진이 `Node Transforms`를 통해 그 결과를 **안정적이고 일관된 상태로 자동 정제**한 뒤, 최종적으로 DOM에 반영합니다. 
+### 2단계: 상태 변경 (Mutation in `_pendingEditorState`)
+
+`editor.update()`가 호출되면, Lexical은 현재 상태(`_editorState`)를 즉시 복제하여 쓰기 가능한 임시 '작업 공간'인 **`_pendingEditorState`** 를 생성합니다. 개발자가 `updateFn` 내에서 사용하는 모든 달러($) 함수는 이 `_pendingEditorState`를 변경합니다.
+
+-   **핵심 로직**: `cloneEditorState` (in `LexicalEditorState.ts`), `$beginUpdate` (in `LexicalUpdates.ts`)
+-   상세 분석: **[업데이트 트랜잭션 시작](./03_begin_update_transaction.md)**
+
+### 3단계: 커밋 - AST 후처리 (Commit & Post-Processing)
+
+`updateFn` 실행이 끝나면, 변경된 `_pendingEditorState`를 최종 확정하기 위한 **커밋(`$commitPendingUpdates`)** 단계가 시작됩니다. 이 단계에서 AST에 대한 가장 중요한 자동 처리들이 일어납니다.
+
+1.  **노드 변환 (Node Transforms)**: `registerNodeTransform`으로 등록된 변환 규칙(e.g., Markdown 단축키)들이 실행됩니다. 이는 Lexical의 강력한 반응성(Reactivity)의 핵심입니다. (상세 분석: **[노드 변환](./06_node_transforms.md)**)
+2.  **텍스트 노드 정규화 (TextNode Normalization)**: 일관성을 위해 인접한 `TextNode`를 병합하거나 빈 노드를 제거합니다.
+3.  **가비지 컬렉션 (Garbage Collection)**: AST 트리에서 분리된 노드들을 메모리에서 제거합니다.
+4.  **최종 상태 교체**: 모든 후처리가 끝난 `_pendingEditorState`가 공식적인 현재 상태 `_editorState`가 됩니다.
+
+-   **핵심 로직**: `$commitPendingUpdates`, `$applyAllTransforms` (in `LexicalUpdates.ts`)
+-   상세 분석: **[업데이트 커밋](./04_commit_pending_updates.md)**, **[더티 노드 마킹](./05_dirty_node_marking.md)**
+
+### 4단계: DOM 재조정 및 리스너 호출
+
+새로운 `_editorState`가 확정되면, 변경 사항을 실제 사용자 화면에 반영합니다.
+
+1.  **DOM 재조정 (Reconciliation)**: 이전 `_editorState`와 새로운 `_editorState`를 비교하여 변경된 부분만 DOM에 효율적으로 업데이트합니다. React의 Virtual DOM과 유사한 방식입니다. (상세 분석: **[DOM 재조정 심층 분석](./09_dom_reconciliation_deep_dive.md)**, **[ElementNode와 재조정](./10_elementnode_and_reconciliation.md)**)
+2.  **리스너 호출**: `onUpdate` 콜백, `registerUpdateListener`, `registerMutationListener` 등으로 등록된 모든 리스너들이 이때 호출되어, 개발자가 변경 사항에 반응할 수 있도록 합니다. (상세 분석: **[업데이트 진입점 및 리스너](./02_entrypoints_and_listeners.md)**)
+
+## 결론
+
+Lexical의 AST 처리는 단일 함수가 아닌, **`Update -> Commit -> Reconcile`** 이라는 명확한 생명주기를 통해 이루어집니다. 이 구조는 `LexicalUpdates.ts`를 중심으로 구현되어 있으며, 복잡한 상태 변경을 안전하고 예측 가능하게 만들어 Lexical의 높은 확장성과 안정성을 보장합니다. 
