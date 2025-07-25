@@ -1,6 +1,10 @@
 # 심층 분석 4.4: 최종 커밋 및 DOM 반영
 
-**문서 상태**: `v1.0`
+**문서 상태**: `v1.2`
+**변경 이력**:
+- `v1.0`: 문서 초안 작성
+- `v1.1`: `$commitPendingUpdates` 함수의 단계별 상세 분석 및 핵심 로직 설명 보강.
+- `v1.2`: 상세 워크플로우를 시각화한 Mermaid 다이어그램 추가.
 
 이 문서는 `$beginUpdate` 트랜잭션의 결과를 실제 DOM에 반영하고, 변경 사항을 외부에 전파하는 최종 단계인 `$commitPendingUpdates` 함수와 전체 워크플로우를 상세히 분석합니다.
 
@@ -8,148 +12,204 @@
 
 ---
 
-## 1. 통합 워크플로우: `$beginUpdate` & `$commitPendingUpdates`
+## 1. 개요: 업데이트 사이클의 심장부
 
-아래 다이어그램은 업데이트의 시작부터 DOM 반영까지 모든 함수들이 어떻게 하나의 거대한 트랜잭션으로 통합되어 동작하는지 보여줍니다.
+`$commitPendingUpdates` 함수는 Lexical 업데이트 사이클의 "심장부"입니다. `editor.update()`를 통해 메모리 상에서 계산된 모든 변경사항(`_pendingEditorState`)을 실제 DOM에 반영하고, 이 변경 사실을 시스템의 다른 부분에 알리는 역할을 합니다.
+
+이 함수는 크게 4개의 명확한 단계로 구성됩니다.
+1.  **사전 준비 및 상태 교체 (State Swap)**: 업데이트를 진행할지 결정하고, 임시 상태를 공식 상태로 승격시킵니다.
+2.  **DOM 렌더링 (Reconciliation)**: 변경된 내용을 실제 DOM에 렌더링합니다.
+3.  **상태 고정 및 내부 정리**: 새로운 상태를 불변(immutable)으로 만들고, 다음 업데이트를 위해 내부 상태를 정리합니다.
+4.  **후속 처리 (Listeners & Callbacks)**: 모든 변경이 완료되었음을 리스너와 콜백을 통해 외부에 전파합니다.
+
+---
+
+## 2. 상세 워크플로우 (다이어그램)
 
 ```mermaid
 graph TD
-    %% 1. 스타일 클래스 정의
-    classDef primary fill:#2E6E9E,stroke:#1C4E7A,color:#fff
-    classDef component fill:#3A7D7C,stroke:#2A6D6C,color:#fff
-    classDef decision fill:#028834,stroke:#015F24,color:#fff
-    classDef warning fill:#994444,stroke:#772222,color:#fff
-    classDef io fill:#8E44AD,stroke:#6C3483,color:#fff
-    classDef db fill:#A86D3A,stroke:#884D1A,color:#fff
+    classDef primary fill:#2E6E9E,stroke:#1C4E7A,color:#fff;
+    classDef component fill:#3A7D7C,stroke:#2A6D6C,color:#fff;
+    classDef decision fill:#028834,stroke:#015F24,color:#fff;
+    classDef warning fill:#994444,stroke:#772222,color:#fff;
+    classDef io fill:#8E44AD,stroke:#6C3483,color:#fff;
 
-    %% 2. 노드 선언
-    Start(["editor.update()"]):::primary
+    Start(["$commitPendingUpdates() 호출"]):::primary
+    
+    subgraph "1. 사전 준비"
+        A["<b>[1.1]</b> pendingState 존재 확인"]:::decision
+        B["<b>[1.2]</b> 상태 교체 (State Swap)<br/>_editorState = pendingState<br/>_pendingState = null"]:::component
+    end
 
-    subgraph "$beginUpdate Transaction"
-        direction TB
-        A["1. \`updateFn()\` 실행<br/>(사용자 로직 적용, 노드 dirty 마킹)"]:::component
-        
-        subgraph "2. 상태 안정화 (Stabilization)"
-            direction TB
-            B["\`processNestedUpdates()\`<br/>(대기열의 업데이트 실행)"]:::component
-            C["\`applySelectionTransforms()\`<br/>(선택 양 끝점 노드 변환)"]:::component
-            D["\`$applyAllTransforms()\`<br/>(모든 dirty 노드 변환/수렴)"]:::component
-        end
+    subgraph "2. DOM 렌더링 (Reconciliation)"
+        C["<b>[2.1]</b> DOM 업데이트 필요?"]:::decision
+        D["<b>[2.2]</b> observer.disconnect()"]:::warning
+        E["<b>[2.3]</b> $reconcileRoot() 실행<br/>(실제 DOM 변경)<br/><i>mutatedNodes 생성</i>"]:::primary
+        F["<b>[2.4]</b> observer.observe()"]:::component
+        Err["<b>[Catch]</b> 에러 발생 시<br/>복구 및 재시도"]:::warning
+    end
 
-        E["3. 메모리 정리 (GC)<br/>\`$garbageCollectDetachedNodes()\`"]:::component
+    subgraph "3. 상태 정리"
+        G["<b>[3.1]</b> 상태 고정<br/>(_readOnly = true)"]:::component
+        H["<b>[3.2]</b> Dirty 플래그 초기화<br/>& GC 실행"]:::component
+    end
+
+    subgraph "4. 후속 처리 (전파)"
+        I["<b>[4.1]</b> DOM Selection 업데이트"]:::io
+        J["<b>[4.2]</b> Mutation Listener 실행"]:::io
+        K["<b>[4.3]</b> Update Listener 실행"]:::io
+        L["<b>[4.4]</b> Deferred Callbacks (onUpdate) 실행"]:::io
+        M["<b>[4.5]</b> 다음 업데이트 큐 확인<br/>($triggerEnqueuedUpdates)"]:::io
     end
     
-    subgraph "Error Handling"
-        Catch(["catch 블록"]):::warning
-        Rollback["상태 롤백"]:::warning
-    end
+    End(["종료"]):::primary
 
-    CommitDecision{"\`_flushSync\` 또는 에러?"}:::decision
-
-    subgraph "$commitPendingUpdates (DOM 쓰기)"
-        direction TB
-        F["1\. 상태 교체 (State Swap)"]:::io
-        G["2\. DOM Reconciliation<br/>(\`$reconcileRoot()\`)"]:::io
-        H["3\. DOM 선택 업데이트"]:::io
-        I["4\. 리스너/콜백 실행"]:::io
-    end
-    
-    End(["Update Cycle 종료"]):::primary
-
-    %% 3. 관계 연결
     Start --> A
-    A --> B --> C --> D --> E --> CommitDecision
-
-    %% 에러 경로
-    A --> Catch
-    B --> Catch
-    C --> Catch
-    D --> Catch
-    Catch --> Rollback --> CommitDecision
-
-    %% 커밋 결정 경로
-    CommitDecision -- "Yes (Sync or Error)" --> F
-    CommitDecision -- "No (Async)" --> End
+    A -- "No" --> End
+    A -- "Yes" --> B
     
-    F --> G --> H --> I --> End
+    B --> C
+    C -- "No" --> G
+    C -- "Yes" --> D --> E
+    E -- "성공" --> F
+    E -- "실패" --> Err --> F
+    
+    F --> G --> H --> I --> J --> K --> L --> M --> End
 ```
 
 ---
 
-## 2. 심장부: `$commitPendingUpdates`
+## 3. 상세 분석 (코드 기반)
 
-모든 가상적 변경사항을 실제 DOM에 반영하고, 변경 사실을 외부에 전파하는 최종 단계입니다. 이 함수는 크게 **1) 상태 준비, 2) DOM 조작(Reconciliation), 3) 후속 처리(Listeners/Callbacks)** 3단계의 명확한 파이프라인으로 구성됩니다.
+### 3.1. 1단계: 사전 준비 및 상태 교체 (State Swap)
 
-### 2.1. 상세 분석 (코드 기반)
+가장 먼저, 커밋을 진행할 조건이 되는지 확인하고, 업데이트의 핵심 단계인 "상태 교체"를 수행합니다.
 
-**1단계: 상태 준비 및 사전 검사**
-- 함수가 호출되면, 가장 먼저 처리할 `pendingEditorState`가 있는지 확인하고 없으면 즉시 종료합니다.
-- `headless` 모드 여부 등을 판단하여 DOM 조작을 건너뛸지(`shouldSkipDOM`) 결정합니다.
-- **핵심 동작**: `editor._pendingEditorState`를 `null`로 만들고, 그 값을 `editor._editorState`로 옮겨, `pending` 상태를 공식적인 현재 상태로 **승격**시킵니다.
-- 이후의 모든 DOM 조작은 이 새로운 `_editorState`와 커밋 직전의 `currentEditorState`를 비교하여 이루어집니다.
+```typescript
+// packages/lexical/src/LexicalUpdates.ts -> $commitPendingUpdates
 
-**2단계: DOM 조작 (Reconciliation)**
-- 이 단계는 `!shouldSkipDOM`이고, 실제로 변경된 노드(`needsUpdate`)가 있을 때만 실행됩니다.
-- **`try...catch...finally`** 블록으로 안전하게 감싸여 있습니다.
-  - **`try`**:
-    - 가장 먼저, Lexical의 DOM 변경을 감지하는 `MutationObserver`를 `disconnect()`하여 DOM 조작 중 불필요한 이벤트 발생을 막습니다.
-    - **`$reconcileRoot()` 함수를 호출**합니다. 이 함수가 실질적인 DOM 렌더링을 담당하며, `currentEditorState`와 새로운 `_editorState`를 비교하여 변경이 필요한 최소한의 노드만 생성/수정/삭제합니다.
-  - **`catch`**: `reconcile` 과정에서 에러가 발생하면, Lexical은 이전의 안정적인 상태(`currentEditorState`)로 에디터를 복구하려고 시도합니다. 이 복구마저 실패하면, 무한 루프를 방지하기 위해 에러를 던집니다.
-  - **`finally`**: 성공하든 실패하든, `MutationObserver`를 다시 `observe()`하여 에디터가 다음 변경을 감지할 수 있도록 합니다.
+export function $commitPendingUpdates(
+  editor: LexicalEditor,
+  recoveryEditorState?: EditorState,
+): void {
+  const pendingEditorState = editor._pendingEditorState;
+  const rootElement = editor._rootElement;
+  const shouldSkipDOM = editor._headless || rootElement === null;
 
-**3단계: 후속 처리 (Listeners, Callbacks, GC)**
-- 모든 DOM 작업이 완료된 후, 마무리 작업들을 수행합니다.
-- **상태 초기화**: 다음 업데이트 사이클을 위해 `_dirtyType`, `_dirtyLeaves` 등 'dirty' 관련 상태를 모두 깨끗하게 초기화합니다.
-- **가비지 컬렉션(GC)**: `$garbageCollectDetachedDecorators`를 호출하여 더 이상 사용되지 않는 데코레이터 노드를 메모리에서 정리합니다.
-- **DOM 선택 업데이트**: `updateDOMSelection()`을 통해 가상의 선택 정보를 실제 브라우저의 파란색 하이라이트(캐럿)에 반영합니다.
-- **리스너 실행**: 모든 변경이 완료되었음을 시스템의 다른 부분에 알리기 위해, 아래 순서로 각종 리스너와 콜백을 트리거합니다.
-  1.  **Mutation Listeners**: DOM 노드의 직접적인 추가/제거/변경을 감지합니다.
-  2.  **Update Listeners**: 에디터 상태 객체(`EditorState`) 자체가 변경되었음을 알립니다.
-  3.  **TextContent Listeners**: 에디터의 텍스트 콘텐츠가 변경되었을 때 호출됩니다.
-  4.  **Deferred Callbacks**: `editor.update()`의 `onUpdate` 콜백처럼, 모든 작업이 끝난 후 실행되도록 예약된 함수들을 실행합니다.
+  if (pendingEditorState === null) {
+    return;
+  }
+// ...
+  const currentEditorState = editor._editorState;
+  // ...
+  const needsUpdate = editor._dirtyType !== NO_DIRTY_NODES;
+  // ...
+  editor._pendingEditorState = null;
+  editor._editorState = pendingEditorState;
+```
 
+-   **`recoveryEditorState?`**: (선택적) 렌더링 과정에서 오류가 발생했을 때, 리스너들에게 `prevEditorState`로 전달할 복구용 상태입니다. 평소에는 `undefined`입니다.
+-   **사전 검사**: `pendingEditorState`가 없으면 아무 작업도 하지 않고 즉시 함수를 종료합니다. `headless` 모드이거나 루트 요소가 없으면 DOM 관련 작업을 건너뜁니다.
+-   **상태 교체 (State Swap)**:
+    - `editor._editorState`(현재 공식 상태)를 `currentEditorState` 변수에 백업합니다.
+    - **(핵심)** `editor._pendingEditorState`를 `null`로 만들어, 이제부터 들어오는 `editor.update()`는 새로운 트랜잭션을 시작하도록 합니다.
+    - **(핵심)** 임시 상태였던 `pendingEditorState`를 공식 `editor._editorState`로 승격시킵니다. 이제 이 함수의 목표는 실제 DOM을 이 새로운 `_editorState`와 똑같이 만드는 것입니다.
 
-### 2.2. 시각 자료
+### 3.2. 2단계: DOM 렌더링 (Reconciliation)
 
-```mermaid
-graph TD
-    classDef primary fill:#2E6E9E,stroke:#1C4E7A,color:#fff
-    classDef component fill:#3A7D7C,stroke:#2A6D6C,color:#fff
-    classDef decision fill:#028834,stroke:#015F24,color:#fff
-    classDef warning fill:#994444,stroke:#772222,color:#fff
-    classDef io fill:#8E44AD,stroke:#6C3483,color:#fff
+실제로 DOM을 조작하는 가장 중요하고 위험한 단계입니다. `try...catch...finally`로 안전하게 보호되어 있습니다.
 
-    A(["$commitPendingUpdates() 호출"]):::primary
-    B{"pendingEditorState 존재?"}:::decision
-    C["상태 준비<br/>(State Swap, 컨텍스트 백업)"]:::component
-    D{"DOM 업데이트 필요?"}:::decision
-    
-    subgraph "try...catch...finally"
-        E["'observer.disconnect()'"]:::warning
-        F["**$reconcileRoot()**<br/>(실제 DOM 변경)"]:::primary
-        G["에러 발생 시<br/>상태 복구 시도"]:::warning
-        H["\`observer.observe()\`"]:::component
-    end
-    
-    I["GC & 상태 초기화<br/>(dirty flags, decorators)"]:::component
-    J["'updateDOMSelection()'<br/>(화면의 캐럿/선택 업데이트)"]:::io
-    
-    subgraph "Listeners & Callbacks 실행"
-        K["Mutation Listeners"]:::io
-        L["Update Listeners"]:::io
-        M["TextContent Listeners"]:::io
-        N["Deferred Callbacks"]:::io
-    end
-    
-    O(["종료"]):::primary
+```typescript
+// packages/lexical/src/LexicalUpdates.ts -> $commitPendingUpdates
 
-    A --> B
-    B -- "No" --> O
-    B -- "Yes" --> C
-    C --> D
-    D -- "No" --> I
-    D -- "Yes" --> E --> F
-    F -- "성공" --> H
-    F -- "실패" --> G --> H
-    H --> I --> J --> K --> L --> M --> N --> O
-``` 
+  if (!shouldSkipDOM && needsUpdate && observer !== null) {
+    // ...
+    editor._updating = true;
+    try {
+      observer.disconnect();
+
+      mutatedNodes = $reconcileRoot(/* ... */);
+    } catch (error) {
+      if (!isAttemptingToRecoverFromReconcilerError) {
+        // ...
+        $commitPendingUpdates(editor, currentEditorState);
+      }
+      // ...
+    } finally {
+      observer.observe(rootElement, observerOptions);
+      // ...
+    }
+  }
+```
+
+-   **`editor._updating = true`**: 이 플래그는 DOM 렌더링 과정이 다른 동기적 업데이트에 의해 중단되지 않도록 보호합니다.
+-   **`observer.disconnect()`**: **(핵심)** `MutationObserver`를 일시 중지합니다. Lexical이 스스로 DOM을 변경하는 동안, 그 변경을 스스로 감지하여 또 다른 업데이트를 유발하는 **무한 루프를 방지**하기 위한 필수적인 안전장치입니다.
+-   **`$reconcileRoot()`**: **(핵심)** 이 함수가 이전 상태(`currentEditorState`)와 새로운 공식 상태(`_editorState`)를 비교하여, 변경이 필요한 최소한의 DOM 노드만 수정/추가/삭제하는 **실제 렌더링**을 수행합니다. 변경된 노드 정보는 `mutatedNodes`에 저장됩니다.
+-   **`catch` 블록**: 렌더링 중 에러가 발생하면, 에디터를 초기화하고 다시 커밋을 시도(`$commitPendingUpdates(editor, currentEditorState)`)하여 에디터를 복구하려고 시도합니다. 이때 `recoveryEditorState`에 이전 상태를 넘겨주어, 리스너들이 올바른 `prevEditorState`를 받을 수 있도록 보장합니다.
+-   **`finally` 블록**: 에러 발생 여부와 상관없이, 다시 `observer.observe()`를 호출하여 에디터가 다음 사용자 입력을 감지할 수 있도록 `MutationObserver`를 재활성화합니다.
+
+---
+
+### **3.3. 핵심 동작 원리: DOM Reconciliation 심층 분석**
+
+`$commitPendingUpdates`의 심장부인 `$reconcileRoot`는 `EditorState`의 변경사항을 실제 DOM에 반영하는 렌더링 엔진의 시작점입니다.
+
+이 과정은 '지휘관' 역할을 하는 `$reconcileRoot`와 '실행자' 역할을 하는 `$reconcileNode`의 긴밀한 협력을 통해, **"변경되지 않은 것은 건드리지 않는다"**는 핵심 원칙하에 최소한의 비용으로 수행됩니다.
+
+> 더 상세한 Reconciliation 동작 원리와 코드 분석은 **[09_dom_reconciliation_deep_dive.md](./09_dom_reconciliation_deep_dive.md)** 문서를 참고하세요.
+
+---
+
+### 3.4. 3단계: 상태 고정 및 내부 정리
+
+DOM 렌더링이 끝나면, 새로운 상태를 불변(immutable)으로 만들고 다음 업데이트를 위해 내부 상태를 정리합니다.
+
+```typescript
+// packages/lexical/src/LexicalUpdates.ts -> $commitPendingUpdates
+
+  if (!pendingEditorState._readOnly) {
+    pendingEditorState._readOnly = true;
+    if (__DEV__) {
+      // ... (Object.freeze로 객체를 얼려 불변성 강제)
+    }
+  }
+// ...
+  if (needsUpdate) {
+    editor._dirtyType = NO_DIRTY_NODES;
+    // ... (모든 dirty* 상태를 깨끗하게 초기화)
+  }
+  $garbageCollectDetachedDecorators(editor, pendingEditorState);
+```
+
+-   **`_readOnly = true`**: 새로운 `_editorState`가 된 `pendingEditorState`의 `_readOnly` 플래그를 `true`로 설정하여, 이 상태는 더 이상 수정될 수 없음을 공식화합니다. 개발 모드에서는 `Object.freeze`를 통해 이를 더욱 강력하게 강제합니다.
+-   **내부 상태 초기화**: 다음 업데이트 사이클을 위해 모든 'dirty' 관련 상태(어떤 노드가 변경되었는지 표시하는 플래그)를 깨끗하게 초기화합니다.
+-   **가비지 컬렉션**: 더 이상 DOM 트리에 붙어있지 않은 데코레이터 노드를 메모리에서 정리합니다.
+
+### 3.5. 4단계: 후속 처리 - 리스너 및 콜백 실행
+
+모든 상태와 DOM 변경이 완료되었음을 시스템의 다른 부분에 전파하는 마지막 단계입니다.
+
+```typescript
+// packages/lexical/src/LexicalUpdates.ts -> $commitPendingUpdates
+
+  // ... (DOM Selection 업데이트 로직) ...
+
+  if (mutatedNodes !== null) {
+    triggerMutationListeners(/* ... */);
+  }
+  // ...
+  triggerTextContentListeners(/* ... */);
+
+  triggerListeners('update', editor, true, { /* ... */ });
+  
+  triggerDeferredUpdateCallbacks(editor, deferred);
+  
+  $triggerEnqueuedUpdates(editor);
+```
+-   **DOM Selection 업데이트**: 사용자의 커서 위치나 하이라이트 등 시각적인 선택 영역을 실제 DOM에 반영합니다.
+-   **리스너/콜백 호출 순서**:
+    1.  **`triggerMutationListeners`**: `registerMutationListener`로 등록된 리스너들을 호출합니다.
+    2.  **`triggerTextContentListeners`**: `registerTextContentListener`로 등록된 리스너들을 호출합니다.
+    3.  **`triggerListeners('update', ...)`**: **(핵심)** 가장 일반적인 `registerUpdateListener`의 콜백들을 여기서 실행합니다. 이때 `prevEditorState`로는 `recoveryEditorState`나 `currentEditorState`를, `editorState`로는 새로운 공식 상태인 `pendingEditorState`를 전달합니다.
+    4.  **`triggerDeferredUpdateCallbacks`**: **(핵심)** `registerUpdateListener`까지 모두 실행된 후, `editor.update`의 `onUpdate` 옵션으로 전달되었던 콜백들(`deferred` 배열)을 가장 마지막에 실행합니다.
+    5.  **`$triggerEnqueuedUpdates`**: 이 커밋이 진행되는 동안 `editor._updates` 큐에 새로 쌓인 업데이트가 있다면, 다음 업데이트 사이클을 여기서 시작합니다. 

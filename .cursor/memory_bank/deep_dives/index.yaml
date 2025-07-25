@@ -11,6 +11,8 @@ documents:
     summary: '@lexical/react와 @lexical/yjs를 사용하여 Lexical 에디터에 실시간 협업 기능을 구현하는 방법에 대해 심층적으로 분석합니다.'
   - path: './lexical_with_react.md'
     summary: '@lexical/react 패키지를 사용하여 Lexical을 React 애플리케이션에 통합하는 방법과 주요 패턴, 그리고 고급 활용법에 대해 심층적으로 분석합니다.'
+  - path: './decorator_node_rendering_pipeline.md'
+    summary: 'DecoratorNode가 Lexical의 내부 상태에서 실제 React 컴포넌트로 렌더링되기까지의 전 과정을 추적하고, Reconciler, useDecorators 훅, React Portal의 상호작용을 단계별로 설명합니다.'
 
 directories:
   # 예시:
