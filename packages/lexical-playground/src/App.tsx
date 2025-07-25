@@ -277,3 +277,11 @@ export default function PlaygroundApp(): JSX.Element {
     </SettingsContext>
   );
 }
+
+// import {MyEditor} from './MyEditor';
+
+// function App() {
+//   return <MyEditor />;
+// }
+
+// export default App;

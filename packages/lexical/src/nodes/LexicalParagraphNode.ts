@@ -114,7 +114,6 @@ export class ParagraphNode extends ElementNode {
   }
 
   // Mutation
-
   insertNewAfter(
     rangeSelection: RangeSelection,
     restoreSelection: boolean,
