@@ -1,0 +1,7 @@
+# .cursor/core/protocols/checklists/index.yaml
+directories: []
+documents:
+    - path: post_flight_checklist.md
+      summary: 'AI가 모든 작업을 완료하고 사용자에게 최종 응답을 하기 직전에, 시스템의 상태를 기록하고 무결성을 검증하는 점검 목록입니다.'
+    - path: pre_flight_checklist.md
+      summary: 'AI가 사용자의 요청을 본격적으로 처리하기 전, 현재 컨텍스트를 동기화하고 잠재적 위험을 점검하는 필수 절차 목록입니다.'

@@ -1,0 +1,15 @@
+# .cursor/core/index.yaml
+# 이 파일은 .cursor/core 디렉토리의 전체 구조를 설명하는 최상위 인덱스입니다.
+# 마지막 업데이트: 2025-08-05
+
+directories:
+    - path: experts/
+      summary: '각 전문 분야를 담당하는 전문가 AI들의 설정 파일이 위치한 디렉토리입니다. execution, specialized, orchestration 하위 디렉토리로 구성됩니다.'
+    - path: protocols/
+      summary: 'AI의 모든 행동 양식과 절차를 정의하는 프로토콜 문서들이 체계적으로 분류되어 있는 디렉토리입니다.'
+
+documents:
+    - path: brain.yaml
+      summary: 'AI의 두뇌 역할을 하는 핵심 설정 파일입니다. 시스템의 모든 상태, 경로, 규칙, 페르소나를 정의하는 Single Source of Truth입니다.'
+    - path: CHANGELOG.md
+      summary: 'AI 시스템의 모든 버전 변경 이력을 기록하는 파일입니다.'

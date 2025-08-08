@@ -1,0 +1,15 @@
+# .cursor/core/protocols/workflow/index.yaml
+directories: []
+documents:
+    - path: acting_protocol.md
+      summary: 'AI가 `ACTING` 상태일 때, 승인된 계획에 따라 작업을 수행하고, 예외를 처리하며, 전문가 개입을 관리하는 절차를 정의합니다.'
+    - path: booting_protocol.md
+      summary: 'AI가 `BOOTING` 상태일 때, 시스템을 시작하고, 필수 컨텍스트를 로드하며, 자신의 상태를 진단하는 초기화 절차를 정의합니다.'
+    - path: failure_management_protocol.md
+      summary: '이 프로토콜은 시스템이 `FAILED` 상태에 진입했을 때, 실패 상황을 체계적으로 기록하고 해결 과정을 문서화하여 시스템의 안정성과 회복탄력성을 높이는 것을 목표로 합니다.'
+    - path: planning_protocol.md
+      summary: 'AI가 `PLANNING` 상태일 때, 사용자의 요청을 분석하고, 위험을 평가하며, 단계별 실행 계획을 수립하는 절차를 정의합니다.'
+    - path: setup_protocol.md
+      summary: 'AI가 `SETUP` 상태일 때 (주로 최초 실행 시), 필수 지식 베이스 파일이 없을 경우 이를 생성하기 위한 절차를 정의합니다.'
+    - path: progress_archiving_protocol.md
+      summary: '`progress.md` 파일이 과도하게 길어지는 것을 방지하기 위해 완료된 마일스톤을 주기적으로 아카이빙하는 절차를 정의합니다.'

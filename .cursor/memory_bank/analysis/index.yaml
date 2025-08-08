@@ -10,6 +10,9 @@ documents:
     - path: './README.md'
       summary: 'analysis 폴더 전체의 분석 주제 목록과 각 주제에 대한 설명을 제공하는 중앙 목차(Table of Contents) 문서입니다. (Auto-generated)'
       version: '1.0'
+    - path: './year_select_onvalidate_analysis.md'
+      summary: 'UIKit의 year_select 컴포넌트에서 onChange와 onValidate가 분리된 이유를 분석하고, 이를 통해 컴포넌트의 재사용성과 유연성을 확보하는 설계 패턴을 설명합니다.'
+      version: '1.0'
 
 directories:
     - path: './initialization/'

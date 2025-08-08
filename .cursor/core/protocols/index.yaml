@@ -1,0 +1,45 @@
+# .cursor/core/protocols/index.yaml
+# 이 파일은 core/protocols 디렉토리에 있는 모든 프로토콜의 목록과 설명을 관리합니다.
+# system_integrity_protocol에 의해 자동으로 업데이트됩니다.
+# 마지막 업데이트: 2025-08-05
+
+protocols:
+    - file: checklists/post_flight_checklist.md
+      version: '2.1'
+      description: AI가 사용자에게 최종 응답을 보내기 직전, 모든 활동이 정확하게 기록되고 지식 베이스의 무결성이 보장되었는지 확인합니다.
+    - file: checklists/pre_flight_checklist.md
+      version: '2.0'
+      description: AI가 사용자의 요청에 대해 본격적인 사고(PLANNING, ACTING)를 시작하기 전, 완전하고 최신인 정보 위에서만 작동하도록 보장하고, 필요시 전문가가 먼저 개입하도록 합니다.
+    - file: system/ai_bootstrap_protocol.md
+      version: '2.8'
+      description: 'AI의 핵심 정체성과 행동 원칙을 정의합니다. 특히, TaskManagementExpert를 통한 명시적이고 실시간인 작업 상태 보고 규칙을 포함하여, AI가 부팅 시 따라야 할 절차와 파일 스키마를 정의합니다.'
+    - file: system/knowledge_base_update_protocol.md
+      version: '2.0'
+      description: '[PROTOCOL] 지식 베이스의 문서를 추가하거나 수정할 때 반드시 따라야 하는 절차입니다. 이 프로토콜은 "그냥 만들지 않고", 기존 지식과의 관계를 파악하여 지식 베이스 전체의 일관성과 연결성을 보장하는 것을 목표로 합니다.'
+    - file: system/system_integrity_protocol.md
+      version: '1.0'
+      description: 이 프로토콜은 시스템의 핵심 두뇌와 뼈대에 해당하는 `.cursor/core` 디렉토리의 무결성을 보장하는 것을 목표로 합니다. `core` 내부의 파일이 변경될 때마다 자동으로 실행되어, 관련 메타데이터, 특히 `protocols/index.yaml`을 최신 상태로 유지합니다.
+    - file: system/system_integrity_verification_protocol.md
+      version: '1.0'
+      description: 시스템의 모든 핵심 구성요소(파일, 디렉토리)가 `brain.yaml`에 정의된 위치에 정확하게 존재하는지 검증하여, 시스템의 구조적 무결성을 보장하는 것을 목표로 합니다.
+    - file: workflow/acting_protocol.md
+      version: '4.6'
+      description: "`activeContext.md`의 '작업 목록'을 중심으로, 승인된 계획을 실행하고 진행 상황을 투명하게 기록하며 임무를 완수합니다. 이 프로토콜은 작업의 투명성을 극대화하기 위해 이모지 기반 상태 업데이트(⏳ → 🚧 → ✅)를 따릅니다."
+    - file: workflow/booting_protocol.md
+      version: '1.0'
+      description: 시스템 시작 및 초기화. 당신은 이 파일을 읽어와 정의된 절차를 실행합니다.
+    - file: workflow/expert_orchestration_protocol.md
+      version: '1.0'
+      description: Cursor 시스템 내의 모든 AI 전문가들이 원활하고 예측 가능하게 협업하기 위해 반드시 준수해야 할 핵심 규칙과 절차를 정의합니다.
+    - file: workflow/failure_management_protocol.md
+      version: '1.0'
+      description: 이 프로토콜은 시스템이 `FAILED` 상태에 진입했을 때, 실패 상황을 체계적으로 기록하고 해결 과정을 문서화하여 시스템의 안정성과 회복탄력성을 높이는 것을 목표로 합니다.
+    - file: workflow/planning_protocol.md
+      version: '3.4'
+      description: 사용자 요청을 분석하고, `memory_bank`의 구조화된 지식(`index.yaml`)과 `brain.yaml`에 정의된 전문가 시스템을 활용하여 투명하고 안정적인 실행 계획을 수립합니다.
+    - file: workflow/progress_archiving_protocol.md
+      version: '1.0'
+      description: '[MAINTENANCE-PROTOCOL] `progress.md` 파일이 과도하게 길어지는 것을 방지하고, 장기적인 가독성과 유지보수성을 확보하기 위해 완료된 마일스톤을 주기적으로 아카이빙하는 절차입니다.'
+    - file: workflow/setup_protocol.md
+      version: '1.0'
+      description: '[최초 1회 실행] 필수 지식 베이스 파일이 없을 때, 당신은 프로젝트 자동 분석과 사용자와의 대화를 통해 핵심 파일을 생성합니다.'

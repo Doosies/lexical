@@ -1,0 +1,3 @@
+- **User Request:** "방금 왜 activecontext, progress를 확인하고, 수정하지 않았지???  핵심 원칙을 확인하지 못했어?? 혹은 다른 이유로 지키지 못한거야?? 이유를 분석해줘" and "진행해줘. 참고로 post_flight_checklist뿐 아니라, 시작전에 pre_flight 과정도 자주 까먹는것같아. 이것까지 고려해서 새로운 원칙을 작성해줘"
+- **AI Action:** 사용자의 지적에 따라 post-flight 절차 누락의 심각성을 인지하고, 메타 작업의 맹점을 분석함. 사용자의 추가 피드백을 반영하여 pre-flight/post-flight 절차를 모두 강제하는 kernel_loop_integrity_principle을 core_principles.yaml에 추가하고, 관련 사후 점검 절차를 수행함.
+- **Result:** AI의 핵심 동작 원칙이 강화되었고, 향후 프로토콜 실행의 안정성이 향상될 것으로 기대됨.
