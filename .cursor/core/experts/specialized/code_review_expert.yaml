@@ -11,7 +11,11 @@ summary: '입력된 코드 변경 내역(diff)을 분석하여, 내장된 규칙
 
 workflow:
     description: '입력된 코드 변경 내역(diff)을 분석하고 내장된 규칙을 참조하여, 구조화된 코드 리뷰를 반환합니다.'
-
+    parameters:
+        - name: 'diff_content'
+          type: 'string'
+          description: '`git diff --staged`의 결과물'
+          required: true
     internal_rules:
         # 이 섹션은 .cursor/rules/commit-rule.mdc 파일의 코드 리뷰 관련 규칙을 내장합니다.
         review_structure:
@@ -21,45 +25,23 @@ workflow:
               prompt: '잠재적인 문제점, 더 나은 구현 방식, 또는 코드 가독성/유지보수성 측면에서 개선할 수 있는 부분은 무엇인가?'
             - section: '종합 의견 (Overall opinion)'
               prompt: '이 변경사항이 전체 시스템에 미치는 영향은 어떠하며, 실무 환경에 적용하기에 적절한가?'
-
     steps:
         - step: 1
-          name: 'Git Diff 결과 파일로 저장 (Windows PowerShell)'
-          goal: '스테이징된 모든 변경 사항을 분석을 위해 임시 파일에 안정적으로 저장합니다.'
-          actions:
-              - '[EXPERT_CALL] `{{rule_engine.expert_registry.execution.terminal_command_expert}}`를 호출하여 다음 명령어를 실행합니다: `git diff --staged | Out-File -FilePath ".git/diff_output.tmp" -Encoding utf8`'
-          on_failure: '명령어 실행에 실패하면, `status: "failure"`와 오류 메시지를 반환합니다.'
-
-        - step: 2
-          name: 'Diff 파일 내용 읽기'
-          goal: '파일에 저장된 diff 내용을 읽어와 컨텍스트에 로드합니다.'
-          actions:
-              - '[EXPERT_CALL] `{{rule_engine.expert_registry.execution.file_reading_expert}}`를 호출하여 `.git/diff_output.tmp` 파일의 전체 내용을 읽습니다. -> `diff_content`'
-          on_failure: '파일 읽기에 실패하면, `status: "failure"`와 오류 메시지를 반환하고, 남아있는 임시 파일을 삭제 시도합니다.'
-
-        - step: 3
-          name: '임시 파일 정리'
-          goal: '더 이상 필요 없는 임시 파일을 즉시 삭제하여 시스템을 깨끗하게 유지합니다.'
-          actions:
-              - '[EXPERT_CALL] `{{rule_engine.expert_registry.execution.terminal_command_expert}}`를 호출하여 다음 명령어를 실행합니다: `Remove-Item -Path ".git/diff_output.tmp" -Force`'
-          on_failure: '파일 삭제에 실패하더라도, 오류를 무시하고 다음 단계를 계속 진행합니다 (이미 파일이 없거나 권한 문제가 있을 수 있음).'
-
-        - step: 4
           name: '코드 변경사항 심층 분석'
-          goal: '로드된 `diff_content`를 바탕으로 코드의 구조적, 논리적 변경 사항을 분석합니다.'
+          goal: '입력받은 `diff_content`를 바탕으로 코드의 구조적, 논리적 변경 사항을 분석합니다.'
           actions:
               - '추가/수정/삭제된 코드 라인을 분석하여 변경의 핵심 로직을 파악합니다.'
               - '코드 스타일, 변수명, 컨벤션 등이 기존 코드 베이스와 일관성을 유지하는지 확인합니다.'
               - '잠재적인 성능 문제나 예외 처리 누락 가능성이 있는지 검토합니다.'
 
-        - step: 5
+        - step: 2
           name: '구조화된 코드 리뷰 작성'
           goal: '분석 결과와 내장된 규칙에 따라, 각 섹션별로 리뷰 내용을 작성합니다.'
           actions:
               - '`internal_rules.review_structure`의 각 섹션(`좋았던 점` 등)에 해당하는 내용을 분석 결과에 기반하여 구체적으로 작성합니다.'
               - '모든 피드백은 명확한 코드 라인이나 로직을 근거로 제시합니다.'
 
-        - step: 6
+        - step: 3
           name: '결과 데이터 표준화'
           goal: '생성된 코드 리뷰를 오케스트레이션 프로토콜에 맞는 표준 형식으로 가공합니다.'
           actions:

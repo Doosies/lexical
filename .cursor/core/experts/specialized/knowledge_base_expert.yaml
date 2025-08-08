@@ -116,13 +116,19 @@ workflows:
                   - '[TOOL: write] 확정된 최종 경로에 `document_content`를 저장합니다.'
               on_failure: '파일 쓰기 실패 시, `status: "failure"`와 오류 메시지를 반환합니다.'
             - step: 5
-              name: '[Protocol Step 6] 목차(index.yaml) 업데이트'
-              goal: '문서가 저장된 디렉토리의 `index.yaml` 파일을 업데이트하여, 지식 베이스의 메타데이터를 동기화합니다.'
+              name: '[Protocol Step 6] 계층적 목차(index.yaml) 업데이트'
+              goal: '문서가 저장된 디렉토리부터 시작하여, `.cursor` 디렉토리에 도달할 때까지 상위의 모든 `index.yaml` 파일을 재귀적으로 업데이트합니다.'
               actions:
-                  - '[TOOL: read_file] 해당 디렉토리의 `index.yaml`을 읽어옵니다.'
-                  - '새로 추가된 파일을 `documents` 리스트에 추가합니다.'
-                  - '[TOOL: write] 업데이트된 내용으로 `index.yaml` 파일을 덮어씁니다.'
-              on_failure: '`index.yaml` 업데이트 실패 시, 경고를 로그에 남기고 다음 단계를 진행합니다.'
+                  - '[SET_VARIABLE] current_path = "문서가 저장된 디렉토리 경로"'
+                  - '[LOOP_START] `current_path`가 `.cursor` 디렉토리 내부 경로인 동안 루프를 계속합니다.'
+                  - '  1. [SET_VARIABLE] index_file_path = `current_path` + "/index.yaml"'
+                  - '  2. [CONDITION_IF] `index_file_path`가 존재한다면:'
+                  - '  3.   - [TOOL: read_file] `index_file_path`를 읽습니다.'
+                  - "  4.   - '읽어온 내용에 새로운 문서 정보(또는 하위 디렉토리 정보)가 이미 존재하는지 확인합니다.'"
+                  - "  5.   - '만약 정보가 없다면, `documents` 또는 `sub_directories` 리스트에 새로운 항목을 추가합니다.'"
+                  - "  6.   - '[TOOL: write] 업데이트된 내용으로 `index_file_path`를 덮어씁니다.'"
+                  - '  7. [SET_VARIABLE] `current_path`를 상위 디렉토리 경로로 변경합니다. (e.g., /path/to/child -> /path/to)'
+                  - '[LOOP_END] 루프를 종료합니다.'
             - step: 6
               name: '결과 반환'
               goal: '작업 완료 상태와 최종 저장 경로를 반환합니다.'

@@ -1,0 +1,4 @@
+{
+	"status": "RUNNING",
+	"last_updated": "{{current_iso_time}}"
+}
