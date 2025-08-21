@@ -1,0 +1,44 @@
+# ===============================================
+# /flexion/analysis/update_mechanism/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /flexion/analysis/update_mechanism/ 폴더에 있는 모든 분석 문서의 목록 및 요약을 관리합니다.
+# AI는 새로운 분석 문서를 추가할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_update_mechanism_overview.md'
+      summary: 'Lexical의 핵심 상태 객체인 EditorState의 구조부터, 업데이트 트랜잭션의 시작, 처리, 최종 DOM 반영까지의 전체 과정을 심층적으로 분석합니다.'
+      version: '1.0'
+    - path: './02_entrypoints_and_listeners.md'
+      summary: '업데이트 트랜잭션이 시작되는 주요 진입점(entrypoint)들과, 업데이트 완료 후 실행되는 리스너(listener)들의 종류와 역할을 분석합니다.'
+      version: '1.0'
+    - path: './03_begin_update_transaction.md'
+      summary: 'editor.update()의 내부 동작과, 안전한 업데이트 컨텍스트를 제공하는 콜백 함수의 역할을 분석합니다.'
+      version: '1.0'
+    - path: './04_commit_pending_updates.md'
+      summary: '업데이트 큐에 쌓인 변경 사항들을 처리하는 _commitPendingUpdates() 함수의 내부 동작을 분석합니다.'
+      version: '1.0'
+    - path: './05_dirty_node_marking.md'
+      summary: '노드가 변경되었음을 알리는 "dirty" 마킹의 원리와, 이것이 업데이트 성능에 미치는 영향을 분석합니다.'
+      version: '1.0'
+    - path: './06_node_transforms.md'
+      summary: 'dirty로 표시된 노드들을 찾아, 등록된 변환(Transform) 함수들을 반복적으로 적용하는 $applyAllTransforms 함수의 동작을 분석합니다.'
+      version: '1.0'
+    - path: './07_nested_updates.md'
+      summary: '하나의 업데이트 트랜잭션 내에서 다른 업데이트가 발생하는 중첩 업데이트(Nested Update)의 처리 방식을 분석합니다.'
+      version: '1.0'
+    - path: './08_update_tags.md'
+      summary: '업데이트의 종류를 식별하고, 특정 리스너만 선택적으로 실행되도록 하는 업데이트 태그(Update Tag)의 활용법을 분석합니다.'
+      version: '1.0'
+    - path: './09_dom_reconciliation_deep_dive.md'
+      summary: '업데이트된 EditorState가 실제 DOM에 반영되는 과정(DOM Reconciliation)을 심층적으로 분석합니다.'
+      version: '1.0'
+    - path: './10_elementnode_and_reconcile.md'
+      summary: 'ElementNode의 자식 노드 변경 사항이 실제 DOM에 어떻게 반영(reconcile)되는지 그 상세 로직을 분석합니다.'
+      version: '1.0'
+
+directories: []

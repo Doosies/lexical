@@ -1,0 +1,23 @@
+# ===============================================
+# /flexion/analysis/node_system/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /flexion/analysis/node_system/ 폴더에 있는 모든 분석 문서의 목록 및 요약을 관리합니다.
+# AI는 새로운 분석 문서를 추가할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './01_node_replacement.md'
+      summary: 'Lexical의 노드를 다른 노드로 교체하는 메커니즘을 분석합니다.'
+      version: '1.0'
+    - path: './02_node_state_api.md'
+      summary: '노드의 상태를 관리하는 다양한 API를 분석합니다.'
+      version: '1.0'
+    - path: './03_node_traversal_with_nodecaret.md'
+      summary: 'NodeCaret을 이용한 노드 순회 방법을 분석합니다.'
+      version: '1.0'
+
+directories: []

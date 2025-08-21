@@ -21,15 +21,15 @@ workflow:
           required: true
         - name: 'analysis_report'
           type: 'object'
-          description: '관련 코드에 대한 `CodeAnalysisExpert`의 사전 분석 결과 (선택 사항)'
+          description: '관련 코드에 대한 `{{configuration.expert_registry.code_analysis_expert}}`의 사전 분석 결과 (선택 사항)'
           required: false
     steps:
         - step: 1
           name: '근본 원인 진단'
-          goal: '수집된 모든 정보를 종합하여 오류의 가장 가능성 있는 원인을 추론합니다.'
+          goal: '수집된 모든 정보의 상관관계를 분석하여, 오류의 가장 가능성 높은 원인을 특정합니다.'
           actions:
-              - '입력받은 `error_log`, `code_snippet`, `analysis_report`를 종합적으로 분석합니다.'
-              - '예를 들어, `code_snippet`의 "user.getName()" 부분과 `error_log`의 "NullPointerException"을 연관지어, "변수 `user`가 초기화되지 않은 상태로 호출되었다"는 근본 원인을 진단합니다.'
+              - '입력받은 `error_log`, `code_snippet`, `analysis_report` 사이의 상관관계를 분석합니다.'
+              - '예를 들어, `code_snippet`의 "user.getName()" 부분과 `error_log`의 "NullPointerException"을 연관지어, "변수 `user`가 초기화되지 않은 상태로 호출되었다"는 가장 가능성 높은 원인을 특정합니다.'
 
         - step: 2
           name: '해결책 제안'

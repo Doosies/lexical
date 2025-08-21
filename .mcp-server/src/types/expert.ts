@@ -1,36 +1,57 @@
-import { Message } from './common';
-import { ExpertName } from './expert_name';
+import z from 'zod';
+import {Message} from './common';
+import {ExpertName} from './expert_name';
 
-export type ExpertContext = {
-	user_request: string;
-	available_host_tools: string[];
-};
-
-export type ExpertOutputType = 'llm_request' | 'llm_response' | 'info' | 'error';
-
-export type ExpertOutput = {
-	type: ExpertOutputType;
-	systemPrompt?: string;
-	messages: Message[];
-	temperature?: number;
-	maxTokens?: number;
-	note?: string;
-};
-
-export interface ExpertTask {
-	type: string; // 전문가가 수행할 작업의 종류 (예: "retrieve", "save", "synthesize")
-	topic: string; // 작업의 주제 또는 제목
-	content: string; // 작업에 필요한 데이터 (단순 문자열, 또는 복잡한 객체)
+export interface PlanIndices {
+    prev: number;
+    now: number;
+    next: number;
+    last: number;
 }
 
-export type ExpertPlans = {
-	expert: ExpertName;
-	task: ExpertTask; // 표준화된 ExpertTask 타입을 사용합니다.
-}[];
+export interface ExpertPlan {
+    expert: ExpertName;
+    task: ExpertTask;
+}
 
-export interface Expert<TInput = unknown> {
-	name: ExpertName;
-	taskTypes: string[];
-	description: string;
-	execute(context: ExpertContext, input: TInput): Promise<ExpertOutput>;
+export interface ExpertTask {
+    type: string;
+    topic: string;
+    content: any;
+    status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+}
+
+export interface ExecutionResult {
+    output: ExpertOutput;
+    newTasks?: ExpertTask[];
+}
+
+export type ExpertOutput =
+    | {
+          type: 'info';
+          messages: Message[];
+      }
+    | {
+          type: 'execution_plan';
+          messages?: Message[];
+      }
+    | {
+          type: 'plan';
+          messages?: Message[];
+      };
+
+export interface Expert<TInput = ExpertTask> {
+    name: ExpertName;
+    description: string;
+    taskTypes: string[];
+    isExecutingInternalPlan: boolean;
+    run(context: ExpertContext, input: TInput): Promise<ExpertOutput>;
+    runNextInternalPlan(context: ExpertContext): Promise<ExpertOutput>;
+    isInternalPlanCompleted(): boolean;
+    getInputSchema(): z.ZodTypeAny;
+}
+
+export interface ExpertContext {
+    userRequest: string;
+    workspacePath: string;
 }

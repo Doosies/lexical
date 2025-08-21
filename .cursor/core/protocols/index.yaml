@@ -1,13 +1,21 @@
 # .cursor/core/protocols/index.yaml
 # 이 파일은 core/protocols 디렉토리에 있는 모든 프로토콜의 목록과 설명을 관리합니다.
-# system_integrity_protocol에 의해 자동으로 업데이트됩니다.
-# 마지막 업데이트: 2025-08-05
+# AI 에이전트에 의해 수동으로 관리됩니다.
+# 마지막 업데이트: 2025-08-12
 
 protocols:
-    - file: system/ai_bootstrap_protocol.md
-      version: '2.8'
-      description: 'AI의 핵심 정체성과 행동 원칙을 정의합니다. 특히, TaskManagementExpert를 통한 명시적이고 실시간인 작업 상태 보고 규칙을 포함하여, AI가 부팅 시 따라야 할 절차와 파일 스키마를 정의합니다.'
-    - file: workflow/booting_protocol.md
+    - file: ai_bootstrap_protocol.md
+      version: '4.0'
+      description: 'AI의 핵심 정체성, 커널 책임주의 원칙, 부팅 절차, 핵심 컨텍스트 파일 스키마를 정의하는 최상위 프로토콜입니다.'
+    - file: booting_protocol.md
       version: '1.0'
-      description: 시스템 시작 및 초기화. 당신은 이 파일을 읽어와 정의된 절차를 실행합니다.
-      description: '[MAINTENANCE-PROTOCOL] `progress.md` 파일이 과도하게 길어지는 것을 방지하고, 장기적인 가독성과 유지보수성을 확보하기 위해 완료된 마일스톤을 주기적으로 아카이빙하는 절차입니다.'
+      description: '시스템 시작 시 무결성을 검사하고 초기화하는 절차를 정의합니다.'
+    - file: knowledge_base_update_protocol.md
+      version: '1.0'
+      description: '지식베이스에 새로운 정보를 저장하거나 업데이트할 때 따르는 절차를 정의합니다.'
+    - file: planning_protocol.md
+      version: '1.0'
+      description: '사용자 요청을 분석하여 실행 계획을 수립하는 절차를 정의합니다.'
+    - file: setup_protocol.md
+      version: '1.0'
+      description: '시스템 초기 설치 및 환경 설정을 위한 절차를 정의합니다.'

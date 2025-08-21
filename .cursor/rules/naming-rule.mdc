@@ -1,0 +1,53 @@
+---
+description: Flexion monorepo 네이밍 규칙
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: false
+---
+
+# 네이밍 규칙 (Naming Convention)
+
+## 전역 규칙
+- **변수명**: snake_case (예: `const variable = ''`)
+- **함수명**: camelCase (예: `function Function(){}`)
+- **React 컴포넌트 파일**: PascalCase.tsx (예: `ECButton.tsx`)
+- **Hook 파일**: camelCase.ts (예: `useAuth.ts`)
+- **유틸리티 파일**: snake_case.ts (예: `format_date.ts`)
+
+## Node 계층
+- **도메인 폴더명**: 소문자, 의미있는 이름 (예: `code`, `date`, `button`)
+- **Node 파일명**: PascalCase, `Flexion` + Domain + `Node.tsx`
+  - 예: `FlexionCodeNode.tsx`, `FlexionDateNode.tsx`
+- **Node 클래스명**: 파일명과 동일 (예: `FlexionCodeNode`)
+
+## Command
+- **Command 상수명**: UPPER_SNAKE_CASE, `[EVENT]_[TARGET]_COMMAND`
+  - 예: `CHANGE_CODE_VALUE_COMMAND`, `FOCUS_VALUE_COMMAND`
+- **Command 파일명**: UPPER_SNAKE_CASE.ts (상수명과 동일 파일명)
+  - 예: `CHANGE_CODE_VALUE_COMMAND.ts`
+- **commands/index.ts**에서 도메인 내 Command들을 재export
+
+## 타입(Types)
+- **타입 파일명**: PascalCase
+  - 예: `FlexionCodeNodeProps.ts`, `FlexionCodeNodeState.ts`
+- **인터페이스명**: PascalCase, 필요 시 `I` prefix 권장
+  - 예: `IFlexionCodeNodeState`, `IFlexionCodeNodeProps`
+
+## Plugin
+- **Plugin 파일명**: PascalCase + `Plugin.tsx`
+  - 예: `FlexionCodePlugin.tsx`
+- **내보내는 컴포넌트명**: 파일명과 동일 (예: `FlexionCodePlugin`)
+
+## 외부 상태/설정(옵션)
+- **ExternalState 타입명**: `Flexion` + Domain + `ExternalState`
+  - 예: `FlexionCodeExternalState`
+- **Config 인터페이스명**: `I` + Platform + Domain + `Config`
+  - 예: `IReactButtonConfig`
+
+## 참고 및 근거
+- 폴더 구조와 파일명 규칙: `docs/getting-started/03-folder-structure.md`
+- Command 네이밍 패턴: `docs/getting-started/06-command-system.md`
+- Node/파일/클래스 네이밍: `docs/flow/flow.md`, `docs/readme.md`
+- ESLint 규칙 참고: `flexion/node-naming-convention` (Node 명명 규칙 점검)
+

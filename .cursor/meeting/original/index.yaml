@@ -1,0 +1,25 @@
+# .cursor/meeting/original/index.yaml
+# 이 파일은 회의록 원본 텍스트 파일의 목록을 관리합니다.
+# 마지막 업데이트: 2025-08-12
+
+files:
+    - path: 250725_0925(EFE1팀).txt
+      summary: 'EFE1팀 회의. 렉시컬 신규 노드(Decimal, Code) 개발 및 역할 분담에 대한 논의.'
+    - path: 250725_1025(flexion).txt
+      summary: 'Flexion 프로젝트 초기 설정, 빌드 프로세스, 명명 규칙, 아키텍처 방향성에 대한 논의.'
+    - path: 250730_0910(flexion).txt
+      summary: 'Flexion 아키텍처 설계 관련 회의.'
+    - path: 250731_1312(efe1).txt
+      summary: 'EFE1팀 프로젝트 파트 분담 관련 회의.'
+    - path: 250731_1520(flexion).txt
+      summary: 'Flexion 모듈 역할 설계 관련 회의.'
+    - path: 250801_0910(flexion).txt
+      summary: 'Flexion 키 생성 및 뷰모델 정리 관련 회의.'
+    - path: 250804_1430(flexion).txt
+      summary: 'Flexion AST 아키텍처 논의.'
+    - path: 250806_1538(flexion).txt
+      summary: 'Flexion Definition Normalization 아키텍처 설계 논의.'
+    - path: 250808_0953(flexion).txt
+      summary: 'Flexion 아키텍처 및 컴포넌트 개발 방향성 논의.'
+    - path: 250811_1702(flexion).txt
+      summary: 'AI 기반 Rule-Growing 개발 방법론 및 Flexion 아키텍처 논의.'

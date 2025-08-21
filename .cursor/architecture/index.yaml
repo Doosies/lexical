@@ -1,0 +1,32 @@
+# ===============================================
+# /.cursor/architecture/ 문서 목차 (Index)
+# ===============================================
+# 이 파일은 /.cursor/architecture/ 폴더에 있는 모든 아키텍처 결정 기록(ADR) 문서의 목록 및 요약을 관리합니다.
+# AI는 새로운 ADR 문서를 추가할 때, 반드시 이 파일을 최신 상태로 유지해야 합니다.
+# (This file is auto-generated and maintained by the AI.)
+# ===============================================
+
+documents:
+    - path: './README.md'
+      summary: '이 폴더의 목적과 문서 목록을 설명하는, 사람이 읽기 좋은 가이드 문서입니다. (Auto-generated)'
+      version: '1.0'
+    - path: './adr-001-adaptive-orchestration-model.md'
+      summary: '시스템이 동적인 상황에 대응하고, 실행 계획을 유연하게 조정할 수 있도록 하는 "적응형 오케스트레이션 모델"을 정의합니다.'
+      version: '1.0'
+    - path: './adr-002-executable-prompt-architecture.md'
+      summary: '모든 전문가의 역할과 능력을 YAML 형식의 "실행 가능한 프롬프트"로 정의하여, 시스템이 자신의 능력을 동적으로 로드하고 실행할 수 있게 하는 아키텍처를 설명합니다.'
+      version: '1.0'
+    - path: './adr-003-executable-prompt-architecture.md'
+      summary: 'ADR-002를 보완하여, 실행 가능한 프롬프트의 구체적인 스키마와 전문가 간의 협업 프로토콜을 정의합니다.'
+      version: '1.0'
+    - path: './adr-004-orchestration-router-and-kernel-responsibility.md'
+      summary: 'OrchestrationEngineExpert를 OrchestrationRouter로 변경하고, 커널의 책임을 위임과 최종 무결성 보장으로 명확히 분리하여 시스템의 안정성을 강화하는 결정 (adr-005에 의해 대체됨)'
+      version: '1.0'
+    - path: './adr-005-plan-executor-and-master-planner-architecture.md'
+      summary: 'PlanExecutor와 Master Planner 역할을 도입하여 OrchestrationRouter의 모호성을 해결하려던 시도. (adr-006에 의해 대체됨)'
+      version: '1.0'
+    - path: './adr-006-direct-kernel-execution-architecture.md'
+      summary: 'PlanExecutor를 제거하고 System Kernel이 직접 계획을 실행하도록 아키텍처를 간소화하여 명확성을 높임. (현재 아키텍처)'
+      version: '1.0'
+
+directories: []

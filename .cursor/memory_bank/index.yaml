@@ -1,31 +1,26 @@
-# ===============================================
-# 메모리 뱅크 루트 목차 (Memory Bank Root Index)
-# ===============================================
-# 이 파일은 메모리 뱅크의 최상위 목차 역할을 하며, 모든 하위 디렉토리의 목록과 요약을 관리합니다.
-# AI는 파일 시스템 변경 시, `index_consistency_protocol`에 따라 이 파일을 자동으로 최신 상태로 유지해야 합니다.
-# ===============================================
+# Root index for the entire .cursor/memory_bank directory.
 
-documents:
-    # 예시:
-    # - path: './sample-document.md'
-    #   summary: '문서에 대한 간략한 요약입니다.'
+# This file acts as a central registry for all knowledge categories within the memory bank.
+# It is used by the AI to quickly understand the overall structure and locate
+# relevant information.
 
-directories:
-    - path: './project_context/'
-      summary: '프로젝트의 목표, 기술 스택, 현재 상태 등 핵심 공용 컨텍스트를 관리합니다.'
-    - path: './users/'
-      summary: '사용자별 개인화된 컨텍스트(activeContext, progress, user_profile)를 저장합니다.'
-    - path: './short_term_memory/'
-      summary: 'AI의 모든 상호작용 결과를 우선순위에 따라 기록하는 단기 기억 로그 저장소입니다.'
-    - path: './troubleshooting/'
-      summary: '시스템 실패 및 중요 오류에 대한 원인과 해결 과정을 기록하는 실패 회고록 저장소입니다.'
-    - path: './guidelines/'
-      summary: 'AI 시스템 아키텍처(`brain.yaml`), Lexical API, 노드/플러그인 개발 등 핵심 개발 가이드라인을 제공합니다.'
-    - path: './analysis/'
-      summary: 'Lexical의 데이터 흐름, 노드 시스템(`__key` 포함), 플러그인 등 핵심 아키텍처를 심층 분석한 결과를 기록합니다.'
-    - path: './deep_dives/'
-      summary: '특정 기술이나 아키텍처에 대한 심층 분석 문서를 포함합니다.'
-    - path: './examples/'
-      summary: '특정 작업을 수행하는 방법에 대한 구체적인 코드 예제를 포함합니다.'
-    - path: './decisions/'
-      summary: '중요한 기술적 결정(ADR)을 기록한 문서를 포함합니다.'
+# Each key represents a top-level directory.
+# The `summary` provides a one-line description of the category's purpose.
+# The `path` points to the corresponding subdirectory.
+
+index:
+    - id: '5.0'
+      summary: "All knowledge related to the 'ecount-v5.0' project."
+      path: './5.0/'
+    - id: 'flexion'
+      summary: "All knowledge related to the 'Flexion' editor project."
+      path: './flexion/'
+    - id: 'philosophy'
+      summary: "Core guiding principles and development methodologies of 'The Brain' system."
+      path: './philosophy/'
+    - id: 'session_logs'
+      summary: 'Archives of significant past interactions and decisions.'
+      path: './session_logs/'
+    - id: 'users'
+      summary: 'User-specific contexts, settings, and temporary files.'
+      path: './users/'

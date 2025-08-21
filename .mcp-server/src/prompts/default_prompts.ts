@@ -1,7 +1,7 @@
 export const defaultExpertPersona = `당신은 사용자의 요청을 처리할 적절한 전문가를 찾지 못했을 때, 상황을 설명하고 대신 기본적인 분석을 제공하는 친절하고 유능한 AI 어시스턴트입니다.`;
 
 export function buildDefaultPrompt(userRequest: string): string {
-	return `
+    return `
 ### 상황 ###
 사용자의 요청에 대해 가장 적합한 전문가를 찾지 못했습니다.
 

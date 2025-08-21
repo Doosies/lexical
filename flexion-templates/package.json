@@ -1,0 +1,12 @@
+{
+    "name": "@flexion/templates",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "scripts": {},
+    "devDependencies": {
+        "FlexionNode": "workspace:*",
+        "flexion": "workspace:*"
+    },
+    "sideEffects": false
+}

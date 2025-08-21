@@ -1,0 +1,482 @@
+---
+description: flexion의 boilerplate code를 생성할 때 반드시 참조해야하는 규칙
+---
+
+# Flexion Boilerplate Code Generation Rule (v2.5 - Linearized)
+
+## 목차
+
+-   [Step 1: 입력 분석 (Input Analysis)](#step-1-입력-분석-input-analysis)
+-   [Step 2: 파일 경로 및 상태 결정 (File Path & Status Resolution)](#step-2-파일-경로-및-상태-결정-file-path--status-resolution)
+-   [Step 3: 파일 내용 생성 (File Content Generation)](#step-3-파일-내용-생성-file-content-generation)
+    -   [3.1. Import 규칙](#31-import-규칙)
+    -   [3.2. 핵심 로직 생성 (Node, Types)](#32-핵심-로직-생성-node-types)
+        -   [3.2.1. `Flexion{DataType}Node.tsx`](#321-flexiondatatypenodetsx)
+        -   [3.2.2. `types/Flexion{DataType}NodeProps.ts`](#322-typesflexiondatatypenodepropsts)
+        -   [3.2.3. `types/Flexion{DataType}NodeState.ts`](#323-typesflexiondatatypenodestatets)
+    -   [3.3. 상호작용 로직 생성 (Commands, Plugins)](#33-상호작용-로직-생성-commands-plugins)
+        -   [3.3.1. `commands/{view_type}/{COMMAND_NAME}.ts`](#331-commandsview_typecommand_namets)
+        -   [3.3.2. `plugins/{view_type}/Flexion{DataType}{ViewType}Plugin.tsx`](#332-pluginsview_typeflexiondatatypetypetypetsx)
+    -   [3.4. 뷰(View) 생성](#34-뷰view-생성)
+        -   [3.4.1. `views/Base{DataType}View.tsx`](#341-viewsbasedatatypetypetsx)
+        -   [3.4.2. `views/{DataType}ViewFactory.ts`](#342-viewsdatatypeviewfactoryts)
+        -   [3.4.3. `views/{view_type}/{ViewType}{DataType}View.tsx`](#343-viewsview_typeviewtypedatatypetypetsx)
+    -   [3.5. 모듈 연결 (`index.ts`)](#35-모듈-연결-indexts)
+-   [Step 4: 파일 시스템 적용 (File System Application)](#step-4-파일-시스템-적용-file-system-application)
+    -   [4.1. 파일 병합 및 업데이트 규칙](#41-파일-병합-및-업데이트-규칙)
+-   [Step 5: 최종 검증 (Final Verification)](#step-5-최종-검증-final-verification)
+    -   [5.1. 검증 체크리스트](#51-검증-체크리스트)
+
+<br>
+
+> **절대 원칙 (Golden Rules)**
+>
+> 1.  **선형적 단계 수행**: LLM은 반드시 Step 1부터 Step 5까지 순서대로 각 단계를 완벽하게 수행해야 합니다. 이전 단계가 완료되지 않은 상태에서 다음 단계로 넘어가서는 안 됩니다.
+> 2.  **명확한 입출력**: 각 단계는 이전 단계의 결과물을 입력으로 받으며, 다음 단계로 전달할 명확한 결과물을 출력해야 합니다.
+> 3.  **검증**: Step 5의 최종 검증 단계를 통해 생성된 코드의 정합성을 보장해야 합니다.
+
+<br>
+
+## LLM을 위한 가이드
+
+> **1. 당신의 역할**: 당신은 **Flexion Boilerplate 생성 전문가**입니다. 당신의 임무는 이 규칙 문서를 완벽하게 이해하고, 아래에 정의된 5단계의 선형적 프로세스를 정확하게 따라 코드를 생성하는 것입니다.
+> **2. 당신의 목표**: 템플릿 파일들을 입력받아, 각 단계를 순차적으로 수행하여 최종적으로 유효한 소스 코드 파일들을 생성, 수정, 또는 삭제하는 것입니다.
+
+---
+
+## Step 1: 입력 분석 및 JSON 설계도 생성 (Input Analysis & JSON Blueprint Generation)
+
+**[역할]**: 제공된 템플릿 파일(`types.ts`, `_*ts`)의 내용을 분석하여, 코드 생성에 필요한 모든 정보를 추출하고 **구조화된 단일 JSON 객체(설계도)**를 생성합니다. 이 단계의 유일한 산출물은 이 JSON 객체입니다.
+
+1.  **정보 추출**:
+    -   `packages/flexion-templates/src/{data_type}/types.ts`에서 `NodeData`, `NodeState`, `NodeProps` 인터페이스의 **내용(body)**을 문자열로 추출합니다.
+    -   각 `packages/flexion-templates/src/{data_type}/{config}.ts` 파일에서 `data_type`, `view_type`, `commands` 배열(커맨드명, payload 타입, 우선순위)을 추출합니다.
+2.  **JSON 설계도 생성**: 추출된 모든 정보를 아래 구조에 따라 단일 JSON 객체로 통합합니다. 이 객체는 후속 단계의 유일한 정보 소스가 됩니다.
+
+    -   **JSON 출력 예시**:
+        ```json
+        {
+            "data_type": "Sample",
+            "types": {
+                "NodeData": "name: string; value: number;",
+                "NodeState": "view_type: EN_VIEW_TYPE;  is_editable: boolean;",
+                "NodeProps": "custom_prop: () => void;"
+            },
+            "view_configs": [
+                {
+                    "view_type": "default",
+                    "commands": [
+                        {
+                            "name": "A_COMMAND",
+                            "payload_type": "BaseNodePayload",
+                            "priority": "NORMAL"
+                        }
+                    ]
+                },
+                {
+                    "view_type": "anchor",
+                    "commands": [
+                        {
+                            "name": "B_COMMAND",
+                            "payload_type": "ValuePayload<string>",
+                            "priority": "HIGH"
+                        }
+                    ]
+                }
+            ]
+        }
+        ```
+
+3.  **설계도 보고**: 생성된 JSON 설계도를 사용자에게 `json ... ` 형식으로 출력하여 분석 결과를 보고합니다.
+4.  **결과물**: 생성된 **JSON 설계도**. 이 객체는 Step 2의 입력으로 사용됩니다.
+
+## Step 2: 파일 경로 및 상태 결정 (File Path & Status Resolution)
+
+**[역할]**: **오직 Step 1의 JSON 설계도**만을 입력으로 받아, 생성/수정/삭제가 필요한 모든 파일의 절대 경로와 상태를 결정하여 **"파일 작업 목록"**을 생성합니다.
+
+1.  **파일 경로 확정**: Step 1의 JSON 설계도와 **파일 영향 분석표**를 참조하여, 영향을 받는 모든 파일의 전체 경로 목록을 생성합니다.
+    -   **파일 영향 분석표 (File Influence Map)**
+        | JSON Key | 목적 | 영향을 받는 생성 파일 |
+        |---|---|---|
+        | `view_configs` | `view_type`별 상호작용 및 UI 정의 | `commands/*`, `plugins/*`, `views/*` |
+        | `types` | 핵심 데이터 구조 및 상태 정의 | `types/*` |
+        | 모든 변경 | 모듈 연결성 보장 | 각 계층의 `index.ts` |
+        | 최초 생성 시 | 기본 구조 형성 | `Flexion{DataType}Node.tsx`, `views/Base{DataType}View.tsx` |
+2.  **파일 상태 결정**: 확정된 각 파일 경로에 대해 파일 시스템을 확인하여 `🟢NEW`, `✏️UPDATE`, `❌DELETE`, `⚪UNCHANGED` 상태를 결정합니다.
+
+> **[UPDATE / UNCHANGED 상태 결정 가이드]**
+>
+> LLM은 파일의 상태를 결정할 때 아래 기준을 엄격하게 따라야 합니다. "기능적 변경" 유무가 가장 중요한 판단 기준입니다.
+>
+> -   **`✏️UPDATE` (기능적 변경이 있는 경우)**
+>     -   인터페이스 상속 구조 변경 (`extends` 추가/삭제/변경)
+>     -   함수 또는 메서드의 시그니처(인자, 반환 타입) 변경
+>     -   새로운 로직(메서드, 함수, 변수, `case` 문 등) 추가 또는 기존 로직 삭제
+>     -   `export` 목록에 새로운 아이템이 추가되거나 삭제되는 경우
+> -   **`⚪UNCHANGED` (기능적 변경이 없는 경우)**
+>     -   `import` 구문의 순서, 그룹화 방식 또는 경로만 변경된 경우 (단, 변경 전후의 경로가 기능적으로 동일한 모듈을 가리켜야 함. 예: 상대 경로 ↔ 절대 경로/별칭)
+>     -   주석의 내용, 위치, 추가 또는 삭제
+>     -   단순 줄바꿈, 공백 등 코드 포맷팅 스타일 변경
+>
+> **판단이 모호할 경우**:
+> 위 기준에 따라 기능적 변경 여부를 판단하기 모호한 경우, LLM은 자의적으로 판단하지 않고 **반드시 사용자에게 질문하여 확인**을 받아야 합니다.
+>
+> 이 규칙은 불필요한 코드 변경(churn)을 방지하고, 사용자가 직접 수정한 코드 스타일을 존중하기 위함입니다.
+
+3.  **변경 사항 시각화 및 보고**: 결정된 파일 상태를 기반으로, 아래와 같은 트리 구조를 생성하여 사용자에게 보고합니다. 이 시각화 자료를 통해 사용자는 변경될 내용을 명확히 인지할 수 있습니다.
+
+```markdown
+/nodes/{data_type}/
+|-- commands/
+| |-- {view_type}/
+| | |-- {COMMAND_NAME}.ts (🟢NEW)
+| | └─- index.ts (✏️UPDATE)
+| └─- index.ts
+|-- plugins/
+| |-- {view_type}/
+| | |-- Flexion{DataType}{ViewType}Plugin.tsx (🟢NEW)
+| | |-- NoMoreNeedPlugin.tsx (❌DELETE)
+| | |-- PrevPlugin.tsx (⚪UNCHANGED)
+| | └─- index.ts (✏️UPDATE)
+| └─- index.ts
+|-- types/
+| |-- Flexion{DataType}NodeProps.ts(✏️UPDATE)
+| |-- Flexion{DataType}NodeState.ts(⚪UNCHANGED)
+| └─- index.ts (⚪UNCHANGED)
+|-- views/
+| |-- {view_type}/
+| | |-- {ViewType}{DataType}View.tsx(✏️UPDATE)
+| | └─- index.ts (⚪UNCHANGED)
+| |-- Base{DataType}View.tsx(⚪UNCHANGED)
+| |-- {DataType}ViewFactory.ts(✏️UPDATE)
+| └─- index.ts (⚪UNCHANGED)
+|-- Flexion{DataType}Node.tsx (⚪UNCHANGED)
+└─- index.ts (⚪UNCHANGED)
+```
+
+4.  **결과물**: `[{path: '...', status: 'NEW'}, {path: '...', status: 'UPDATE'}, ...]` 형태의 **"파일 작업 목록"**을 생성합니다. 이 목록은 Step 3의 입력으로 사용됩니다.
+
+## Step 3: 파일 내용 생성 (File Content Generation)
+
+**[역할]**: Step 2의 **"파일 작업 목록"**과 Step 1의 **"JSON 설계도"**를 참조하여, 각 파일에 들어갈 전체 내용을 메모리상에서 생성합니다.
+
+### 3.1. Import 규칙
+
+LLM은 아래에 정의된 **우선순위**에 따라 Import 경로를 결정해야 합니다.
+
+#### 우선순위 1: 공용 모듈 상대 경로 계산
+
+-   아래 '공용 모듈' 테이블에 정의된 항목을 import할 경우, **반드시** 현재 생성 중인 파일 위치를 기준으로 상대 경로를 동적으로 계산해야 합니다.
+-   **(중요) 깊은 경로 import 금지 (No Deep Imports)**: 공용 모듈(`base`, `common` 등)에서 import할 때는 `../base/types/FlexionNodeProps`와 같이 2단계 이상 깊은 파일 경로로 직접 접근해서는 안 됩니다. 반드시 모듈의 진입점(예: `../../base, ../common, ../../../common`)을 통해 import 해야 합니다.
+
+| 모듈 경로                                   | 주요 Export 항목                                                                                                 | 설명                                          |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `packages/30.flexion-node/src/nodes/base`   | `BaseNodeView`, `INodeView`, `FlexionNodeEventHandler`, `FlexionNodeProps`, `FlexionNodeState`, `IDataTypeState` | 모든 노드 View와 타입의 기반이 되는 공용 모듈 |
+| `packages/30.flexion-node/src/nodes/common` | `BaseNodePayload`, `ValuePayload`                                                                                | 모든 노드에서 공통으로 사용하는 Payload 타입  |
+
+#### 우선순위 2: 핵심 모듈 절대 경로 (Source of Truth)
+
+-   아래 테이블의 모듈은 경로 계산 없이 명시된 경로를 그대로 사용해야 합니다.
+
+| 모듈/클래스/함수                                              | 경로 (Path)                             | 설명                                   |
+| ------------------------------------------------------------- | --------------------------------------- | -------------------------------------- |
+| `FlexionDecoratorNode`, `createCommand`, `COMMAND_PRIORITY_*` | `import { ... } from 'flexion';`        | Node의 핵심 기반 클래스 및 커맨드 관련 |
+| `useFlexionComposerContext`                                   | `import { ... } from 'FlexionNode';`    | Flexion 컨텍스트 접근 훅               |
+| `mergeRegister`                                               | `import { ... } from '@flexion/utils';` | 여러 커맨드 리스너를 병합하는 유틸     |
+
+#### 우선순위 3: 일반 로직 및 그룹화
+
+-   위 두 경우에 해당하지 않는 경우, 동일 `{data_type}` 모듈 내에서는 짧은 상대 경로를 사용하고, 그 외에는 `tsconfig` 별칭을 사용합니다.
+-   모든 import 구문은 1. 외부 라이브러리, 2. 모노레포 라이브러리, 3. 내부 모듈 순으로 그룹화하고 정렬합니다.
+
+### 3.2. 핵심 로직 생성 (Node, Types)
+
+#### 3.2.1. `Flexion{DataType}Node.tsx`
+
+-   **규칙**:
+    1. `'flexion'` 패키지에서 `FlexionDecoratorNode`를 `import`하여 상속받습니다.
+    2. 아래 메서드들만 코드 템플릿과 같이 정확하게 구현합니다.
+        - `$getConfig()`: `type` 속성을 `{data_type}`으로 설정하여 반환합니다.
+        - `createDOM()`: 기본 `HTMLElement`를 생성하여 반환합니다.
+        - `decorate()`: `{DataType}ViewFactory`를 사용하여 View 컴포넌트를 생성하고 반환합니다.
+    3. `constructor`는 추가하지 않습니다.
+-   **코드 템플릿**:
+
+        ```typescript
+
+    import { EditorConfig, FlexionDecoratorNode, IFlexionDecoratorNodeConfig } from 'flexion';
+    import React from 'react';
+
+    import { Flexion{DataType}NodeData, Flexion{DataType}NodeState } from './types';
+    import { create{DataType}View } from './views';
+
+    export class Flexion{DataType}Node extends FlexionDecoratorNode<
+    Flexion{DataType}NodeData,
+    Flexion{DataType}NodeState,
+    React.ReactElement > {
+    protected $getConfig(): IFlexionDecoratorNodeConfig | null {
+    return {type: '{data_type}'};
+    }
+
+            createDOM(config: EditorConfig): HTMLElement {
+                return document.createElement('span');
+            }
+
+            decorate(): JSX.Element {
+                const state = this.$getState();
+                const view_type = state?.view_type;
+
+            const view = create{DataType}View(this, view_type);
+            return view.getComponent();
+            }
+        }
+        ```
+
+#### 3.2.2. `types/Flexion{DataType}NodeProps.ts`
+
+-   **규칙**: `packages/flexion-templates/src/{data_type}/types.ts` 파일에서 `NodeProps` 인터페이스의 정의를 추출하여 아래 템플릿에 통합합니다.
+-   **코드 템플릿**:
+
+        ```typescript
+
+    import {FlexionNodeProps, FlexionNodeState} from 'FlexionNode';
+
+    export interface Flexion{DataType}NodeProps<
+    TDataType,
+    TState extends FlexionNodeState, > extends FlexionNodeProps<TDataType, TState> {
+    // ... (템플릿의 NodeProps 내용)
+    }
+
+    ```
+
+    ```
+
+#### 3.2.3. `types/Flexion{DataType}NodeState.ts`
+
+-   **규칙**: `packages/flexion-templates/src/{data_type}/types.ts` 파일에서 `NodeData`와 `NodeState` 인터페이스의 정의를 추출하여 아래 템플릿에 통합합니다.
+-   **코드 템플릿**:
+
+        ```typescript
+
+    import {FlexionNodeState} from 'FlexionNode';
+
+    export type Flexion{DataType}NodeData = {
+    // ... (템플릿의 NodeData 내용)
+    };
+
+    export interface Flexion{DataType}NodeState extends FlexionNodeState {
+    // ... (템플릿의 NodeState 내용)
+    }
+
+    ```
+
+    ```
+
+### 3.3. 상호작용 로직 생성 (Commands, Plugins)
+
+#### 3.3.1. `commands/{view_type}/{COMMAND_NAME}.ts`
+
+    - **규칙**:
+    1.  `createCommand`를 사용하여 커맨드를 생성하고 `export` 합니다.
+    2.  템플릿의 `payload_type`에 따라 `ValuePayload` 또는 `BaseNodePayload`를 `import` 합니다.
+
+-   **코드 템플릿**:
+
+    ```typescript
+    import { createCommand, ValuePayload, BaseNodePayload } from 'flexion';
+
+    export type {CommandNamePascal}Payload = {PayloadType}; // ValuePayload or BaseNodePayload
+
+    export const {COMMAND_NAME}_COMMAND =
+        createCommand<{CommandNamePascal}Payload>('{COMMAND_NAME}_COMMAND');
+    ```
+
+#### 3.3.2. `plugins/{view_type}/Flexion{DataType}{ViewType}Plugin.tsx`
+
+    - **규칙**:
+        1. `memo`로 감싸진 React 컴포넌트로 구현합니다.
+    2. `useEffect` 훅 내에서 `flexion.registerCommand()`를 호출하여 템플릿에 정의된 모든 커맨드를 등록합니다.
+    3. 콜백 핸들러는 기본적으로 `return false;`를 반환합니다.
+    4. 커맨드 우선순위는 템플릿에 명시된 `priority` 값을 사용합니다.
+
+-   **코드 템플릿**:
+
+    ```typescript
+    import { memo, useEffect } from 'react';
+    import { useFlexionComposerContext } from 'FlexionNode';
+    import { mergeRegister } from '@flexion/utils';
+    import { COMMAND_PRIORITY_{Priority} } from 'flexion';
+    import { {COMMAND_NAME}_COMMAND, {CommandNamePascal}Payload } from '../../commands';
+
+    export const Flexion{DataType}{ViewType}Plugin = memo(function Flexion{DataType}{ViewType}Plugin() {
+        const [flexion] = useFlexionComposerContext();
+
+        useEffect(() => {
+            return mergeRegister(
+                flexion.registerCommand(
+                    {COMMAND_NAME}_COMMAND,
+                    (payload: {CommandNamePascal}Payload) => {
+                        // business logic
+                        return false;
+                    },
+                    COMMAND_PRIORITY_{Priority},
+                ),
+                // ... other registerCommand calls
+            );
+        }, [flexion]);
+
+        return null;
+    });
+    ```
+
+### 3.4. 뷰(View) 생성
+
+#### 3.4.1. `views/Base{DataType}View.tsx`
+
+-   **규칙**: `'../../base/BaseNodeView'` 경로에서 `BaseNodeView`를 `import`하여 상속받는 추상 클래스로 구현합니다.
+-   **코드 템플릿**:
+
+    ```typescript
+    import { FlexionDecoratorNode } from 'flexion';
+    import { BaseNodeView } from '../../base/BaseNodeView';
+    import {Flexion{DataType}CodeNodeData, Flexion{DataType}CodeNodeState} from '../types';
+
+    export abstract class Base{DataType}View extends BaseNodeView<
+        Flexion{DataType}Node,
+        Flexion{DataType}CodeNodeData,
+        Flexion{DataType}CodeNodeState
+    > {
+        constructor(node: FlexionDecoratorNode<any, any, any>) {
+            super(node);
+        }
+        abstract getComponent(): React.ReactElement;
+    }
+    ```
+
+#### 3.4.2. `views/{DataType}ViewFactory.ts`
+
+    - **규칙**:
+    1. `switch` 문을 사용하여 `view_type`에 따라 적절한 View 인스턴스를 생성하여 반환합니다. `case`는 템플릿에 정의된 모든 `view_type`에 대해 존재해야 합니다.
+    2. **(중요) `default` 케이스 처리**:
+        - 템플릿 config 파일 중 `view_type`이 `'default'`인 것이 **있는 경우**: `switch` 문의 `default`에서 해당 `Default{DataType}View` 인스턴스를 생성하여 반환해야 합니다. 이는 명시적으로 처리되지 않은 `view_type`에 대한 기본값 역할을 합니다.
+        - `view_type`이 `'default'`인 config 파일이 **없는 경우**: `switch` 문의 `default`에서는 `throw new Error('Unsupported view type');`를 호출해야 합니다.
+
+-   **코드 템플릿 예시**:
+
+    -   **`view_type: 'default'`가 있는 경우**:
+
+        ```typescript
+        import {EN_VIEW_TYPE, BaseNodeView} from 'FlexionNode';
+        import {Flexion{DataType}Node} from '../Flexion{DataType}Node';
+
+        import {Anchor{DataType}View} from './anchor';
+        import {Default{DataType}View} from './default';
+
+        export function create{DataType}View(
+            node: Flexion{DataType}Node,
+            view_type: EN_VIEW_TYPE
+        ): BaseNodeView {
+            switch (view_type) {
+                case EN_VIEW_TYPE.Anchor:
+                    return new Anchor{DataType}View(node);
+                default:
+                    return new Default{DataType}View(node);
+            }
+        }
+        ```
+
+    -   **`view_type: 'default'`가 없는 경우**:
+
+        ```typescript
+        import {EN_VIEW_TYPE, BaseNodeView} from 'FlexionNode';
+        import {Flexion{DataType}Node} from '../Flexion{DataType}Node';
+
+        import {Anchor{DataType}View} from './anchor';
+        import {Image{DataType}View} from './image';
+
+        export function create{DataType}View(
+            node: Flexion{DataType}Node,
+            view_type: EN_VIEW_TYPE
+        ): BaseNodeView {
+            switch (view_type) {
+                case EN_VIEW_TYPE.Anchor:
+                    return new Anchor{DataType}View(node);
+                case EN_VIEW_TYPE.Image:
+                    return new Image{DataType}View(node);
+                default:
+                    throw new Error('Unsupported view type');
+            }
+        }
+        ```
+
+#### 3.4.3. `views/{view_type}/{ViewType}{DataType}View.tsx`
+
+    - **규칙**:
+    1.  `Base{DataType}View`를 상속받습니다.
+    2.  `getComponent()` 메서드는 `this.getState()`와 `this.getData()`를 사용해야 하며, 기본적으로 `<div>컴포넌트를 입력해주세요</div>`를 반환합니다.
+    3.  템플릿에 정의된 각 `command`에 대해, `on{EventName}` 형태의 이벤트 핸들러를 구현하고, `this.dispatchCommand()`를 호출해야 합니다.
+
+-   **코드 템플릿**:
+
+        ```typescript
+
+    import React from 'react';
+    import { Base{DataType}View } from '../Base{DataType}View';
+    import { {COMMAND_NAME}\_COMMAND, {CommandNamePascal}Payload } from '../../commands';
+
+    export class {ViewType}{DataType}View extends Base{DataType}View {
+    getComponent(): React.ReactElement {
+    const state = this.getState();
+    const data = this.getData();
+
+                return <div>컴포넌트를 입력해주세요</div>;
+            }
+
+        on{CommandName} = (event: React.MouseEvent): void => {
+            this.dispatchCommand({COMMAND_NAME}_COMMAND, {
+                    dataKey: this.getDataKey(),
+                value: event.currentTarget.textContent,
+                });
+            };
+            // ... other command handlers
+        }
+        ```
+
+### 3.5. 모듈 연결 (`index.ts`)
+
+-   각 서브디렉토리(`commands`, `plugins`, `types`, `views` 등)와 최상위 `{data_type}` 디렉토리의 `index.ts` 파일 내용을 `export * from '...'` 구문을 사용하여 생성합니다.
+-   `packages/30.flexion-node/src/nodes/index.ts` 에도 새로운 `{data_type}` 모듈을 `export` 하는 라인을 추가합니다.
+
+## Step 4: 파일 시스템 적용 (File System Application)
+
+**[역할]**: Step 3의 **"파일 내용 목록"**을 실제 파일 시스템에 적용합니다.
+
+1.  **파일 작업 수행**:
+    -   `status`가 `🟢NEW` 또는 `✏️UPDATE`인 파일에 대해 `edit_file` 도구를 사용하여 내용을 쓰거나 수정합니다.
+    -   `status`가 `❌DELETE`인 파일에 대해 `delete_file` 도구를 사용합니다.
+2.  **병합 규칙 적용**: `status`가 `✏️UPDATE`인 경우, 아래의 **파일 병합 및 업데이트 규칙**을 준수하여 `edit_file` 도구를 정교하게 사용해야 합니다.
+
+### 4.1. 파일 병합 및 업데이트 규칙
+
+-   **신규 내용 추가**: 템플릿에 새로 추가된 `command`, `interface` 필드, `case` 문 등이 기존 파일에 없다면 해당 내용을 추가합니다.
+-   **기존 내용 보존**: 사용자가 직접 추가한 코드는 삭제되지 않고 그대로 유지되어야 합니다.
+-   **선택적 업데이트**: 템플릿의 내용이 변경된 경우, 파일 전체를 덮어쓰지 않고 해당 부분만 선택적으로 수정합니다.
+-   **`index.ts` 관리**: `index.ts` 파일은 현재 템플릿과 관련된 `export` 구문만 선택적으로 추가/수정/삭제해야 합니다.
+
+## Step 5: 최종 검증 (Final Verification)
+
+**[역할]**: Step 4 완료 후, 생성되거나 수정된 모든 파일의 정합성을 검증하고 필요시 수정합니다.
+
+1.  **검증 실행**: 아래 **검증 체크리스트**의 모든 항목을 순서대로 검사합니다.
+2.  **오류 수정**: 만약 단 하나의 항목이라도 실패할 경우, 즉시 해당 문제를 수정하고 **처음부터 다시 전체 체크리스트를 재검증**합니다.
+3.  **완료**: 모든 항목이 연속으로 통과할 때까지 이 과정을 반복합니다.
+
+### 5.1. 검증 체크리스트
+
+-   **[ ] 범위 제한**: 모든 파일 변경이 `packages/30.flexion-node/src/nodes/{data_type}/` 디렉토리 내에서만 이루어졌는가?
+-   **[ ] ESLint 유효성**: 생성/수정된 모든 파일이 `eslint` 검사를 통과하는가?
+-   **[ ] `Flexion{DataType}Node.tsx`**: 상속, 제네릭, 필수 메서드 구현이 정확한가?
+-   **[ ] `types/`**: `NodeProps`, `NodeState`가 템플릿과 일치하게 생성되었는가?
+-   **[ ] `views/`**: `Base{DataType}View` 상속 및 이벤트 핸들러 구현이 정확한가?
+-   **[ ] `plugins/`**: `registerCommand` 사용 및 콜백 반환 값이 정확한가?
+-   **[ ] Import 경로**: 모든 `import` 구문이 `Step 3.1`의 규칙을 완벽하게 준수하는가?

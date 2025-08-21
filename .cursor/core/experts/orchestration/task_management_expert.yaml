@@ -5,43 +5,61 @@ persona:
     background: '작업을 추가, 수정, 삭제하고 전체 작업 목록의 상태를 일관되게 유지하는 데 특화되어 있습니다.'
     traits:
         - '체계성: 모든 작업 변경 사항을 정확하게 기록하고 반영합니다.'
-summary: '세션의 To-Do 리스트를 관리하고, 그 결과를 명시적으로 반환하는 원자적(atomic) 작업을 수행합니다.'
+summary: '세션의 To-Do 리스트를 관리하고, 그 결과를 명시적으로 반환하는 원자적(atomic) 작업을 수행합니다. '
+
+constraints:
+    - 'todo_write 툴은 절대 호출하지 않는다.'
+    - 'update_active_context, archive_goal_to_progress, archive_progress_logs 워크플로에서는 edit_file만 사용한다.'
+    - 'ToDo 리스트 수정은 반드시 activeContext.md 파일을 edit_file로 덮어쓰는 방식으로 수행한다.'
 
 workflows:
     update_active_context:
-        description: '수행할 작업(action)과 To-Do 목록(todos)을 입력받아, 내부 To-Do 리스트와 `activeContext.md` 파일을 동기화하고, 최종 기록된 컨텐츠를 반환합니다.'
+        description: 'To-Do 목록(todos)을 입력받아, `activeContext.md` 파일을 직접 읽고 수정하여 작업 목록을 동기화하고, 최종 기록된 컨텐츠를 반환합니다.'
+        parameters:
+            - name: 'todos'
+              type: 'array'
+              description: '업데이트할 To-Do 항목의 배열'
+              required: true
         steps:
             - step: 1
-              name: '입력 파라미터 검증'
-              goal: '필수 파라미터인 `action`과 `todos`가 존재하는지 확인합니다.'
+              name: '`activeContext.md` 파일 읽기'
+              goal: '현재 activeContext.md 파일의 내용을 읽어옵니다.'
               actions:
-                  - '입력 데이터에서 `action`과 `todos`를 확인합니다.'
-              on_failure: '필수 파라미터가 누락된 경우, `status: "failure"`와 오류 메시지를 반환하고 즉시 종료합니다.'
+                  - '[TOOL: read_file] .cursor/memory_bank/users/{user.name}/activeContext.md 파일을 읽습니다.'
+              on_failure: '`activeContext.md` 파일 읽기 실패 시, `status: "failure"`와 오류 메시지를 반환합니다.'
 
             - step: 2
-              name: '내부 To-Do 리스트 업데이트'
-              goal: '시스템의 내부 To-Do 리스트를 업데이트합니다.'
+              name: 'To-Do 목록 생성 및 내용 교체'
+              goal: '읽어온 파일 내용을 기반으로 새로운 To-Do 리스트를 생성하고, 기존 목록을 교체합니다.'
               actions:
-                  - '[TOOL: todo_write] todos="{{parameters.todos}}", merge="{{parameters.action == "update"}}"'
-              on_failure: '내부 To-Do 리스트 업데이트 실패 시, `status: "failure"`와 오류 메시지를 반환합니다.'
+                  - '[INFO] 상태(status)를 이모지(emoji)로 변환하는 규칙을 명시적으로 정의합니다: `pending` -> `⏳`, `in_progress` -> `🚧`, `completed` -> `✅`, `cancelled` -> `⚫️`.'
+                  - '입력받은 `todos` 배열을 위 규칙에 따라 이모지가 포함된 마크다운 리스트 형식으로 변환합니다.'
+                  - '`step-1`에서 읽어온 `activeContext.md` 내용에서 `작업 목록 (Todo List)` 섹션을 찾아, 그 내용을 새로 생성된 마크다운 리스트로 교체합니다.'
+                  - '수정된 전체 내용을 `written_content` 변수에 저장합니다.'
+              on_failure: '내용 생성 또는 교체 실패 시, `status: "failure"`와 오류 메시지를 반환합니다.'
 
             - step: 3
-              name: '`activeContext.md` 파일 업데이트'
-              goal: '사용자가 보는 `activeContext.md`의 작업 목록을 동기화하고, 기록된 내용을 기억합니다.'
+              name: '`activeContext.md` 파일 쓰기'
+              goal: '새로운 내용으로 activeContext.md를 덮어씁니다.'
               actions:
-                  - '[TOOL: read_file] `.cursor/memory_bank/users/{user.name}/activeContext.md` 파일을 읽습니다.'
-                  - '[INFO] 상태(status)를 이모지(emoji)로 변환하는 규칙을 명시적으로 정의합니다: `pending` -> `⏳`, `in_progress` -> `🚧`, `completed` -> `✅`, `cancelled` -> `⚫️`.'
-                  - '입력받은 `todos` 배열을 위 규칙에 따라 이모지가 포함된 마크다운 리스트 형식(예: `- ✅ [completed] 작업 완료`)으로 변환합니다.'
-                  - '읽어온 `activeContext.md` 내용에서 `작업 목록 (Todo List)` 섹션을 찾아, 그 내용을 새로 생성된 마크다운 리스트로 교체합니다.'
-                  - '수정된 전체 내용을 `written_content` 변수에 저장합니다.'
-                  - '[TOOL: write] `written_content` 변수의 내용을 `.cursor/memory_bank/users/{user.name}/activeContext.md`에 덮어씁니다.'
-              on_failure: '`activeContext.md` 파일 수정 실패 시, `status: "failure"`와 오류 메시지를 반환합니다.'
+                  - '[TOOL: edit_file] `written_content` 변수의 내용을 .cursor/memory_bank/users/{user.name}/activeContext.md에 덮어씁니다.'
+              on_failure: '`activeContext.md` 파일 쓰기 실패 시, `status: "failure"`와 오류 메시지를 반환합니다.'
 
             - step: 4
-              name: '결과 데이터 표준화'
-              goal: '오케스트레이터가 검증할 수 있도록, 성공 상태와 실제 기록된 내용을 포함하여 결과를 반환합니다.'
+              name: '수정 결과 검증 (Self-Verification)'
+              goal: '파일이 실제로 의도한 내용으로 수정되었는지, "실행 후 자기 검증 원칙"에 따라 확인합니다.'
               actions:
-                  - '최종 결과를 `{ "status": "success", "data": { "message": "...", "written_content": "{{steps.step-3.written_content}}" } }` 형식의 JSON 객체로 래핑하여 반환합니다.'
+                  - '[TOOL: read_file] .cursor/memory_bank/users/{user.name}/activeContext.md 파일을 다시 읽습니다.'
+                  - '[CONDITION_IF] 다시 읽어온 파일의 내용이 `step-2`의 `written_content`와 일치하지 않는다면:'
+                  - '  - [THROW_ERROR] "검증 실패: activeContext.md 파일이 의도대로 수정되지 않았습니다."'
+              on_failure: '파일 읽기 또는 내용 비교 실패 시, `status: "failure"`와 오류 메시지를 반환합니다.'
+
+            - step: 5
+              name: '최종 결과 반환'
+              goal: '검증이 완료된 수정 내용을 오케스트레이터에게 반환하여 투명성을 확보합니다.'
+              actions:
+                  - '최종 결과를 `{ "status": "success", "data": { "written_content": "{{steps.step-2.written_content}}" } }` 형식으로 래핑하여 반환합니다.'
+              on_failure: '결과 반환 과정에서 오류 발생 시, `status: "failure"`와 오류 메시지를 반환합니다.'
 
     archive_goal_to_progress:
         description: '완료된 핵심 목표를 `progress.md` 파일에 새로운 마일스톤으로 기록합니다. 날짜 오류를 방지하기 위해 시스템의 현재 날짜를 직접 조회하여 사용합니다.'
@@ -73,5 +91,55 @@ workflows:
             - step: 4
               name: 'progress.md 파일 쓰기 및 결과 반환'
               actions:
-                  - '[TOOL: write] 수정된 전체 내용을 `.cursor/memory_bank/users/{user.name}/progress.md`에 덮어씁니다.'
+                  - '[TOOL: edit_file] 수정된 전체 내용을 `.cursor/memory_bank/users/{user.name}/progress.md`에 덮어씁니다.'
                   - '`{ "status": "success", "message": "progress.md에 새 마일스톤을 기록했습니다." }` 형식으로 결과를 반환합니다.'
+
+    archive_progress_logs:
+        description: '[MAINTENANCE] progress.md가 과도하게 길어지는 것을 방지하기 위해, 완료된 마일스톤을 날짜별 로그 파일로 아카이빙합니다.'
+        parameters:
+            - name: 'force_archive'
+              type: 'boolean'
+              description: '조건과 상관없이 아카이빙을 강제 실행할지 여부'
+              required: false
+        steps:
+            - step: 1
+              name: '아카이빙 조건 확인'
+              goal: 'progress.md 파일의 상태를 확인하여 아카이빙이 필요한지 결정합니다.'
+              actions:
+                  - '[CONDITION_IF] `force_archive`가 true가 아니라면:'
+                  - '  - [TOOL: read_file] progress.md 파일을 읽습니다.'
+                  - '  - [LOGIC] "최근 완료된 마일스톤" 섹션의 항목 수가 20개 미만이면, `{ "status": "success", "message": "아카이빙 조건 미충족. 건너뜁니다." }`를 반환하고 종료합니다.'
+
+            - step: 2
+              name: '로그 디렉토리 확인 및 생성'
+              goal: '아카이브 파일이 저장될 `progress_logs` 디렉토리의 존재를 보장합니다.'
+              actions:
+                  - '[TOOL: list_dir] `.cursor/memory_bank/users/{user.name}/`'
+                  - '[CONDITION_IF] `progress_logs` 디렉토리가 없다면:'
+                  - '  - [TOOL: run_terminal_cmd] command="mkdir .cursor/memory_bank/users/{user.name}/progress_logs"'
+
+            - step: 3
+              name: '마일스톤 추출 및 아카이빙'
+              goal: 'progress.md의 각 마일스톤을 날짜별 로그 파일로 옮겨 기록합니다.'
+              actions:
+                  - '[TOOL: read_file] progress.md 파일을 다시 읽습니다.'
+                  - '[LOGIC] "최근 완료된 마일스톤" 섹션의 각 항목을 날짜별로 그룹화합니다.'
+                  - '[LOOP] 날짜 그룹을 순회하며:'
+                  - '  - [SET_VARIABLE] log_file_path = `.cursor/memory_bank/users/{user.name}/progress_logs/{date}.md`'
+                  - '  - [TOOL: read_file] `log_file_path` (오류 무시)'
+                  - '  - [LOGIC] 해당 날짜의 마일스톤을 기존 로그 내용의 상단에 추가합니다.'
+                  - '  - [TOOL: edit_file] 새로운 내용으로 `log_file_path`를 덮어씁니다.'
+
+            - step: 4
+              name: 'progress.md 재구성'
+              goal: '아카이빙된 내용을 제거하고, 로그 파일 링크를 추가하여 progress.md를 정리합니다.'
+              actions:
+                  - '[LOGIC] `progress.md`에서 아카이빙된 마일스톤 항목을 모두 제거합니다.'
+                  - '[LOGIC] "완료된 마일스톤 로그" 섹션에 각 로그 파일로의 링크가 없으면 추가합니다.'
+                  - '[TOOL: edit_file] 정리된 내용으로 `progress.md` 파일을 덮어씁니다.'
+
+            - step: 5
+              name: '결과 반환'
+              goal: '작업 완료를 알립니다.'
+              actions:
+                  - '`{ "status": "success", "message": "progress.md의 내용을 성공적으로 아카이빙했습니다." }` 형식으로 결과를 반환합니다.'

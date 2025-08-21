@@ -1,0 +1,25 @@
+# .cursor/meeting/summary/index.yaml
+# 이 파일은 요약된 회의록 마크다운 파일의 목록을 관리합니다.
+# 마지막 업데이트: 2025-08-12
+
+files:
+    - path: 2025-07-25_렉시컬_신규노드_개발논의_회의.md
+      summary: '렉시컬(Lexical) 기반의 신규 노드(Decimal, Code) 개발 및 역할 분담에 대한 회의 요약본입니다.'
+    - path: 2025-07-25_플렉션_아키텍처_역할정의_회의.md
+      summary: '플렉션(Flexion) 프로젝트의 초기 아키텍처와 팀원 역할 정의에 대한 회의 요약본입니다.'
+    - path: 2025-07-30_플렉션아키텍처설계_회의.md
+      summary: '플렉션(Flexion) 아키텍처 설계에 대한 회의 요약본입니다.'
+    - path: 2025-07-31_프로젝트_개발파트분담_회의.md
+      summary: 'EFE1팀의 프로젝트 개발 파트 분담에 대한 회의 요약본입니다.'
+    - path: 2025-07-31_플렉션_모듈역할_설계_회의.md
+      summary: '플렉션(Flexion) 프로젝트의 모듈별 역할 설계에 대한 회의 요약본입니다.'
+    - path: 2025-08-01_플렉션키생성과뷰모델정리_회의.md
+      summary: '플렉션(Flexion) 프로젝트의 키 생성 전략과 뷰모델 정리에 대한 회의 요약본입니다.'
+    - path: 2025-08-04_Flexion_AST_아키텍처_논의_회의.md
+      summary: '플렉션(Flexion) 프로젝트의 AST(Abstract Syntax Tree) 아키텍처에 대한 회의 요약본입니다.'
+    - path: 2025-08-06_FlexionDefinitionNormalization아키텍처설계_회의.md
+      summary: '플렉션(Flexion)의 Definition Normalization 아키텍처 설계에 대한 회의 요약본입니다.'
+    - path: 2025-08-08_Flexion아키텍처및컴포넌트개발방향성논의_회의.md
+      summary: '플렉션(Flexion) 아키텍처 및 컴포넌트 개발 방향성에 대한 회의 요약본입니다.'
+    - path: 2025-08-11_AI기반Rule-Growing개발방법론및Flexion아키텍처논의_회의.md
+      summary: 'AI 기반의 Rule-Growing 개발 방법론과 플렉션(Flexion) 아키텍처에 대한 논의 요약본입니다.'

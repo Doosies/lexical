@@ -1,0 +1,9 @@
+# .cursor/meeting/index.yaml
+# 이 파일은 .cursor/meeting 디렉토리의 전체 구조를 설명하는 최상위 인덱스입니다.
+# 마지막 업데이트: 2025-08-12
+
+directories:
+    - path: original/
+      summary: '회의록 원본(.txt) 파일들을 저장하는 디렉토리입니다. MeetingNotesExpert에 의해 처리되기 전의 원본 데이터입니다.'
+    - path: summary/
+      summary: 'MeetingNotesExpert가 생성한 요약된 회의록(.md) 파일들을 저장하는 디렉토리입니다.'

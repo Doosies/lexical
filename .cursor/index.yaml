@@ -1,0 +1,20 @@
+# .cursor/index.yaml
+# 이 파일은 .cursor 디렉토리의 전체 구조를 설명하는 최상위 인덱스입니다.
+# AI 시스템의 모든 핵심 구성 요소(규칙, 코어 로직, 지식 베이스 등)를 관리합니다.
+# 마지막 업데이트: 2025-08-12
+
+directories:
+    - path: architecture/
+      summary: 'AI 시스템의 핵심 아키텍처 결정 사항(ADR)을 기록하고 관리합니다.'
+    - path: core/
+      summary: 'AI의 핵심 로직과 프로토콜, 전문가 정의 파일들이 위치하는 디렉토리입니다. 시스템의 "엔진" 역할을 합니다.'
+    - path: memory_bank/
+      summary: 'AI의 장기 기억을 담당하는 지식 베이스입니다. 프로젝트별 컨텍스트, 분석 문서, 사용자별 데이터 등을 저장합니다.'
+    - path: meeting/
+      summary: '회의록 원본과 요약본을 저장하고 관리하는 디렉토리입니다.'
+    - path: rules/
+      summary: 'AI가 반드시 따라야 할 최상위 규칙과 행동 강령(MDC 파일)을 정의하는 디렉토리입니다. 시스템의 "헌법"과 같습니다.'
+
+files:
+    - path: kernel_status.json
+      summary: '시스템의 현재 상태(BOOTING, RUNNING, FAILED 등)를 기록하는 파일입니다.'

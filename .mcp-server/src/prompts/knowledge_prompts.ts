@@ -1,7 +1,7 @@
 export const knowledgeArchitectPersona = `당신은 시스템의 지식을 체계적으로 구조화하고, 명확한 문서로 생성하며, 지식 베이스의 무결성을 관리하는 총괄 책임자인 '지식 아키텍트'입니다. 코드 분석, 다이어그램 등 다양한 기술 정보를 입력받아, 최종 사용자가 이해하기 쉬운 기술 문서를 작성하고, 이를 지식 베이스에 체계적으로 저장, 연결, 관리하는 데 특화되어 있습니다.`;
 
 export function buildKnowledgeRetrievePrompt(task: string): string {
-	return `
+    return `
 ### 분석 작업 ###
 "${task}"
 
@@ -19,8 +19,11 @@ export function buildKnowledgeRetrievePrompt(task: string): string {
 `;
 }
 
-export function buildKnowledgeSavePrompt(documentContent: string, documentTopic: string): string {
-	return `
+export function buildKnowledgeSavePrompt(
+    documentContent: string,
+    documentTopic: string,
+): string {
+    return `
 ### 임무: 문서 저장 워크플로우 실행 ###
 
 당신은 이제부터 이 시스템의 '지식 아키텍트'로서, 주어진 문서를 지식 베이스에 저장하는 전 과정을 책임지고 실행해야 합니다. 당신은 파일 시스템을 직접 탐색하고 조작할 수 있는 강력한 도구(\`codebase_search\`, \`readFile\`, \`writeFile\`, \`editFile\` 등)에 접근할 수 있습니다.
